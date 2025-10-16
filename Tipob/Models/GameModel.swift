@@ -20,7 +20,7 @@ struct GameModel {
         round += 1
         userBuffer = []
         currentGestureIndex = 0
-        sequence.append(GestureType.allCases.randomElement(using: &randomNumberGenerator)!)
+        sequence.append(GestureType.allCases.randomElement(using: &randomNumberGenerator) ?? .up)
         timeRemaining = Double(sequence.count) * GameConfiguration.perGestureTime
     }
 
@@ -49,10 +49,25 @@ struct GameModel {
 }
 
 struct GameConfiguration {
+    // Gameplay Timing
     static var perGestureTime: TimeInterval = 3.0
+    static var sequenceShowDuration: TimeInterval = 0.6
+    static var sequenceGapDuration: TimeInterval = 0.2
+    static var transitionDelay: TimeInterval = 0.5
+    static var flashAnimationDuration: TimeInterval = 0.3
+
+    // Gesture Detection
     static var minSwipeDistance: CGFloat = 50.0
     static var minSwipeVelocity: CGFloat = 100.0
     static var edgeBufferDistance: CGFloat = 24.0
-    static var sequenceShowDuration: TimeInterval = 0.6
-    static var sequenceGapDuration: TimeInterval = 0.2
+    static var doubleTapMaxInterval: TimeInterval = 0.3
+    static var longPressMinDuration: TimeInterval = 0.6
+    static var twoFingerSwipeMinDistance: CGFloat = 50.0
+
+    // UI Constants
+    static var arrowFontSize: CGFloat = 120.0
+    static var headerTopPadding: CGFloat = 100.0
+    static var bottomPadding: CGFloat = 50.0
+    static var progressDotSize: CGFloat = 12.0
+    static var progressDotSpacing: CGFloat = 10.0
 }

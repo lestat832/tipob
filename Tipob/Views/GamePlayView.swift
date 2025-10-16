@@ -19,7 +19,7 @@ struct GamePlayView: View {
                 Text("Swipe!")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
                     .foregroundColor(.gray.opacity(0.5))
-                    .padding(.top, 100)
+                    .padding(.top, GameConfiguration.headerTopPadding)
 
                 Spacer()
 
@@ -35,17 +35,17 @@ struct GamePlayView: View {
 
                 Spacer()
 
-                HStack(spacing: 10) {
+                HStack(spacing: GameConfiguration.progressDotSpacing) {
                     ForEach(0..<viewModel.gameModel.sequence.count, id: \.self) { index in
                         Circle()
                             .fill(index < viewModel.gameModel.currentGestureIndex ? Color.green : Color.gray.opacity(0.3))
-                            .frame(width: 12, height: 12)
+                            .frame(width: GameConfiguration.progressDotSize, height: GameConfiguration.progressDotSize)
                     }
                 }
-                .padding(.bottom, 50)
+                .padding(.bottom, GameConfiguration.bottomPadding)
             }
         }
-        .detectSwipes { gesture in
+        .detectGestures { gesture in
             viewModel.handleSwipe(gesture)
         }
     }

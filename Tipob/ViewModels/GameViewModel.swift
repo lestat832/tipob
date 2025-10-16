@@ -9,11 +9,14 @@ class GameViewModel: ObservableObject {
     @Published var flashColor: Color = .clear
 
     private var timer: Timer?
-    private var sequenceTimer: Timer?
     var randomNumberGenerator: RandomNumberGenerator = SystemRandomNumberGenerator()
 
     init() {
         gameModel.bestStreak = PersistenceManager.shared.loadBestStreak()
+    }
+
+    deinit {
+        timer?.invalidate()
     }
 
     func transitionToMenu() {
@@ -30,13 +33,13 @@ class GameViewModel: ObservableObject {
 
     private func showNextGestureInSequence() {
         guard showingGestureIndex < gameModel.sequence.count else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + GameConfiguration.transitionDelay) {
                 self.transitionToAwaitInput()
             }
             return
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + (GameConfiguration.sequenceShowDuration + GameConfiguration.sequenceGapDuration)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + Double(GameConfiguration.transitionDelay)) {
             self.showingGestureIndex += 1
             self.showNextGestureInSequence()
         }
@@ -83,11 +86,11 @@ class GameViewModel: ObservableObject {
         flashColor = .green
         HapticManager.shared.success()
 
-        withAnimation(.easeInOut(duration: 0.3)) {
+        withAnimation(.easeInOut(duration: GameConfiguration.flashAnimationDuration)) {
             flashColor = .clear
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + GameConfiguration.transitionDelay) {
             self.gameModel.startNewRound(with: &self.randomNumberGenerator)
             self.gameState = .showSequence
             self.showingGestureIndex = 0
@@ -102,7 +105,7 @@ class GameViewModel: ObservableObject {
         flashColor = .red
         HapticManager.shared.error()
 
-        withAnimation(.easeInOut(duration: 0.3)) {
+        withAnimation(.easeInOut(duration: GameConfiguration.flashAnimationDuration)) {
             flashColor = .clear
         }
 

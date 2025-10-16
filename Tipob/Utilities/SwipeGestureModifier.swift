@@ -6,24 +6,26 @@ struct SwipeGestureModifier: ViewModifier {
     @State private var dragStartTime: Date = Date()
 
     func body(content: Content) -> some View {
-        content
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        if dragStartLocation == .zero {
-                            dragStartLocation = value.startLocation
-                            dragStartTime = Date()
+        GeometryReader { geometry in
+            content
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            if dragStartLocation == .zero {
+                                dragStartLocation = value.startLocation
+                                dragStartTime = Date()
+                            }
                         }
-                    }
-                    .onEnded { value in
-                        handleSwipe(from: value.startLocation, to: value.location)
-                        dragStartLocation = .zero
-                    }
-            )
+                        .onEnded { value in
+                            handleSwipe(from: value.startLocation, to: value.location, in: geometry.size)
+                            dragStartLocation = .zero
+                        }
+                )
+        }
     }
 
-    private func handleSwipe(from start: CGPoint, to end: CGPoint) {
-        guard !isNearEdge(start) else { return }
+    private func handleSwipe(from start: CGPoint, to end: CGPoint, in size: CGSize) {
+        guard !isNearEdge(start, in: size) else { return }
 
         let deltaX = end.x - start.x
         let deltaY = end.y - start.y
@@ -39,14 +41,13 @@ struct SwipeGestureModifier: ViewModifier {
         onSwipe(gesture)
     }
 
-    private func isNearEdge(_ point: CGPoint) -> Bool {
-        let screenBounds = UIScreen.main.bounds
+    private func isNearEdge(_ point: CGPoint, in size: CGSize) -> Bool {
         let buffer = GameConfiguration.edgeBufferDistance
 
         return point.x < buffer ||
-               point.x > screenBounds.width - buffer ||
+               point.x > size.width - buffer ||
                point.y < buffer ||
-               point.y > screenBounds.height - buffer
+               point.y > size.height - buffer
     }
 
     private func determineGesture(from angle: CGFloat) -> GestureType {
