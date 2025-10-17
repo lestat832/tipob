@@ -19,7 +19,7 @@ struct GamePlayView: View {
                 Text("Swipe!")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
                     .foregroundColor(.gray.opacity(0.5))
-                    .padding(.top, GameConfiguration.headerTopPadding)
+                    .padding(.top, 100)
 
                 Spacer()
 
@@ -28,24 +28,26 @@ struct GamePlayView: View {
                     timeRemaining: .constant(viewModel.timeRemaining)
                 )
 
-                Text("Gesture \(viewModel.gameModel.currentGestureIndex + 1) of \(viewModel.gameModel.sequence.count)")
-                    .font(.system(size: 20, weight: .medium, design: .rounded))
-                    .foregroundColor(.gray)
-                    .padding(.top, 20)
+                if viewModel.gameModel.currentGestureIndex < viewModel.gameModel.sequence.count {
+                    Text("Gesture \(viewModel.gameModel.currentGestureIndex + 1) of \(viewModel.gameModel.sequence.count)")
+                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                        .foregroundColor(.gray)
+                        .padding(.top, 20)
+                }
 
                 Spacer()
 
-                HStack(spacing: GameConfiguration.progressDotSpacing) {
+                HStack(spacing: 10) {
                     ForEach(0..<viewModel.gameModel.sequence.count, id: \.self) { index in
                         Circle()
                             .fill(index < viewModel.gameModel.currentGestureIndex ? Color.green : Color.gray.opacity(0.3))
-                            .frame(width: GameConfiguration.progressDotSize, height: GameConfiguration.progressDotSize)
+                            .frame(width: 12, height: 12)
                     }
                 }
-                .padding(.bottom, GameConfiguration.bottomPadding)
+                .padding(.bottom, 50)
             }
         }
-        .detectGestures { gesture in
+        .detectSwipes { gesture in
             viewModel.handleSwipe(gesture)
         }
     }

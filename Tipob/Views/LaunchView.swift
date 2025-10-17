@@ -24,16 +24,10 @@ struct LaunchView: View {
                     .opacity(opacity)
                     .rotationEffect(.degrees(rotation))
 
-                HStack(spacing: 20) {
-                    ForEach(GestureType.allCases, id: \.self) { gesture in
-                        Text(gesture.symbol)
-                            .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(.white)
-                            .opacity(opacity)
-                            .scaleEffect(scale)
-                            .animation(.spring(response: 0.5, dampingFraction: 0.6).delay(0.2), value: scale)
-                    }
-                }
+                Text("Swipe to Survive")
+                    .font(.system(size: 24, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.8))
+                    .opacity(opacity)
             }
         }
         .onAppear {

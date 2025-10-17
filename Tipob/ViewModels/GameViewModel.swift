@@ -28,7 +28,11 @@ class GameViewModel: ObservableObject {
         gameModel.startNewRound(with: &randomNumberGenerator)
         gameState = .showSequence
         showingGestureIndex = 0
-        showNextGestureInSequence()
+
+        // Add initial delay so player can read "Watch the sequence!" message
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.showNextGestureInSequence()
+        }
     }
 
     private func showNextGestureInSequence() {
@@ -39,7 +43,10 @@ class GameViewModel: ObservableObject {
             return
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + Double(GameConfiguration.transitionDelay)) {
+        // Wait for arrow animation to complete: show duration + gap duration
+        let displayDuration = GameConfiguration.sequenceShowDuration + GameConfiguration.sequenceGapDuration
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + displayDuration) {
             self.showingGestureIndex += 1
             self.showNextGestureInSequence()
         }

@@ -9,7 +9,7 @@ struct ArrowView: View {
 
     var body: some View {
         Text(gesture.symbol)
-            .font(.system(size: GameConfiguration.arrowFontSize, weight: .bold))
+            .font(.system(size: 120, weight: .bold))
             .foregroundColor(colorForGesture(gesture))
             .scaleEffect(scale)
             .opacity(opacity)
@@ -41,6 +41,12 @@ struct ArrowView: View {
     }
 
     private func colorForGesture(_ gesture: GestureType) -> Color {
-        return gesture.swiftUIColor
+        switch gesture.color {
+        case "blue": return .blue
+        case "green": return .green
+        case "red": return .red
+        case "yellow": return .yellow
+        default: return .gray
+        }
     }
 }

@@ -5,7 +5,10 @@ This directory contains AI-generated analysis, planning documents, and session c
 ## Quick Navigation
 
 ### Session Context (Start Here)
-- **[implementation-summary-2025-10-16.md](implementation-summary-2025-10-16.md)** - ⭐ Latest: Priority 1 fixes + 4 new gestures
+- **[ui-fixes-2025-10-16.md](ui-fixes-2025-10-16.md)** - ⭐ Latest: Fixed launch screen & initial gesture visibility
+- **[revert-to-original-swipes-2025-10-16.md](revert-to-original-swipes-2025-10-16.md)** - Reverted to working 4-swipe baseline
+- **[bugfix-swipe-detection-2025-10-16.md](bugfix-swipe-detection-2025-10-16.md)** - Attempted fix (didn't work)
+- **[implementation-summary-2025-10-16.md](implementation-summary-2025-10-16.md)** - Priority 1 fixes + 4 new gestures (reverted)
 - **[session-context-2025-10-10.md](session-context-2025-10-10.md)** - Previous planning session state
 
 ### Analysis Documents
