@@ -48,7 +48,10 @@ struct GamePlayView: View {
             }
         }
         .detectSwipes { gesture in
-            viewModel.handleSwipe(gesture)
+            viewModel.handleGesture(gesture)
+        }
+        .detectTaps { gesture in
+            viewModel.handleGesture(gesture)
         }
     }
 }

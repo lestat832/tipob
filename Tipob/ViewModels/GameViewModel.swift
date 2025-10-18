@@ -69,7 +69,7 @@ class GameViewModel: ObservableObject {
         }
     }
 
-    func handleSwipe(_ gesture: GestureType) {
+    func handleGesture(_ gesture: GestureType) {
         guard gameState == .awaitInput else { return }
 
         if gameModel.isCurrentGestureCorrect(gesture) {

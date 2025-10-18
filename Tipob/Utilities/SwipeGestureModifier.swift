@@ -8,8 +8,8 @@ struct SwipeGestureModifier: ViewModifier {
     func body(content: Content) -> some View {
         GeometryReader { geometry in
             content
-                .gesture(
-                    DragGesture(minimumDistance: 0)
+                .highPriorityGesture(
+                    DragGesture(minimumDistance: 20)
                         .onChanged { value in
                             if dragStartLocation == .zero {
                                 dragStartLocation = value.startLocation

@@ -46,6 +46,7 @@ struct ArrowView: View {
         case "green": return .green
         case "red": return .red
         case "yellow": return .yellow
+        case "purple": return .purple
         default: return .gray
         }
     }
