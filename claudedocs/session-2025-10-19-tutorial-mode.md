@@ -1,7 +1,7 @@
 # Session Summary - October 19, 2025
 **Duration**: Full session
-**Status**: ✅ Complete - Tutorial Mode Fully Implemented
-**Focus**: Tutorial game mode with guided gesture learning
+**Status**: ✅ Complete - Tutorial Mode + MCP Configuration
+**Focus**: Tutorial game mode with guided gesture learning + Serena MCP setup for Claude Code
 
 ---
 
@@ -229,6 +229,13 @@
 **Root Cause**: VStack lacked proper frame constraints
 **Fix**: Added `.frame(maxWidth: .infinity)` to key elements
 **Result**: ✅ All content properly centered
+
+### Issue 5: Serena MCP Not Available in Claude Code
+**Symptom**: Serena MCP configured but not loading during sessions
+**Root Cause**: MCP was configured for Claude Desktop (`claude_desktop_config.json`), user exclusively uses Claude Code
+**Fix**: Created `~/.claude/mcp.json` with proper configuration for Claude Code
+**Result**: ✅ Serena MCP now configured for correct environment
+**Documentation**: Complete setup guide in `mcp-setup-claude-code.md`
 
 ---
 
