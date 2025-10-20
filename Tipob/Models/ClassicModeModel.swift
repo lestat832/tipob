@@ -3,6 +3,7 @@ import Foundation
 struct ClassicModeModel {
     var currentGesture: GestureType?
     var score: Int = 0
+    var bestScore: Int = 0
     var reactionTime: TimeInterval = ClassicModeModel.initialReactionTime
     var gesturesSinceSpeedUp: Int = 0
 
@@ -12,17 +13,17 @@ struct ClassicModeModel {
     static let speedUpAmount: TimeInterval = 0.2
 
     mutating func reset() {
-        currentGesture = nil
         score = 0
         reactionTime = ClassicModeModel.initialReactionTime
         gesturesSinceSpeedUp = 0
+        // Generate initial gesture immediately so it's ready when view renders
+        currentGesture = GestureType.allCases.randomElement()!
     }
 
-    mutating func generateRandomGesture() -> GestureType {
+    mutating func generateRandomGesture() {
         let allGestures = GestureType.allCases
         let randomGesture = allGestures.randomElement()!
         currentGesture = randomGesture
-        return randomGesture
     }
 
     mutating func recordSuccess() {
@@ -34,6 +35,12 @@ struct ClassicModeModel {
             gesturesSinceSpeedUp = 0
             let newTime = reactionTime - ClassicModeModel.speedUpAmount
             reactionTime = max(newTime, ClassicModeModel.minimumReactionTime)
+        }
+    }
+
+    mutating func updateBestScore() {
+        if score > bestScore {
+            bestScore = score
         }
     }
 }

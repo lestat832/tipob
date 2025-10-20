@@ -5,13 +5,9 @@ struct MenuView: View {
     @State private var buttonScale: CGFloat = 1.0
     @State private var isAnimating = false
     @State private var showingModeSheet = false
-    @AppStorage("selectedGameMode") private var selectedModeRawValue: String = GameMode.memory.rawValue
+    @AppStorage("selectedGameMode") private var selectedModeRawValue: String = GameMode.classic.rawValue
 
     private var selectedMode: GameMode {
-        // Migrate old "Classic" to "Memory"
-        if selectedModeRawValue == "Classic" {
-            selectedModeRawValue = "Memory"
-        }
         return GameMode(rawValue: selectedModeRawValue) ?? .memory
     }
 
@@ -30,7 +26,12 @@ struct MenuView: View {
                     .foregroundColor(.white)
                     .shadow(radius: 10)
 
-                if viewModel.gameModel.bestStreak > 0 {
+                // Show appropriate best score based on selected mode
+                if selectedMode == .classic && viewModel.classicModeModel.bestScore > 0 {
+                    Text("Best Score: \(viewModel.classicModeModel.bestScore)")
+                        .font(.system(size: 24, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.9))
+                } else if selectedMode == .memory && viewModel.gameModel.bestStreak > 0 {
                     Text("Best Streak: \(viewModel.gameModel.bestStreak)")
                         .font(.system(size: 24, weight: .semibold, design: .rounded))
                         .foregroundColor(.white.opacity(0.9))

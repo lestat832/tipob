@@ -5,8 +5,12 @@ struct ClassicModeView: View {
 
     var body: some View {
         ZStack {
-            Color.white
-                .ignoresSafeArea()
+            LinearGradient(
+                gradient: Gradient(colors: [.purple.opacity(0.8), .blue.opacity(0.8)]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
 
             if viewModel.flashColor != .clear {
                 viewModel.flashColor
@@ -18,15 +22,14 @@ struct ClassicModeView: View {
             VStack {
                 Text("React Fast!")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundColor(.gray.opacity(0.5))
+                    .foregroundColor(.white)
                     .padding(.top, 100)
 
                 Spacer()
 
-                // Large gesture display
+                // Large gesture display with color-coded arrows
                 if let currentGesture = viewModel.classicModeModel.currentGesture {
-                    Text(currentGesture.symbol)
-                        .font(.system(size: 120))
+                    ArrowView(gesture: currentGesture, isAnimating: false)
                         .transition(.scale)
                 }
 
@@ -41,7 +44,7 @@ struct ClassicModeView: View {
                 // Score display
                 Text("Score: \(viewModel.classicModeModel.score)")
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white)
                     .padding(.top, 20)
 
                 Spacer()
@@ -49,7 +52,7 @@ struct ClassicModeView: View {
                 // Reaction time indicator
                 Text(String(format: "%.1fs", viewModel.classicModeModel.reactionTime))
                     .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(.gray.opacity(0.6))
+                    .foregroundColor(.white.opacity(0.8))
                     .padding(.bottom, 50)
             }
         }

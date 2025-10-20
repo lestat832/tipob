@@ -15,6 +15,7 @@ class GameViewModel: ObservableObject {
 
     init() {
         gameModel.bestStreak = PersistenceManager.shared.loadBestStreak()
+        classicModeModel.bestScore = PersistenceManager.shared.loadClassicBestScore()
     }
 
     deinit {
@@ -143,9 +144,11 @@ class GameViewModel: ObservableObject {
     // MARK: - Classic Mode Methods
 
     private func showNextClassicGesture() {
-        _ = classicModeModel.generateRandomGesture()
+        classicModeModel.generateRandomGesture()
         timeRemaining = classicModeModel.reactionTime
         startClassicModeCountdown()
+        // Explicitly notify SwiftUI of the change
+        objectWillChange.send()
     }
 
     private func startClassicModeCountdown() {
@@ -170,13 +173,11 @@ class GameViewModel: ObservableObject {
             flashColor = .green
             HapticManager.shared.success()
 
+            // Generate next gesture IMMEDIATELY so it's visible right away
+            showNextClassicGesture()
+
             withAnimation(.easeInOut(duration: 0.2)) {
                 flashColor = .clear
-            }
-
-            // Show next gesture after brief delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.showNextClassicGesture()
             }
         } else {
             // Wrong gesture
@@ -186,6 +187,8 @@ class GameViewModel: ObservableObject {
 
     private func classicModeGameOver() {
         timer?.invalidate()
+        classicModeModel.updateBestScore()
+        PersistenceManager.shared.saveClassicBestScore(classicModeModel.bestScore)
         flashColor = .red
         HapticManager.shared.error()
 
