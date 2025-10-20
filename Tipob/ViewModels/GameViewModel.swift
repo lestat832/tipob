@@ -23,6 +23,10 @@ class GameViewModel: ObservableObject {
         gameState = .menu
     }
 
+    func startTutorial() {
+        gameState = .tutorial
+    }
+
     func startGame() {
         gameModel.reset()
         gameModel.startNewRound(with: &randomNumberGenerator)

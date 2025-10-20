@@ -2,9 +2,9 @@ import Foundation
 
 enum GameMode: String, CaseIterable, Identifiable {
     case classic = "Classic"
+    case tutorial = "Tutorial"
     case gameVsPlayerVsPlayer = "Game vs Player vs Player"
     case playerVsPlayer = "Player vs Player"
-    case practice = "Practice"
 
     var id: String { rawValue }
 
@@ -12,12 +12,12 @@ enum GameMode: String, CaseIterable, Identifiable {
         switch self {
         case .classic:
             return "🎯"
+        case .tutorial:
+            return "🎓"
         case .gameVsPlayerVsPlayer:
             return "🎮"
         case .playerVsPlayer:
             return "👥"
-        case .practice:
-            return "🏋️"
         }
     }
 
@@ -25,11 +25,11 @@ enum GameMode: String, CaseIterable, Identifiable {
         switch self {
         case .classic:
             return "Beat your best streak"
+        case .tutorial:
+            return "Learn the gestures"
         case .gameVsPlayerVsPlayer:
             return "Coming soon"
         case .playerVsPlayer:
-            return "Coming soon"
-        case .practice:
             return "Coming soon"
         }
     }

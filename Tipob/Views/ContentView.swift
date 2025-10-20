@@ -15,6 +15,10 @@ struct ContentView: View {
                 MenuView(viewModel: viewModel)
                     .transition(.opacity)
 
+            case .tutorial:
+                TutorialView(viewModel: viewModel)
+                    .transition(.opacity)
+
             case .showSequence:
                 SequenceDisplayView(viewModel: viewModel)
                     .transition(.slide)

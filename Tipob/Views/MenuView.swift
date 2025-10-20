@@ -44,7 +44,12 @@ struct MenuView: View {
 
                 Button(action: {
                     HapticManager.shared.impact()
-                    viewModel.startGame()
+                    // Route to tutorial if selected, otherwise start normal game
+                    if selectedMode == .tutorial {
+                        viewModel.startTutorial()
+                    } else {
+                        viewModel.startGame()
+                    }
                 }) {
                     ZStack {
                         Circle()
