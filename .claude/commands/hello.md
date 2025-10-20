@@ -11,14 +11,11 @@ You are beginning a new work session. Follow these steps in order:
 Provide a friendly, energetic welcome message
 
 ## 2. Load Session
-Execute the following Serena MCP tools to restore session context:
-- `mcp__serena__check_onboarding_performed` - Check if project is onboarded
-- `mcp__serena__list_memories` - List available session memories
-- Run `git status` and `git branch` to check repository state
+Execute the `/sc:load` command to restore previous session context
 
 ## 3. Session Briefing
 After loading completes, provide:
-- Quick recap of where we left off (from memories if available)
+- Quick recap of where we left off
 - Current status/progress
 - What's next on the agenda
 - Ask what the user wants to work on
@@ -27,12 +24,12 @@ After loading completes, provide:
 ```
 👋 Welcome back!
 
-🔍 Loading your previous session...
+🔄 Loading your previous session...
 
 [after load completes]
 
-📍 Where We Left Off:
-- [brief context from memories]
+📍 Where we left off:
+- [brief context]
 
 ✅ Completed: [X/Y tasks]
 ⏳ In Progress: [current phase]
