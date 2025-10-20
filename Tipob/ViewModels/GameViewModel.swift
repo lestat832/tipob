@@ -143,7 +143,7 @@ class GameViewModel: ObservableObject {
     // MARK: - Classic Mode Methods
 
     private func showNextClassicGesture() {
-        let gesture = classicModeModel.generateRandomGesture()
+        _ = classicModeModel.generateRandomGesture()
         timeRemaining = classicModeModel.reactionTime
         startClassicModeCountdown()
     }
