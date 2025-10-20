@@ -22,22 +22,35 @@ struct GameOverView: View {
                     .opacity(opacity)
 
                 VStack(spacing: 15) {
-                    HStack {
-                        Text("Round:")
-                            .font(.system(size: 28, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white.opacity(0.8))
-                        Text("\(viewModel.gameModel.round)")
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                    }
+                    if viewModel.isClassicMode {
+                        // Classic Mode - show Score
+                        HStack {
+                            Text("Score:")
+                                .font(.system(size: 28, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white.opacity(0.8))
+                            Text("\(viewModel.classicModeModel.score)")
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                        }
+                    } else {
+                        // Memory Mode - show Round
+                        HStack {
+                            Text("Round:")
+                                .font(.system(size: 28, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white.opacity(0.8))
+                            Text("\(viewModel.gameModel.round)")
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                        }
 
-                    HStack {
-                        Text("Best Streak:")
-                            .font(.system(size: 28, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white.opacity(0.8))
-                        Text("\(viewModel.gameModel.bestStreak)")
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
-                            .foregroundColor(.yellow)
+                        HStack {
+                            Text("Best Streak:")
+                                .font(.system(size: 28, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white.opacity(0.8))
+                            Text("\(viewModel.gameModel.bestStreak)")
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .foregroundColor(.yellow)
+                        }
                     }
                 }
                 .opacity(opacity)

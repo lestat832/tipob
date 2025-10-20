@@ -2,6 +2,7 @@ import Foundation
 
 enum GameMode: String, CaseIterable, Identifiable {
     case classic = "Classic"
+    case memory = "Memory"
     case tutorial = "Tutorial"
     case gameVsPlayerVsPlayer = "Game vs Player vs Player"
     case playerVsPlayer = "Player vs Player"
@@ -11,7 +12,9 @@ enum GameMode: String, CaseIterable, Identifiable {
     var emoji: String {
         switch self {
         case .classic:
-            return "🎯"
+            return "⚡"
+        case .memory:
+            return "🧠"
         case .tutorial:
             return "🎓"
         case .gameVsPlayerVsPlayer:
@@ -24,7 +27,9 @@ enum GameMode: String, CaseIterable, Identifiable {
     var description: String {
         switch self {
         case .classic:
-            return "Beat your best streak"
+            return "React fast! Copy gestures before time runs out — it gets faster every few rounds."
+        case .memory:
+            return "Watch and repeat the growing sequence — how long can you remember?"
         case .tutorial:
             return "Learn the gestures"
         case .gameVsPlayerVsPlayer:

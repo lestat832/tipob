@@ -19,6 +19,10 @@ struct ContentView: View {
                 TutorialView(viewModel: viewModel)
                     .transition(.opacity)
 
+            case .classicMode:
+                ClassicModeView(viewModel: viewModel)
+                    .transition(.opacity)
+
             case .showSequence:
                 SequenceDisplayView(viewModel: viewModel)
                     .transition(.slide)

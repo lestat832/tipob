@@ -5,10 +5,14 @@ struct MenuView: View {
     @State private var buttonScale: CGFloat = 1.0
     @State private var isAnimating = false
     @State private var showingModeSheet = false
-    @AppStorage("selectedGameMode") private var selectedModeRawValue: String = GameMode.classic.rawValue
+    @AppStorage("selectedGameMode") private var selectedModeRawValue: String = GameMode.memory.rawValue
 
     private var selectedMode: GameMode {
-        GameMode(rawValue: selectedModeRawValue) ?? .classic
+        // Migrate old "Classic" to "Memory"
+        if selectedModeRawValue == "Classic" {
+            selectedModeRawValue = "Memory"
+        }
+        return GameMode(rawValue: selectedModeRawValue) ?? .memory
     }
 
     var body: some View {
@@ -44,11 +48,17 @@ struct MenuView: View {
 
                 Button(action: {
                     HapticManager.shared.impact()
-                    // Route to tutorial if selected, otherwise start normal game
-                    if selectedMode == .tutorial {
+                    // Route based on selected mode
+                    switch selectedMode {
+                    case .tutorial:
                         viewModel.startTutorial()
-                    } else {
+                    case .classic:
+                        viewModel.startClassicMode()
+                    case .memory:
                         viewModel.startGame()
+                    default:
+                        // Multiplayer modes not yet implemented
+                        break
                     }
                 }) {
                     ZStack {

@@ -4,9 +4,11 @@ import Combine
 class GameViewModel: ObservableObject {
     @Published var gameState: GameState = .launch
     @Published var gameModel = GameModel()
+    @Published var classicModeModel = ClassicModeModel()
     @Published var showingGestureIndex = 0
     @Published var timeRemaining: TimeInterval = 0
     @Published var flashColor: Color = .clear
+    @Published var isClassicMode: Bool = false
 
     private var timer: Timer?
     var randomNumberGenerator: RandomNumberGenerator = SystemRandomNumberGenerator()
@@ -27,7 +29,15 @@ class GameViewModel: ObservableObject {
         gameState = .tutorial
     }
 
+    func startClassicMode() {
+        isClassicMode = true
+        classicModeModel.reset()
+        gameState = .classicMode
+        showNextClassicGesture()
+    }
+
     func startGame() {
+        isClassicMode = false
         gameModel.reset()
         gameModel.startNewRound(with: &randomNumberGenerator)
         gameState = .showSequence
@@ -126,6 +136,63 @@ class GameViewModel: ObservableObject {
     func resetToMenu() {
         gameState = .menu
         gameModel.reset()
+        classicModeModel.reset()
         flashColor = .clear
+    }
+
+    // MARK: - Classic Mode Methods
+
+    private func showNextClassicGesture() {
+        let gesture = classicModeModel.generateRandomGesture()
+        timeRemaining = classicModeModel.reactionTime
+        startClassicModeCountdown()
+    }
+
+    private func startClassicModeCountdown() {
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            self.timeRemaining -= 0.1
+            if self.timeRemaining <= 0 {
+                self.classicModeGameOver()
+            }
+        }
+    }
+
+    func handleClassicModeGesture(_ gesture: GestureType) {
+        guard gameState == .classicMode else { return }
+        guard let currentGesture = classicModeModel.currentGesture else { return }
+
+        timer?.invalidate()
+
+        if gesture == currentGesture {
+            // Correct gesture
+            classicModeModel.recordSuccess()
+            flashColor = .green
+            HapticManager.shared.success()
+
+            withAnimation(.easeInOut(duration: 0.2)) {
+                flashColor = .clear
+            }
+
+            // Show next gesture after brief delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.showNextClassicGesture()
+            }
+        } else {
+            // Wrong gesture
+            classicModeGameOver()
+        }
+    }
+
+    private func classicModeGameOver() {
+        timer?.invalidate()
+        flashColor = .red
+        HapticManager.shared.error()
+
+        withAnimation(.easeInOut(duration: GameConfiguration.flashAnimationDuration)) {
+            flashColor = .clear
+        }
+
+        gameState = .gameOver
     }
 }
