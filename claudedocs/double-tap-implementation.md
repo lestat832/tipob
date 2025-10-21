@@ -29,12 +29,24 @@ Successfully implemented the Double Tap (◎) gesture as a distinct gesture type
 - Uses `DispatchWorkItem` to handle the delay and cancellation
 - Prevents both gestures from firing simultaneously
 
+**Detection Window:**
+- 300ms window to distinguish single from double tap
+
+**Logic Flow:**
+1. First tap → Start 300ms timer
+2. If second tap within 300ms → Cancel timer, fire double tap
+3. If timer expires → Fire single tap
+
+**State Management:**
+- `tapCount`: Tracks number of taps in current sequence
+- `singleTapTimer`: Cancellable work item for delayed single tap processing
+
 **Key Code:**
 ```swift
 private let doubleTapWindow: TimeInterval = 0.3 // 300ms
 
 if tapCount == 1 {
-    // Wait to see if second tap comes
+    // Wait to see if a second tap comes
     let workItem = DispatchWorkItem { [tapCount] in
         if tapCount == 1 {
             onTap(.tap)
@@ -111,7 +123,7 @@ if tapCount == 1 {
 
 - [ ] **Single Tap Detection**
   - Tap once and wait 300ms
-  - Should trigger single tap (⊙ purple)
+  - Should trigger single tap (⊙ yellow)
   - Should give 1 haptic pulse
 
 - [ ] **Double Tap Detection**
