@@ -33,6 +33,9 @@ struct GameVsPlayerVsPlayerView: View {
     // Visual feedback
     @State private var flashColor: Color = .clear
 
+    // Track which player should go next after sequence
+    @State private var nextPlayer: Int = 1
+
     enum PvPGamePhase {
         case nameEntry
         case watchSequence
@@ -205,11 +208,13 @@ struct GameVsPlayerVsPlayerView: View {
             Text("\(currentPlayerName)'s Turn")
                 .font(.system(size: 36, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
                 .padding(.top, 80)
 
             Text("Round \(currentRound)")
                 .font(.system(size: 20, weight: .medium, design: .rounded))
                 .foregroundColor(.white.opacity(0.8))
+                .frame(maxWidth: .infinity)
 
             Spacer()
 
@@ -348,6 +353,9 @@ struct GameVsPlayerVsPlayerView: View {
         // Calculate difficulty
         perGestureTime = calculatePerGestureTime(round: currentRound)
 
+        // Player 1 always goes first in a new round
+        nextPlayer = 1
+
         // Show sequence
         showSequenceToPlayers()
     }
@@ -371,9 +379,9 @@ struct GameVsPlayerVsPlayerView: View {
 
     private func showGesturesRecursively() {
         guard showingGestureIndex < sequence.count else {
-            // Sequence complete, start player 1's turn
+            // Sequence complete, start the next player's turn
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                startPlayerTurn(player: 1)
+                startPlayerTurn(player: nextPlayer)
             }
             return
         }
@@ -449,9 +457,10 @@ struct GameVsPlayerVsPlayerView: View {
         }
 
         if currentPlayer == 1 {
-            // Player 1 succeeded, now Player 2's turn
+            // Player 1 succeeded, show sequence again for Player 2
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                startPlayerTurn(player: 2)
+                nextPlayer = 2
+                showSequenceToPlayers()
             }
         } else {
             // Player 2 finished, evaluate round
@@ -478,9 +487,10 @@ struct GameVsPlayerVsPlayerView: View {
         }
 
         if currentPlayer == 1 {
-            // Player 1 failed, still give Player 2 a chance
+            // Player 1 failed, show sequence again for Player 2
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                startPlayerTurn(player: 2)
+                nextPlayer = 2
+                showSequenceToPlayers()
             }
         } else {
             // Player 2 finished, evaluate
