@@ -25,9 +25,12 @@ struct ArrowView: View {
     }
 
     private func animateIn() {
-        if gesture.animationStyle == .doublePulse {
+        switch gesture.animationStyle {
+        case .doublePulse:
             animateDoublePulse()
-        } else {
+        case .fillGlow:
+            animateFillGlow()
+        case .singlePulse:
             animateSinglePulse()
         }
     }
@@ -82,6 +85,31 @@ struct ArrowView: View {
         }
     }
 
+    private func animateFillGlow() {
+        // Gradual fill/glow effect over 0.8s
+        withAnimation(.easeInOut(duration: 0.8)) {
+            scale = 1.2
+            opacity = 1.0
+            glowRadius = 30  // Higher glow than other gestures
+        }
+
+        // Quick flash on completion
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            withAnimation(.easeInOut(duration: 0.1)) {
+                self.scale = 1.4  // Quick pop
+            }
+        }
+
+        // Fade out
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+            withAnimation(.easeInOut(duration: GameConfiguration.sequenceGapDuration)) {
+                self.scale = 1.0
+                self.opacity = 0
+                self.glowRadius = 0
+            }
+        }
+    }
+
     private func colorForGesture(_ gesture: GestureType) -> Color {
         switch gesture.color {
         case "blue": return .blue
@@ -90,6 +118,7 @@ struct ArrowView: View {
         case "orange": return .orange
         case "yellow": return .yellow
         case "cyan": return .cyan
+        case "magenta": return .magenta
         default: return .gray
         }
     }

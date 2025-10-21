@@ -37,6 +37,11 @@ class HapticManager {
         }
     }
 
+    // Long press: one medium-duration pulse
+    func longPress() {
+        impactGenerator.impactOccurred(intensity: 0.7)
+    }
+
     // Helper to trigger appropriate haptic based on gesture type
     func gestureHaptic(for gesture: GestureType) {
         switch gesture {
@@ -44,6 +49,8 @@ class HapticManager {
             singleTap()
         case .doubleTap:
             doubleTap()
+        case .longPress:
+            longPress()
         default:
             impact()
         }

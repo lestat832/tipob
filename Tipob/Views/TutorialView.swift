@@ -14,7 +14,7 @@ struct TutorialView: View {
     @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
 
     // Tutorial gesture sequence (fixed order)
-    let tutorialGestures: [GestureType] = [.up, .down, .left, .right, .tap, .doubleTap]
+    let tutorialGestures: [GestureType] = [.up, .down, .left, .right, .tap, .doubleTap, .longPress]
 
     var currentGesture: GestureType {
         tutorialGestures[currentGestureIndex]
@@ -193,7 +193,7 @@ struct TutorialView: View {
                 currentGestureIndex += 1
             }
         } else {
-            // Completed all 5 gestures
+            // Completed all 7 gestures
             completeRound()
         }
     }
@@ -243,6 +243,8 @@ struct TutorialView: View {
             return "Tap the screen"
         case .doubleTap:
             return "Double tap quickly"
+        case .longPress:
+            return "Press and hold"
         }
     }
 
@@ -260,6 +262,8 @@ struct TutorialView: View {
             return .yellow
         case "cyan":
             return .cyan
+        case "magenta":
+            return .magenta
         default:
             return .white
         }

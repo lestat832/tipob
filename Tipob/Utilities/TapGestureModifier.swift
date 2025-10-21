@@ -1,7 +1,9 @@
 import SwiftUI
 
-// Tap detection with single vs double tap differentiation
-// Two taps within 300ms = double tap, otherwise single tap
+// Press detection with single tap, double tap, and long press differentiation
+// Tap: single press
+// Double tap: two taps within 300ms
+// Long press: hold for 700ms
 extension View {
     func detectTaps(onTap: @escaping (GestureType) -> Void) -> some View {
         self.modifier(TapDetectionModifier(onTap: onTap))
@@ -13,12 +15,32 @@ struct TapDetectionModifier: ViewModifier {
 
     @State private var tapCount: Int = 0
     @State private var singleTapTimer: DispatchWorkItem?
+    @State private var longPressDetected: Bool = false
 
     private let doubleTapWindow: TimeInterval = 0.3 // 300ms
+    private let longPressDuration: TimeInterval = 0.7 // 700ms
 
     func body(content: Content) -> some View {
         content
+            .simultaneousGesture(
+                LongPressGesture(minimumDuration: longPressDuration)
+                    .onEnded { _ in
+                        // Long press detected - cancel any pending taps
+                        singleTapTimer?.cancel()
+                        tapCount = 0
+                        longPressDetected = true
+                        onTap(.longPress)
+
+                        // Reset flag after a delay
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            self.longPressDetected = false
+                        }
+                    }
+            )
             .onTapGesture {
+                // Ignore taps if long press was just detected
+                guard !longPressDetected else { return }
+
                 tapCount += 1
 
                 // Cancel any pending single tap
