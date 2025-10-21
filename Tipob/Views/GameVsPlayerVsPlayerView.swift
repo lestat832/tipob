@@ -87,10 +87,11 @@ struct GameVsPlayerVsPlayerView: View {
 
             VStack(spacing: 25) {
                 // Player 1 name
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(spacing: 8) {
                     Text("Player 1 Name")
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .foregroundColor(.white.opacity(0.9))
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                     TextField("Player 1", text: $player1Name)
                         .font(.system(size: 20, weight: .medium, design: .rounded))
@@ -107,10 +108,11 @@ struct GameVsPlayerVsPlayerView: View {
                 }
 
                 // Player 2 name
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(spacing: 8) {
                     Text("Player 2 Name")
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .foregroundColor(.white.opacity(0.9))
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                     TextField("Player 2", text: $player2Name)
                         .font(.system(size: 20, weight: .medium, design: .rounded))
@@ -178,6 +180,7 @@ struct GameVsPlayerVsPlayerView: View {
                     gesture: sequence[showingGestureIndex],
                     isAnimating: true
                 )
+                .id(showingGestureIndex)
             }
 
             Spacer()
