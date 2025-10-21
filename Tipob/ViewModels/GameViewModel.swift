@@ -37,6 +37,10 @@ class GameViewModel: ObservableObject {
         showNextClassicGesture()
     }
 
+    func startGameVsPlayerVsPlayer() {
+        gameState = .gameVsPlayerVsPlayer
+    }
+
     func startGame() {
         isClassicMode = false
         gameModel.reset()

@@ -5,6 +5,7 @@ enum GameState {
     case menu
     case tutorial
     case classicMode
+    case gameVsPlayerVsPlayer
     case showSequence
     case awaitInput
     case judge

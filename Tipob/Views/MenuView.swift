@@ -57,8 +57,10 @@ struct MenuView: View {
                         viewModel.startClassicMode()
                     case .memory:
                         viewModel.startGame()
-                    default:
-                        // Multiplayer modes not yet implemented
+                    case .gameVsPlayerVsPlayer:
+                        viewModel.startGameVsPlayerVsPlayer()
+                    case .playerVsPlayer:
+                        // Not yet implemented
                         break
                     }
                 }) {

@@ -18,9 +18,9 @@ enum GameMode: String, CaseIterable, Identifiable {
         case .tutorial:
             return "🎓"
         case .gameVsPlayerVsPlayer:
-            return "🎮"
-        case .playerVsPlayer:
             return "👥"
+        case .playerVsPlayer:
+            return "🎮"
         }
     }
 
@@ -33,7 +33,7 @@ enum GameMode: String, CaseIterable, Identifiable {
         case .tutorial:
             return "Learn the gestures"
         case .gameVsPlayerVsPlayer:
-            return "Coming soon"
+            return "Take turns repeating the growing gesture sequence. One mistake and the other wins!"
         case .playerVsPlayer:
             return "Coming soon"
         }
