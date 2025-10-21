@@ -263,7 +263,7 @@ struct TutorialView: View {
         case "cyan":
             return .cyan
         case "magenta":
-            return .magenta
+            return Color(red: 1.0, green: 0.0, blue: 1.0) // Magenta RGB
         default:
             return .white
         }

@@ -118,7 +118,7 @@ struct ArrowView: View {
         case "orange": return .orange
         case "yellow": return .yellow
         case "cyan": return .cyan
-        case "magenta": return .magenta
+        case "magenta": return Color(red: 1.0, green: 0.0, blue: 1.0) // Magenta RGB
         default: return .gray
         }
     }
