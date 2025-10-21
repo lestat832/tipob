@@ -82,6 +82,7 @@ struct GameVsPlayerVsPlayerView: View {
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
                 .padding(.top, 60)
 
             VStack(spacing: 25) {
@@ -358,7 +359,11 @@ struct GameVsPlayerVsPlayerView: View {
     private func showSequenceToPlayers() {
         gamePhase = .watchSequence
         showingGestureIndex = 0
-        showGesturesRecursively()
+
+        // Add initial delay so players can read "Watch the Sequence!" message
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.showGesturesRecursively()
+        }
     }
 
     private func showGesturesRecursively() {
