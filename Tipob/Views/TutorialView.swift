@@ -14,7 +14,7 @@ struct TutorialView: View {
     @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
 
     // Tutorial gesture sequence (fixed order)
-    let tutorialGestures: [GestureType] = [.up, .down, .left, .right, .tap]
+    let tutorialGestures: [GestureType] = [.up, .down, .left, .right, .tap, .doubleTap]
 
     var currentGesture: GestureType {
         tutorialGestures[currentGestureIndex]
@@ -241,6 +241,8 @@ struct TutorialView: View {
             return "Swipe Right"
         case .tap:
             return "Tap the screen"
+        case .doubleTap:
+            return "Double tap quickly"
         }
     }
 
@@ -252,10 +254,12 @@ struct TutorialView: View {
             return .green
         case "red":
             return .red
+        case "orange":
+            return .orange
         case "yellow":
             return .yellow
-        case "purple":
-            return .purple
+        case "cyan":
+            return .cyan
         default:
             return .white
         }

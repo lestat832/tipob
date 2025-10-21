@@ -25,6 +25,14 @@ struct ArrowView: View {
     }
 
     private func animateIn() {
+        if gesture.animationStyle == .doublePulse {
+            animateDoublePulse()
+        } else {
+            animateSinglePulse()
+        }
+    }
+
+    private func animateSinglePulse() {
         withAnimation(.easeInOut(duration: GameConfiguration.sequenceShowDuration)) {
             scale = 1.3
             opacity = 1.0
@@ -40,13 +48,48 @@ struct ArrowView: View {
         }
     }
 
+    private func animateDoublePulse() {
+        // First pulse: 175ms
+        withAnimation(.easeInOut(duration: 0.175)) {
+            scale = 1.3
+            opacity = 1.0
+            glowRadius = 20
+        }
+
+        // Slight pause
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.175) {
+            withAnimation(.easeInOut(duration: 0.025)) {
+                scale = 1.1
+                glowRadius = 10
+            }
+        }
+
+        // Second pulse: 175ms
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            withAnimation(.easeInOut(duration: 0.175)) {
+                scale = 1.3
+                glowRadius = 20
+            }
+        }
+
+        // Fade out (total duration ~350ms)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.375) {
+            withAnimation(.easeInOut(duration: GameConfiguration.sequenceGapDuration)) {
+                scale = 1.0
+                opacity = 0
+                glowRadius = 0
+            }
+        }
+    }
+
     private func colorForGesture(_ gesture: GestureType) -> Color {
         switch gesture.color {
         case "blue": return .blue
         case "green": return .green
         case "red": return .red
+        case "orange": return .orange
         case "yellow": return .yellow
-        case "purple": return .purple
+        case "cyan": return .cyan
         default: return .gray
         }
     }

@@ -6,6 +6,7 @@ enum GestureType: CaseIterable {
     case left
     case right
     case tap
+    case doubleTap
 
     var symbol: String {
         switch self {
@@ -14,6 +15,7 @@ enum GestureType: CaseIterable {
         case .left: return "←"
         case .right: return "→"
         case .tap: return "⊙"
+        case .doubleTap: return "◎"
         }
     }
 
@@ -22,8 +24,9 @@ enum GestureType: CaseIterable {
         case .up: return "blue"
         case .down: return "green"
         case .left: return "red"
-        case .right: return "yellow"
-        case .tap: return "purple"
+        case .right: return "orange"
+        case .tap: return "yellow"
+        case .doubleTap: return "cyan"
         }
     }
 
@@ -34,6 +37,20 @@ enum GestureType: CaseIterable {
         case .left: return "Left"
         case .right: return "Right"
         case .tap: return "Tap"
+        case .doubleTap: return "Double Tap"
         }
+    }
+
+    var animationStyle: AnimationStyle {
+        switch self {
+        case .tap: return .singlePulse
+        case .doubleTap: return .doublePulse
+        default: return .singlePulse
+        }
+    }
+
+    enum AnimationStyle {
+        case singlePulse
+        case doublePulse
     }
 }
