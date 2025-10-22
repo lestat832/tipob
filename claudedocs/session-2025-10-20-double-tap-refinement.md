@@ -25,8 +25,8 @@ Refined the Double Tap (◎) gesture implementation to align with updated specif
 | Down | Green | ↓ |
 | Left | Red | ← |
 | Right | Orange | → |
-| Tap | Yellow | ⊙ |
-| Double Tap | Cyan | ◎ |
+| Tap | Yellow | ● |
+| Double Tap | Yellow | ◎ |
 
 ### 2. Haptic Timing Refinement
 **File Modified:** [HapticManager.swift](../Tipob/Utilities/HapticManager.swift)
@@ -154,6 +154,66 @@ Refined the Double Tap (◎) gesture implementation to align with updated specif
 **Previous Session:** Initial Double Tap implementation
 **This Session:** Specification alignment refinement
 **Next Session:** Testing and potential tweaks
+
+## Git Commit
+```
+765d945 feat: Refine Double Tap gesture implementation to match updated specs
+- Updated color mappings: Tap (yellow), DoubleTap (yellow), Right (orange)
+- Refined haptic timing: 75ms gap for double tap pulses
+- Updated animation timing: 175ms + 25ms + 175ms pattern
+- Added orange color support across all views
+- Created comprehensive documentation
+```
+
+## Project Understanding Preserved
+
+### Gesture Detection Architecture
+**Single vs Double Tap Discrimination Pattern:**
+```swift
+private func handleTap() {
+    tapWorkItem?.cancel()
+    tapCount += 1
+
+    if tapCount == 1 {
+        tapWorkItem = DispatchWorkItem { [weak self] in
+            self?.processSingleTap()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: tapWorkItem!)
+    } else if tapCount == 2 {
+        tapWorkItem?.cancel()
+        processDoubleTap()
+    }
+}
+```
+
+**Key Insights:**
+- DispatchWorkItem provides cancellable delayed execution
+- 300ms detection window balances accuracy and responsiveness
+- Shorter windows (200ms) miss legitimate double taps
+- Longer windows (400ms+) create sluggish single tap response
+
+### Timing Precision Discoveries
+**Haptic Feedback Gaps:**
+- 75ms gap: Clear differentiation, responsive feel ✓ (selected)
+- 50ms gap: Feels like single pulse (too short)
+- 100ms gap: Feels disconnected (too long)
+
+**Visual Animation Harmony:**
+- Animation timing mirrors haptic pattern for coherent UX
+- 175ms pulse duration matches haptic feedback perception
+- 25ms gap provides visual separation without delay
+- Total 375ms (double) vs 600ms (single) clearly differentiable
+
+### SwiftUI Auto-Integration Patterns
+**CaseIterable Power:**
+- New gestures added to enum automatically propagate to Classic/Memory modes
+- Tutorial mode requires explicit sequence for pedagogical ordering
+- Practice mode would need custom gesture subset selection logic
+
+**Color System Architecture:**
+- Extension-based color definitions maintain clean separation
+- Gradient generation adapts automatically to new colors
+- Unique colors per gesture critical for recognition and learning
 
 ## Technical Notes
 

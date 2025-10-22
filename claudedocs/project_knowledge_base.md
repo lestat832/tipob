@@ -1,7 +1,7 @@
 # Tipob Project Knowledge Base
 
-**Last Updated**: January 20, 2025
-**Project Status**: Active Development - Dual Game Mode Implementation Complete
+**Last Updated**: October 20, 2025
+**Project Status**: Active Development - 6 Gesture System Complete, Ready for Device Testing
 
 ## Project Overview
 
@@ -126,20 +126,31 @@ let baseTime = max(1.0, 3.0 - Double(currentRound) * 0.1)
 
 ## Gesture System
 
-### Supported Gestures
+### Supported Gestures (6 Total)
 ```swift
-enum GestureType {
-    case swipeUp
-    case swipeDown
-    case swipeLeft
-    case swipeRight
-    case tap
+enum GestureType: String, CaseIterable {
+    case swipeUp      // Blue ↑
+    case swipeDown    // Green ↓
+    case swipeLeft    // Red ←
+    case swipeRight   // Orange →
+    case tap          // Yellow ●
+    case doubleTap    // Yellow ◎
 }
 ```
 
+**Color Scheme** (6 unique colors for visual differentiation):
+| Gesture | Color | Symbol | Purpose |
+|---------|-------|--------|---------|
+| Up | Blue | ↑ | Directional swipe |
+| Down | Green | ↓ | Directional swipe |
+| Left | Red | ← | Directional swipe |
+| Right | Orange | → | Directional swipe |
+| Tap | Yellow | ● | Single tap anywhere |
+| Double Tap | Yellow | ◎ | Two taps within 300ms |
+
 ### Implementation Pattern
 **Custom View Modifiers** (composable, reusable)
-- `TapGestureModifier`: Tap detection anywhere on screen
+- `TapGestureModifier`: Single and double tap detection with 300ms discrimination window
 - `SwipeGestureModifier`: Directional swipe detection
 
 **Usage**:
@@ -148,6 +159,52 @@ view
     .modifier(TapGestureModifier { handleTap() })
     .modifier(SwipeGestureModifier { direction in handleSwipe(direction) })
 ```
+
+### Double Tap Detection Pattern
+**Implementation**: DispatchWorkItem for cancellable delayed execution
+```swift
+private func handleTap() {
+    tapWorkItem?.cancel()
+    tapCount += 1
+
+    if tapCount == 1 {
+        // Wait 300ms to see if second tap arrives
+        tapWorkItem = DispatchWorkItem { [weak self] in
+            self?.processSingleTap()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: tapWorkItem!)
+    } else if tapCount == 2 {
+        // Second tap detected - cancel single tap and process double
+        tapWorkItem?.cancel()
+        processDoubleTap()
+    }
+}
+```
+
+**Key Design Decisions**:
+- **Detection Window**: 300ms provides optimal balance
+  - Shorter (200ms): Misses legitimate double taps
+  - Longer (400ms+): Creates sluggish single tap response
+- **Cancellation Pattern**: DispatchWorkItem allows clean cancellation
+- **State Management**: tapCount tracks taps within detection window
+
+### Haptic Feedback Patterns
+**Single Tap**: 1 pulse
+**Double Tap**: 2 pulses with 75ms gap
+
+**Timing Rationale**:
+- 75ms gap: Clear differentiation, responsive feel ✓ (optimal)
+- 50ms gap: Feels like single pulse (too short)
+- 100ms gap: Feels disconnected (too long)
+
+### Visual Animation Patterns
+**Single Tap**: Quick fade (600ms total)
+- Pulse pattern: 175ms + 250ms + 175ms
+
+**Double Tap**: Dual pulse (375ms total)
+- Pulse pattern: 175ms + 25ms gap + 175ms
+- Animation timing mirrors haptic pattern for coherent UX
+- 25ms gap provides visual separation without delay
 
 ## Critical Design Patterns
 
@@ -218,6 +275,36 @@ Tipob/
 - Git commits: Conventional format (feat:/fix:/docs:)
 
 ## Development Learnings
+
+### Session 2025-10-20 Discoveries
+
+**1. Double Tap Detection Architecture**
+- DispatchWorkItem provides elegant cancellable delayed execution
+- 300ms detection window balances accuracy and responsiveness
+- Shorter windows miss legitimate double taps
+- Longer windows create perceptible lag for single taps
+- Pattern scales well for triple tap or other multi-tap gestures
+
+**2. Haptic-Visual Harmony Principle**
+- Animation timing should mirror haptic feedback patterns
+- 75ms haptic gap matched to 25ms visual gap (perception differs)
+- Coherent multi-sensory feedback improves gesture recognition
+- Users perceive haptic timing differently than visual timing
+- Testing revealed 75ms haptic feels like 25ms visual
+
+**3. Color System Architecture**
+- Unique colors per gesture critical for recognition
+- Tap and Double Tap can share color (differentiated by animation)
+- Orange addition required extension of color system
+- Gradient generation adapts automatically via enum iteration
+- Extension-based color definitions maintain clean separation
+
+**4. SwiftUI Auto-Integration with CaseIterable**
+- New gestures added to enum automatically propagate to Classic/Memory modes
+- Tutorial mode requires explicit sequence for pedagogical ordering
+- Practice mode would need custom gesture subset selection logic
+- CaseIterable power enables zero-config feature additions
+- Enum-driven architecture provides robust auto-integration
 
 ### Session 2025-01-20 Discoveries
 
@@ -341,12 +428,16 @@ Tipob/
 ## Testing Recommendations
 
 ### Manual Testing Checklist
-- [ ] Memory Mode: Sequence accuracy verification
-- [ ] Classic Mode: Speed progression feel
+- [ ] Memory Mode: Sequence accuracy verification (6 gestures)
+- [ ] Classic Mode: Speed progression feel (6 gestures)
 - [ ] Mode switching: State properly reset
-- [ ] Tutorial: First-time user experience
+- [ ] Tutorial: First-time user experience (6 gesture sequence)
 - [ ] Persistence: Preferences saved across launches
-- [ ] Gestures: All 5 gestures register correctly
+- [ ] Gestures: All 6 gestures register correctly
+- [ ] Double Tap: Detection accuracy on physical device
+- [ ] Haptic Feedback: Clear differentiation between single/double tap
+- [ ] Visual Animations: 375ms vs 600ms clarity
+- [ ] Color Visibility: All 6 colors distinguishable
 
 ### Performance Testing
 - [ ] Gesture response latency
@@ -359,23 +450,31 @@ Tipob/
 - [ ] Backgrounding during gameplay
 - [ ] Very long sequences (Memory Mode)
 - [ ] Very high rounds (Classic Mode)
+- [ ] Fast alternating single/double taps
+- [ ] Rapid tap sequences (triple+ taps)
+- [ ] Interrupted double taps (single tap after 300ms)
+- [ ] Boundary conditions (exactly 300ms tap spacing)
 
 ## Future Roadmap Ideas
 
 ### High Priority
-1. **High Score Persistence**: Save best scores per mode
-2. **Statistics Dashboard**: Performance tracking over time
-3. **Difficulty Levels**: Easy/Medium/Hard for Classic Mode
+1. **Practice Mode Implementation**: Mentioned in spec, custom gesture subset practice
+2. **High Score Persistence**: Save best scores per mode
+3. **Statistics Dashboard**: Performance tracking over time (including double tap success rate)
+4. **Timing Adjustments**: Based on device testing feedback
 
 ### Medium Priority
-4. **Achievement System**: Milestones and rewards
-5. **Sound Effects**: Audio feedback for gestures
-6. **Themes**: Visual customization
+5. **Difficulty Levels**: Easy/Medium/Hard for Classic Mode
+6. **Achievement System**: Milestones and rewards
+7. **Sound Effects**: Audio feedback for gestures
+8. **Themes**: Visual customization
+9. **Accessibility Options**: Slower timing variants for double tap detection
 
 ### Low Priority
-7. **Multiplayer**: Challenge friends
-8. **Leaderboards**: Global competition
-9. **Additional Modes**: New game variations
+10. **Multiplayer**: Challenge friends
+11. **Leaderboards**: Global competition
+12. **Additional Modes**: New game variations
+13. **Analytics Integration**: Track gesture success rates and user patterns
 
 ## Common Issues & Solutions
 
@@ -400,6 +499,24 @@ Tipob/
 ```swift
 max(1.0, baseValue - increment * rounds)
 ```
+
+### Issue: Double Tap Not Detected
+**Symptom**: Second tap not registering as double tap
+**Solutions**:
+1. Check detection window (300ms is optimal)
+2. Verify DispatchWorkItem cancellation logic
+3. Reset tapCount after processing
+4. Test on physical device (simulator timing differs)
+
+### Issue: Single Tap Feels Sluggish
+**Symptom**: Delay before single tap registers
+**Cause**: Detection window too long (>300ms)
+**Solution**: Keep window at 300ms or reduce slightly
+
+### Issue: Haptic Feedback Unclear
+**Symptom**: Can't distinguish single vs double tap haptics
+**Solution**: Check HapticManager gap timing (75ms optimal)
+**Testing**: Physical device required (simulator doesn't support haptics)
 
 ## Project Conventions
 
@@ -428,18 +545,26 @@ max(1.0, baseValue - increment * rounds)
 ## Session Context Links
 
 ### Recent Sessions
-- [2025-01-20: Game Mode Refactoring](session_2025_01_20_context.md)
+- [2025-10-20: Double Tap Gesture Refinement](session-2025-10-20-double-tap-refinement.md)
+  - Double tap detection implementation
+  - Haptic and visual timing refinement
+  - Color scheme updates (6 gestures)
+  - Auto-integration via CaseIterable
+
+- [2025-01-20: Game Mode Refactoring](session-2025-01-20-game-mode-refactor.md)
   - Memory Mode branding
   - Classic Mode implementation
   - User migration logic
 
 ### Key Documentation
-- `/claudedocs/session_summary_game_mode_refactoring.md`
-- `/claudedocs/session_2025_01_20_context.md`
+- `/claudedocs/double-tap-implementation.md` - Technical implementation guide
+- `/claudedocs/session-2025-10-20-double-tap-refinement.md` - Latest session summary
+- `/claudedocs/SESSION_INDEX.md` - Quick reference and recovery procedures
 - This file: `/claudedocs/project_knowledge_base.md`
 
 ---
 
 **Knowledge Base Status**: Active and Maintained
-**Last Major Update**: Game Mode Refactoring (2025-01-20)
-**Next Review**: After user testing phase
+**Last Major Update**: Double Tap Gesture Refinement (2025-10-20)
+**Next Review**: After device testing phase
+**Latest Git Commit**: 765d945
