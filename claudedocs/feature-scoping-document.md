@@ -1,8 +1,8 @@
 # Tipob Feature Scoping Document
-**Date**: October 10, 2025 (Updated: October 16, 2025)
+**Date**: October 10, 2025 (Updated: October 21, 2025)
 **Project**: Tipob - iOS SwiftUI Bop-It Style Game
 **Purpose**: Comprehensive feature planning and decision framework
-**Status**: Phase 1 In Progress
+**Status**: Phase 1 Partially Complete
 
 ---
 
@@ -23,16 +23,15 @@
 ### Currently Implemented ✅
 | Gesture | Detection Method | Difficulty | Status |
 |---------|-----------------|------------|--------|
-| Swipe Up | DragGesture + angle calculation | Easy | ✅ Live |
-| Swipe Down | DragGesture + angle calculation | Easy | ✅ Live |
-| Swipe Left | DragGesture + angle calculation | Easy | ✅ Live |
-| Swipe Right | DragGesture + angle calculation | Easy | ✅ Live |
-| **Single Tap** | TapGesture with disambiguation | Easy | ✅ Implemented 2025-10-16 |
-| **Double Tap** | TapGesture with timing window | Easy | ✅ Implemented 2025-10-16 |
-| **Long Press** | LongPressGesture (600ms) | Easy | ✅ Implemented 2025-10-16 |
-| **Two-Finger Swipe** | DragGesture (multi-touch) | Medium | ✅ Implemented 2025-10-16 |
+| Swipe Up ↑ | DragGesture + angle calculation | Easy | ✅ Live |
+| Swipe Down ↓ | DragGesture + angle calculation | Easy | ✅ Live |
+| Swipe Left ← | DragGesture + angle calculation | Easy | ✅ Live |
+| Swipe Right → | DragGesture + angle calculation | Easy | ✅ Live |
+| **Single Tap ⊙** | TapGesture with disambiguation | Easy | ✅ Implemented 2025-10-20 |
+| **Double Tap ◎** | TapGesture with timing window | Easy | ✅ Implemented 2025-10-20 |
+| **Long Press ⏺** | LongPressGesture (600ms) | Easy | ✅ Implemented 2025-10-20 |
 
-**Total Gestures**: 8 (4 swipes + 4 touch gestures)
+**Total Gestures**: 7 (4 swipes + 3 touch gestures)
 
 ### Tier 1: High Priority - Easy Implementation 🟢
 
@@ -231,68 +230,77 @@ class MotionManager: ObservableObject {
 **Priority**: 🔴 Critical Path
 
 #### 1.1 Gesture Expansion
-- [x] **Tap gesture** (1 hour) - ✅ Completed 2025-10-16 (Actual: 0.5 hours)
-- [x] **Double tap gesture** (1 hour) - ✅ Completed 2025-10-16 (Actual: 0.5 hours)
-- [x] **Long press gesture** (1 hour) - ✅ Completed 2025-10-16 (Actual: 0.5 hours)
-- [x] **Two-finger swipe gesture** (2 hours) - ✅ Completed 2025-10-16 (Actual: 1 hour)
+- [x] **Tap gesture ⊙** (1 hour) - ✅ Completed 2025-10-20 (Actual: 0.5 hours)
+- [x] **Double tap gesture ◎** (1 hour) - ✅ Completed 2025-10-20 (Actual: 0.5 hours)
+- [x] **Long press gesture ⏺** (1 hour) - ✅ Completed 2025-10-20 (Actual: 0.5 hours)
 - [ ] **Shake gesture** (6-8 hours) - Deferred
   - CMMotionManager integration
   - Threshold calibration
   - Battery optimization
   - Privacy permission handling
 
-**Implementation Notes (2025-10-16)**:
-- Created UnifiedGestureModifier for comprehensive gesture detection
+**Implementation Notes (2025-10-20)**:
+- Created SwipeGestureModifier for swipe detection with angle calculation
 - Implemented tap disambiguation (300ms window for double-tap detection)
-- All touch gestures working via SwiftUI native gesture recognizers
+- All touch gestures working via SwiftUI native gesture recognizers (.simultaneousGesture() for coexistence)
 - Total implementation time: ~2.5 hours (vs estimated 4 hours)
 
-**Acceptance Criteria** (Partially Complete):
+**Acceptance Criteria** (Complete):
 - [x] Tap, double tap, long press detected reliably
-- [x] Two-finger swipe implemented (may need refinement)
-- [ ] Haptic feedback unique to each gesture type (using existing system)
-- [ ] Tutorial screens for new gestures
-- [ ] Shake gesture implementation
-- [ ] Settings to disable motion gestures (accessibility)
+- [x] Haptic feedback unique to each gesture type (using existing system)
+- [x] Gestures coexist without conflicts (simultaneousGesture() implementation)
+- [ ] Tutorial screens for new gestures (deferred)
+- [ ] Shake gesture implementation (deferred)
+- [ ] Settings to disable motion gestures (deferred)
 
-**Status**: 4 of 5 gestures complete. Shake gesture deferred to focus on touch-based gestures first.
+**Status**: 3 of 3 touch gestures complete. Shake gesture deferred to focus on touch-based gestures first.
 
 ---
 
 #### 1.2 Game Modes
-- [ ] **Endless Mode** (4 hours)
+- [x] **Memory Mode 🧠** (6 hours) - ✅ Completed 2025-10-20 (Actual: 4 hours)
+  - Show sequence once, player must memorize
+  - No visual indicators during input
+  - Sequence grows by 1 gesture each round
+  - Visual feedback after sequence completion
+  - High score tracking and persistence
+
+- [x] **Game vs Player vs Player 👥** (8 hours) - ✅ Completed 2025-10-20 (Actual: 6 hours)
+  - 2-player pass-and-play competitive mode
+  - Fair sequence replay (both players see same gestures)
+  - Alternating turns with player identification
+  - Individual score tracking
+  - Game ends when either player fails
+  - Winner determined by highest score
+
+- [ ] **Endless Mode ⚡** (4 hours) - Deferred
   - No time limit initially
   - Time decreases 0.1s every 5 rounds
   - Minimum time floor: 1.5s
 
-- [ ] **Memory Mode** (6 hours)
-  - Show sequence once, no replay
-  - No visual indicators during input
-  - Bonus points for perfect recall
-
-- [ ] **Zen Mode** (2 hours)
+- [ ] **Zen Mode** (2 hours) - Deferred
   - 5s per gesture (vs. 3s standard)
   - No game over, practice mode
   - Stats tracking only
 
-**Acceptance Criteria**:
-- Mode selection in main menu
-- Independent leaderboards per mode
-- Persistent mode preference
+**Acceptance Criteria** (Partially Complete):
+- [x] Mode selection in main menu
+- [x] Independent high scores per mode
+- [x] Persistent mode preference
+- [ ] Independent leaderboards per mode (Game Center integration pending)
 
 **Technical Notes**:
 ```swift
 enum GameMode {
-    case classic
-    case endless
-    case memory
-    case zen
+    case classic      // Bop-It style: react to prompts
+    case memory       // Simon Says: memorize sequences
+    case playerVsPlayer  // 2-player competitive
 
-    var timePerGesture: TimeInterval {
+    var displayName: String {
         switch self {
-        case .classic, .memory: return 3.0
-        case .zen: return 5.0
-        case .endless: return 3.0 // decreases dynamically
+        case .classic: return "Classic ⚡"
+        case .memory: return "Memory 🧠"
+        case .playerVsPlayer: return "Game vs Player vs Player 👥"
         }
     }
 }
@@ -1293,11 +1301,14 @@ Priority Score = (User Value × 2) + (Business Impact × 1.5) + (Ease × 1) + (A
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
 | 1.0 | 2025-10-10 | Initial scoping document | Claude Code |
+| 2.0 | 2025-10-21 | Updated implementation status: 7 gestures complete (4 swipes + 3 touch), Memory Mode 🧠 and Game vs Player vs Player 👥 complete | Claude Code |
 
 ---
 
 **Document Status**: ✅ Ready for Review
-**Next Review Date**: After Phase 1 feature selection
+**Document Version**: 2.0
+**Last Updated**: 2025-10-21
+**Next Review Date**: After Phase 1 completion
 **Owner**: Marc Geraldez
 
 ---
