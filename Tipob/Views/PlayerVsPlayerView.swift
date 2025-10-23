@@ -20,7 +20,10 @@ struct PlayerVsPlayerView: View {
     // Input tracking
     @State private var userBuffer: [GestureType] = []
     @State private var currentGestureIndex: Int = 0
-    @State private var isAddingGesture: Bool = false
+
+    // Visual state for showing gestures
+    @State private var showGestureAnimation: Bool = false
+    @State private var animatedGesture: GestureType? = nil
 
     // Timing
     @State private var timeRemaining: TimeInterval = 3.0
@@ -29,7 +32,6 @@ struct PlayerVsPlayerView: View {
 
     // Visuals
     @State private var flashColor: Color = .clear
-    @State private var showingGestureIndex: Int = 0
 
     // Stats
     @State private var longestSequence: Int = 0
@@ -39,7 +41,6 @@ struct PlayerVsPlayerView: View {
     enum PvPGamePhase {
         case nameEntry
         case firstGesture
-        case watchSequence
         case repeatPhase
         case addGesture
         case results
@@ -70,8 +71,6 @@ struct PlayerVsPlayerView: View {
                     nameEntryView
                 case .firstGesture:
                     firstGestureView
-                case .watchSequence:
-                    watchSequenceView
                 case .repeatPhase:
                     repeatPhaseView
                 case .addGesture:
@@ -176,23 +175,30 @@ struct PlayerVsPlayerView: View {
                 .font(.system(size: 28, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 30)
                 .padding(.top, 80)
 
             Spacer()
 
-            Text("Perform any gesture to start the chain!")
-                .font(.system(size: 20, weight: .medium, design: .rounded))
-                .foregroundColor(.white.opacity(0.9))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+            // Show gesture animation if performed, otherwise show instruction
+            if showGestureAnimation, let gesture = animatedGesture {
+                ArrowView(gesture: gesture, isAnimating: true)
+                    .transition(.scale.combined(with: .opacity))
+            } else {
+                VStack(spacing: 20) {
+                    Text("Perform any gesture to start the chain!")
+                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                        .foregroundColor(.white.opacity(0.9))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
 
-            Spacer()
-
-            // Gesture hint
-            Text("↑ ↓ ← → ⊙ ◎ ⏺")
-                .font(.system(size: 48, weight: .light, design: .rounded))
-                .foregroundColor(.white.opacity(0.5))
+                    // Gesture hint
+                    Text("↑ ↓ ← → ⊙ ◎ ⏺")
+                        .font(.system(size: 48, weight: .light, design: .rounded))
+                        .foregroundColor(.white.opacity(0.5))
+                }
+            }
 
             Spacer()
         }
@@ -201,44 +207,6 @@ struct PlayerVsPlayerView: View {
         }
         .detectTaps { gesture in
             handleFirstGesture(gesture)
-        }
-    }
-
-    // MARK: - Watch Sequence View
-
-    private var watchSequenceView: some View {
-        VStack(spacing: 40) {
-            Text("Watch the Chain!")
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .padding(.top, 80)
-
-            Text("Round \(currentRound)")
-                .font(.system(size: 24, weight: .semibold, design: .rounded))
-                .foregroundColor(.white.opacity(0.9))
-
-            Spacer()
-
-            // Gesture display
-            if showingGestureIndex < sequence.count {
-                ArrowView(
-                    gesture: sequence[showingGestureIndex],
-                    isAnimating: true
-                )
-                .id(showingGestureIndex)
-            }
-
-            Spacer()
-
-            // Progress dots
-            HStack(spacing: 10) {
-                ForEach(0..<sequence.count, id: \.self) { index in
-                    Circle()
-                        .fill(index < showingGestureIndex ? Color.green : Color.white.opacity(0.3))
-                        .frame(width: 12, height: 12)
-                }
-            }
-            .padding(.bottom, 60)
         }
     }
 
@@ -251,8 +219,8 @@ struct PlayerVsPlayerView: View {
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 30)
                 .frame(maxWidth: .infinity)
+                .padding(.horizontal, 30)
                 .padding(.top, 80)
 
             Text("Round \(currentRound)")
@@ -304,30 +272,35 @@ struct PlayerVsPlayerView: View {
                 .font(.system(size: 28, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 30)
                 .padding(.top, 80)
 
             Spacer()
 
-            Text("Perform any gesture to extend the chain")
-                .font(.system(size: 20, weight: .medium, design: .rounded))
-                .foregroundColor(.white.opacity(0.9))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+            // Show gesture animation if just added, otherwise show instruction
+            if showGestureAnimation, let gesture = animatedGesture {
+                ArrowView(gesture: gesture, isAnimating: true)
+                    .transition(.scale.combined(with: .opacity))
+            } else {
+                VStack(spacing: 20) {
+                    Text("Perform any gesture to extend the chain")
+                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                        .foregroundColor(.white.opacity(0.9))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
 
-            Spacer()
+                    // Current sequence length
+                    Text("Current Chain: \(sequence.count) gestures")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.7))
 
-            // Current sequence length
-            Text("Current Chain: \(sequence.count) gestures")
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                .foregroundColor(.white.opacity(0.7))
-
-            Spacer()
-
-            // Gesture hint
-            Text("↑ ↓ ← → ⊙ ◎ ⏺")
-                .font(.system(size: 48, weight: .light, design: .rounded))
-                .foregroundColor(.white.opacity(0.5))
+                    // Gesture hint
+                    Text("↑ ↓ ← → ⊙ ◎ ⏺")
+                        .font(.system(size: 48, weight: .light, design: .rounded))
+                        .foregroundColor(.white.opacity(0.5))
+                }
+            }
 
             Spacer()
         }
@@ -455,13 +428,15 @@ struct PlayerVsPlayerView: View {
         currentPlayer = 1
         gameOver = false
         winner = nil
+        showGestureAnimation = false
+        animatedGesture = nil
 
         // Player 1 creates first gesture
         gamePhase = .firstGesture
     }
 
     private func handleFirstGesture(_ gesture: GestureType) {
-        guard gamePhase == .firstGesture else { return }
+        guard gamePhase == .firstGesture && !showGestureAnimation else { return }
 
         // Add gesture to sequence
         sequence.append(gesture)
@@ -473,38 +448,19 @@ struct PlayerVsPlayerView: View {
             flashColor = .clear
         }
 
-        // Move to Player 2's turn to repeat
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        // Show the gesture animation immediately
+        animatedGesture = gesture
+        withAnimation {
+            showGestureAnimation = true
+        }
+
+        // Wait for animation, then transition to Player 2's turn
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            showGestureAnimation = false
+            animatedGesture = nil
             currentPlayer = 2
             perGestureTime = calculatePerGestureTime(round: currentRound)
-            showSequenceAndStartRepeat()
-        }
-    }
-
-    private func showSequenceAndStartRepeat() {
-        gamePhase = .watchSequence
-        showingGestureIndex = 0
-
-        // Add initial delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.showGesturesRecursively()
-        }
-    }
-
-    private func showGesturesRecursively() {
-        guard showingGestureIndex < sequence.count else {
-            // Sequence complete, start repeat phase
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                startRepeatPhase()
-            }
-            return
-        }
-
-        let displayDuration = GameConfiguration.sequenceShowDuration + GameConfiguration.sequenceGapDuration
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + displayDuration) {
-            showingGestureIndex += 1
-            showGesturesRecursively()
+            startRepeatPhase()
         }
     }
 
@@ -568,7 +524,7 @@ struct PlayerVsPlayerView: View {
     }
 
     private func handleAddGesture(_ gesture: GestureType) {
-        guard gamePhase == .addGesture else { return }
+        guard gamePhase == .addGesture && !showGestureAnimation else { return }
 
         // Add gesture to sequence
         sequence.append(gesture)
@@ -586,8 +542,16 @@ struct PlayerVsPlayerView: View {
             PersistenceManager.shared.savePvPLongestSequence(longestSequence)
         }
 
-        // Switch to other player
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        // Show the gesture animation immediately
+        animatedGesture = gesture
+        withAnimation {
+            showGestureAnimation = true
+        }
+
+        // Wait for animation, then switch to other player
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            showGestureAnimation = false
+            animatedGesture = nil
             switchToNextPlayer()
         }
     }
@@ -599,8 +563,8 @@ struct PlayerVsPlayerView: View {
         // Update difficulty
         perGestureTime = calculatePerGestureTime(round: currentRound)
 
-        // Show sequence and start next turn
-        showSequenceAndStartRepeat()
+        // Go directly to repeat phase (skip watch sequence)
+        startRepeatPhase()
     }
 
     private func handleWrongGesture() {
@@ -673,7 +637,8 @@ struct PlayerVsPlayerView: View {
         winner = nil
         currentGestureIndex = 0
         userBuffer = []
-        showingGestureIndex = 0
+        showGestureAnimation = false
+        animatedGesture = nil
         stopTimer()
     }
 }
