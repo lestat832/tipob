@@ -1,242 +1,142 @@
-# Tipob Session Index
+# Tipob Project - Session Index
 
-**Purpose**: Quick reference for session restoration and project context recovery
+**Last Updated**: October 23, 2025
+**Project Status**: Phase 1 Complete + Context Optimization Implemented
 
-## Latest Session
+## Latest Session Info
 
-**Date**: 2025-10-20
-**Status**: ✅ Complete - PvP Mode Fully Functional
-**Focus**: Game vs Player vs Player Mode Implementation & Critical UX Fixes
+**Session Date**: October 23, 2025
+**Session Type**: Context Optimization Implementation
+**Duration**: ~90 minutes
+**Branch**: main
+**Last Commit**: Pending (context optimization system)
 
-**Quick Links**:
-- [Session Summary](session-2025-10-20-pvp-mode-fixes.md) - PvP mode implementation and fixes
-- [Previous Session](session-2025-10-20-double-tap-refinement.md) - Double tap gesture refinement
-- [Project Knowledge Base](project_knowledge_base.md) - Cumulative project learnings
+### Session Summary
+Implemented complete reference file system with automatic maintenance (nova_scholartrail pattern):
+- Created project CLAUDE.md (203 lines, ~6K bytes)
+- Extracted 5 focused reference files (~41K total, loaded on-demand)
+- Added automatic daily health checks and monthly audits
+- Implemented smart reference loading system
+- **Result**: 75% reduction in typical context usage (40K → 10K tokens)
 
-## Session Quick Facts
+## Quick Reference
 
-### What Was Done
-- ✅ Implemented complete Game vs Player vs Player mode (~480 lines)
-- ✅ Fixed critical layout centering issues (name entry + player turn screens)
-- ✅ Fixed sequence animation not re-triggering on rounds 2+
-- ✅ Added fair sequence replay for Player 2 (both players see sequence before turn)
-- ✅ Fixed gesture detection conflict (can now swipe when tap expected)
-- ✅ Integrated PvP mode into navigation system
-- ✅ Updated game mode emoji (👥) and description
+### Current Implementation Status
+- **Gestures**: 7 total (Up ↑, Down ↓, Left ←, Right →, Tap ⊙, Double Tap ◎, Long Press ⏺)
+- **Game Modes**: 3 complete (Classic, Memory, PvP)
+- **Tutorial**: Complete
+- **Persistence**: UserDefaults (local only)
 
-### Files Changed (7 total)
-**Created**:
-- `Tipob/Views/GameVsPlayerVsPlayerView.swift` - Complete 2-player mode (~480 lines)
+### Key Files
+- **Project Context**: `CLAUDE.md` (core, always loaded)
+- **Documentation**: `claudedocs/PRODUCT_OVERVIEW.md` (partner-ready)
+- **Feature Planning**: `claudedocs/feature-scoping-document.md` (v2.0)
+- **Core Logic**: `Tipob/ViewModels/GameViewModel.swift`
+- **References**: `.claude/references/` (5 files, loaded on-demand)
 
-**Modified**:
-- `Tipob/Models/GameState.swift` - Added gameVsPlayerVsPlayer case
-- `Tipob/Models/GameMode.swift` - Updated emoji and description
-- `Tipob/ViewModels/GameViewModel.swift` - Added startGameVsPlayerVsPlayer()
-- `Tipob/Views/ContentView.swift` - Added PvP routing
-- `Tipob/Views/MenuView.swift` - Added PvP selection handler
-- `Tipob/Utilities/SwipeGestureModifier.swift` - Fixed gesture conflict
+### Recent Work (October 2025)
+1. **Oct 23**: Implemented context optimization system (75% token reduction)
+2. **Oct 21**: Created product overview document for partner collaboration
+3. **Oct 21**: Fixed slash command configuration (global vs project-local)
+4. **Oct 20**: Implemented Game vs Player vs Player mode with fair sequence replay
+5. **Oct 20**: Added 3 touch gestures (Tap, Double Tap, Long Press)
+6. **Oct 20**: Implemented Memory Mode with sequence memorization
 
-**Documentation Created**:
-- `claudedocs/session-2025-10-20-pvp-mode-fixes.md` - Session summary
+## Project Context
 
-### Git Commits (5)
-```
-d9f03db - feat: Add Game vs Player vs Player (PvP) mode
-9dc32d3 - fix: Fix PvP mode UX issues (initial)
-5e4fc7e - fix: Fix PvP centering and sequence animation issues
-2c3f36c - fix: Fix PvP centering and add fair sequence replay for Player 2
-f6cb21c - fix: Allow swipe gestures when tap is expected (gesture conflict)
-```
-
-### Current State
-- Branch: `main`
-- Working Tree: Modified (documentation updates ready to commit)
-- Build Status: ✅ Success
-- Test Status: PvP mode fully functional, all 7 gestures working correctly
-
-## Next Session Quick Start
-
-### If Testing PvP Mode
-```bash
-cd /Users/marcgeraldez/Projects/tipob
-git status                    # Verify state
-open Tipob.xcodeproj          # Open in Xcode
-# Test PvP mode on physical device with another person
-# Focus: Fairness, sequence visibility, gesture detection, turn flow
-```
-
-### If Implementing Features
-**Priority 1**: Test PvP mode with real 2-player gameplay
-**Priority 2**: Consider adding best-of-N rounds option
-**Priority 3**: Consider player statistics/win tracking
-**Priority 4**: Potential future: Online multiplayer mode
-
-### If Debugging PvP Issues
-Check these files first:
-1. `GameVsPlayerVsPlayerView.swift` - All PvP game logic and UI
-2. `SwipeGestureModifier.swift` - Gesture detection (simultaneousGesture)
-3. `GameViewModel.swift` - Game state management
-4. Pattern: `.id()` modifier for animation re-triggering
-
-## Project Context Summary
-
-### Tech Stack
-- Swift + SwiftUI
-- iOS Platform
-- MVVM Architecture
-- AppStorage for persistence
+### Architecture
+- **Pattern**: MVVM (Model-View-ViewModel)
+- **Framework**: SwiftUI
+- **State Management**: @Published + ObservableObject
+- **Gestures**: SwipeGestureModifier + TapGestureModifier
+- **Context System**: Reference-based with smart loading
 
 ### Game Modes
-1. **Memory Mode** (🧠): Simon Says - memorize sequences
-2. **Classic Mode** (⚡): Bop-It - react to prompts
-3. **Game vs Player vs Player** (👥): 2-player pass-and-play competition
+1. **Classic Mode** ⚡ - Bop-It style reaction game
+2. **Memory Mode** 🧠 - Simon Says sequence memorization
+3. **Game vs Player vs Player** 👥 - 2-player competitive pass-and-play
 
-### Gestures (7 Total)
-- Swipe: Up (blue), Down (green), Left (red), Right (orange)
-- Tap: Single tap (yellow ●), Double tap (yellow ◎), Long press (magenta ⏺)
+### Technical Achievements
+- Gesture coexistence using `.simultaneousGesture()`
+- Tap disambiguation (300ms window for double-tap detection)
+- Fair sequence replay for PvP (both players see identical gestures)
+- Per-mode high score persistence
+- **Context optimization with 75% token reduction**
 
-### Current Capabilities
-- Dual game mode selection
-- Tutorial system (onboarding)
-- User preference persistence
-- Mode-specific gameplay logic
-- Haptic feedback
-- Clean SwiftUI implementation
+## Next Steps Priority
 
-## Session History
+### Immediate
+- Share PRODUCT_OVERVIEW.md with partner
+- Gather partner feedback on implementation
+- Test context optimization system (`/hello` and smart loading)
 
-### 2025-10-20 (Later): PvP Mode Implementation & UX Fixes
-- **Type**: Feature Implementation & Critical Bug Fixes
-- **Duration**: ~3 hours
-- **Status**: Complete
-- **Outcome**: Game vs Player vs Player mode fully functional, gesture conflicts resolved, fair gameplay implemented
-- **Docs**: [Session Summary](session-2025-10-20-pvp-mode-fixes.md)
-- **Git**: d9f03db, 9dc32d3, 5e4fc7e, 2c3f36c, f6cb21c
+### Planned Features
+- Sound effects and music
+- Achievement system
+- Additional gestures (shake, pinch, rotate)
+- Difficulty level selection
+- Statistics dashboard
 
-### 2025-10-20 (Earlier): Double Tap Gesture Refinement
-- **Type**: Implementation Refinement & Specification Alignment
-- **Duration**: ~2 hours
-- **Status**: Complete
-- **Outcome**: Double tap gesture implementation aligned with updated specs, ready for device testing
-- **Docs**: [Session Summary](session-2025-10-20-double-tap-refinement.md) | [Implementation Guide](double-tap-implementation.md)
-- **Git**: 765d945
+### Future Considerations
+- Cloud save and leaderboards
+- Game Center integration
+- Monetization (ads, IAP, subscriptions)
+- Online multiplayer
 
-### 2025-01-20: Game Mode Refactoring
-- **Type**: Feature Implementation
-- **Duration**: 1.5 hours
-- **Status**: Complete
-- **Outcome**: Dual game mode system ready for testing
-- **Docs**: [Full Context](session-2025-01-20-game-mode-refactor.md)
+## Context Optimization System
 
-### Previous Sessions
-- Tutorial implementation
-- Tap gesture addition (Oct 18)
-- 4-swipe baseline restoration (Oct 16)
-- Initial MCP setup (Oct 19)
+### Reference Files (Load on-demand)
+- `swiftui-patterns.md` - MVVM & state management patterns
+- `gesture-implementation.md` - 7-gesture system implementation
+- `game-mode-patterns.md` - Classic/Memory/PvP logic
+- `ui-animation-patterns.md` - Animations & visual feedback
+- `persistence-patterns.md` - Data storage & high scores
 
-## Recovery Procedures
+### Automatic Maintenance
+- **Daily**: Health checks on every `/bye` (file size, deprecated patterns)
+- **Monthly**: Deep audit every 30 sessions (comprehensive analysis)
+- **Session Tracking**: Via Serena MCP (counter-based)
 
-### To Restore Session Context
-1. Read [session-2025-10-20-double-tap-refinement.md](session-2025-10-20-double-tap-refinement.md)
-2. Review [double-tap-implementation.md](double-tap-implementation.md) for technical specs
-3. Check [project_knowledge_base.md](project_knowledge_base.md) for cumulative learnings
+### Token Usage
+- **Before**: ~40K tokens (all docs loaded)
+- **After Typical**: ~10K tokens (core only, 75% reduction)
+- **After Working**: 13-17K tokens (with 1-2 references)
+- **After Full**: 21.5K tokens (all references, 46% reduction)
 
-### To Continue Development
-```bash
-# 1. Verify repository state
-git log --oneline -5
-git status
+## Session Files
+- `context-optimization-summary.md` - Complete implementation details (NEW)
+- `session-2025-10-21-product-overview-update.md` - Documentation update
+- `session-2025-10-21-slash-command-fix.md` - Slash command fix
+- `session-2025-10-20-pvp-mode-fixes.md` - PvP mode implementation
+- `session-2025-10-20-long-press-addition.md` - Long press gesture
+- `session-2025-10-20-double-tap-refinement.md` - Double tap implementation
 
-# 2. Review last session
-cat claudedocs/session-2025-10-20-double-tap-refinement.md | head -80
+## Git Status
+- **Branch**: main
+- **Remote**: https://github.com/lestat832/tipob.git
+- **Pending Commit**: Context optimization system implementation
+- **Files Changed**:
+  - New: CLAUDE.md, .claude/references/ (5 files), .claude/commands/ (2 files)
+  - New: claudedocs/context-optimization-summary.md
+  - Modified: claudedocs/SESSION_INDEX.md
+  - Backup: claudedocs/project_knowledge_base.md.backup
 
-# 3. Check implementation guide
-cat claudedocs/double-tap-implementation.md
+## How to Resume
 
-# 4. Review project patterns
-cat claudedocs/project_knowledge_base.md | grep -A 5 "Gesture Detection"
-
-# 5. Start coding
-open Tipob.xcodeproj
+### Using /hello
 ```
-
-### To Debug Issues
-**Gesture Detection**: Check `double-tap-implementation.md` section "Technical Specifications"
-**Timing Issues**: Check `HapticManager.swift` (75ms gap) and `ArrowView.swift` (animation timing)
-**Color System**: Check `GestureType.swift` color mappings
-**Pattern Reference**: Check `session-2025-10-20-double-tap-refinement.md` section "Project Understanding Preserved"
-
-## Documentation Maintenance
-
-### When to Update
-- After each significant session (>1 hour productive work)
-- When major technical decisions made
-- When new patterns discovered
-- Before switching to different project
-
-### Update Checklist
-- [ ] Create session context document
-- [ ] Update project knowledge base
-- [ ] Generate session checkpoint JSON
-- [ ] Update this index
-- [ ] Commit session docs to git
-
-### Document Locations
+/hello
 ```
-/Users/marcgeraldez/Projects/tipob/claudedocs/
-├── SESSION_INDEX.md                                    (this file)
-├── project_knowledge_base.md                           (cumulative learnings)
-├── session-2025-10-20-double-tap-refinement.md        (latest session summary)
-├── double-tap-implementation.md                        (technical implementation guide)
-├── session-2025-01-20-game-mode-refactor.md           (game mode refactoring session)
-└── [other session docs...]                            (historical sessions)
-```
+Loads this session index and project context automatically. Then tell Claude what you're working on for smart reference loading.
 
-## Quick Reference Commands
+### Smart Reference Loading
+- "Working on gestures" → auto-loads gesture-implementation.md
+- "Adding game mode" → auto-loads game-mode + swiftui patterns
+- "Debugging animations" → auto-loads ui-animation-patterns.md
+- "Implementing settings" → auto-loads persistence + swiftui patterns
 
-### Git Operations
-```bash
-git log --oneline -10              # Recent commits
-git status                         # Current state
-git diff HEAD~1                    # Last commit changes
-git show 765d945                   # Show double tap refinement commit
-```
-
-### File Navigation
-```bash
-ls -la Tipob/Models/               # List models
-ls -la Tipob/Views/                # List views
-find . -name "*.swift" | wc -l     # Count Swift files
-```
-
-### Documentation Access
-```bash
-cat claudedocs/SESSION_INDEX.md                              # This index
-cat claudedocs/session-2025-10-20-double-tap-refinement.md  # Latest session
-cat claudedocs/double-tap-implementation.md                  # Implementation guide
-cat claudedocs/project_knowledge_base.md                     # Project patterns
-```
-
-## Integration Points
-
-### Serena MCP (Configured)
-- Session context: Double tap gesture implementation refinement (2025-10-20)
-- Project patterns: SwiftUI gesture detection, timing precision, color system architecture
-- Recovery data: See `session-2025-10-20-double-tap-refinement.md` section "Project Understanding Preserved"
-
-### Version Control
-- All session docs committed to git
-- Branch: `main`
-- Tag sessions for major milestones
-
-### Xcode Integration
-- Project file: `/Users/marcgeraldez/Projects/tipob/Tipob.xcodeproj`
-- Build: ✅ Success (as of 2025-01-20)
-- Target: iOS
-
----
-
-**Index Last Updated**: 2025-10-20
-**Project Status**: Active Development - 7 Gesture System Complete, 3 Game Modes Implemented
-**Next Milestone**: PvP Mode Real-World Testing (2-Player Gameplay)
-**Latest Commit**: f6cb21c
+### Quick Context Commands
+- Check git status: `git status && git branch`
+- View recent sessions: `ls -lt claudedocs/session-*.md | head -5`
+- Latest docs: `claudedocs/PRODUCT_OVERVIEW.md`
+- Context system details: `claudedocs/context-optimization-summary.md`
