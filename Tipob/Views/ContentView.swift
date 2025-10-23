@@ -27,6 +27,10 @@ struct ContentView: View {
                 GameVsPlayerVsPlayerView(viewModel: viewModel)
                     .transition(.opacity)
 
+            case .playerVsPlayer:
+                PlayerVsPlayerView(viewModel: viewModel)
+                    .transition(.opacity)
+
             case .showSequence:
                 SequenceDisplayView(viewModel: viewModel)
                     .transition(.slide)

@@ -60,8 +60,7 @@ struct MenuView: View {
                     case .gameVsPlayerVsPlayer:
                         viewModel.startGameVsPlayerVsPlayer()
                     case .playerVsPlayer:
-                        // Not yet implemented
-                        break
+                        viewModel.startPlayerVsPlayer()
                     }
                 }) {
                     ZStack {

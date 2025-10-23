@@ -41,6 +41,10 @@ class GameViewModel: ObservableObject {
         gameState = .gameVsPlayerVsPlayer
     }
 
+    func startPlayerVsPlayer() {
+        gameState = .playerVsPlayer
+    }
+
     func startGame() {
         isClassicMode = false
         gameModel.reset()
