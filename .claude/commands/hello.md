@@ -1,62 +1,51 @@
+---
+description: Start session with friendly greeting and context load
+tags: [session, workflow, gitignored]
+---
+
 # Start Session Protocol
 
-You are starting a new work session. Follow these steps in order:
+You are beginning a new work session. Follow these steps in order:
 
-## 1. Load Session Context
+## 1. Warm Greeting
+Provide a friendly, energetic welcome message
 
-**Priority 1: Read Session Index**
-```
-Read: claudedocs/SESSION_INDEX.md
-```
+## 2. Load Previous Session Context
+Use Serena MCP tools to restore previous session state:
 
-This provides:
-- Latest session summary
-- Current implementation status
-- Recent commits
-- Next steps priority
-- Quick reference to key files
+```javascript
+// List available session memories
+const memories = await mcp__serena__list_memories()
 
-**Priority 2: Check Git Status**
-```bash
-git status && git branch
+// Read relevant session context
+const sessionMemory = await mcp__serena__read_memory({ memory_file_name: 'current_session.md' })
+const recentWork = await mcp__serena__read_memory({ memory_file_name: 'recent_work.md' })
 ```
 
-Verify:
-- Current branch
-- Any uncommitted changes
-- Working directory clean/dirty state
+**If memories are found:**
+- Restore previous session context
+- Identify where we left off
+- Load task progress
 
-## 2. Serena Safety Check
+**If no memories found:**
+- This is a fresh start
+- Fallback to reading claudedocs/SESSION_INDEX.md
+- Initialize new session context
 
-**Check if Serena MCP is available:**
+## 3. Session Briefing
+After loading completes, provide:
+- Quick recap of where we left off (if applicable)
+- Current status/progress
+- What's next on the agenda
+- Ask what the user wants to work on
 
-If Serena is active:
-- Session memory available ✅
-- Can use /sc:save and /sc:load ✅
-- Automatic context persistence enabled ✅
-
-If Serena is NOT available:
-- ⚠️ Manual session tracking only
-- Use local SESSION_INDEX.md for context
-- Update SESSION_INDEX.md manually at session end
-
-## 3. Smart Reference Loading
-
-**After context loads, tell Claude what you're working on today:**
-
-Examples:
-- "Working on gesture detection features"
-- "Adding new game mode"
-- "Debugging animations"
-- "Implementing user settings"
-
-**Claude will automatically load appropriate reference files:**
-
-- **Gestures** → `gesture-implementation.md`
-- **Game modes** → `game-mode-patterns.md` + `swiftui-patterns.md`
-- **UI/Animations** → `ui-animation-patterns.md`
-- **Settings/Data** → `persistence-patterns.md` + `swiftui-patterns.md`
-- **Architecture** → `swiftui-patterns.md`
+**Smart Reference Loading:**
+For Tipob project with `.claude/references/`, ask user what they're working on:
+- "Working on gestures" → Load gesture-implementation.md
+- "Working on game modes" → Load game-mode-patterns.md + swiftui-patterns.md
+- "Working on UI/animations" → Load ui-animation-patterns.md
+- "Working on settings/data" → Load persistence-patterns.md + swiftui-patterns.md
+- "General dev/bug fixes" → Core CLAUDE.md is sufficient
 
 **Available references** (see project CLAUDE.md for full list):
 - `.claude/references/swiftui-patterns.md`
@@ -65,22 +54,25 @@ Examples:
 - `.claude/references/ui-animation-patterns.md`
 - `.claude/references/persistence-patterns.md`
 
-## 4. Friendly Greeting
-
-Provide a warm, helpful greeting:
+## Example Hello Format
 
 ```
 👋 Welcome back to Tipob!
 
-📍 Current Status:
-- [Brief status from SESSION_INDEX.md]
+🔄 Loading your previous session...
 
-🎯 Ready to work on:
-- [User's stated goal or suggested next steps]
+[Check Serena memories or SESSION_INDEX.md]
 
-💡 Available references loaded based on your work focus.
+📍 Where we left off:
+- [brief context from session memory]
 
-Let's make progress! 🚀
+✅ Completed: [X/Y tasks]
+⏳ In Progress: [current phase]
+
+🎯 Ready to continue with:
+- [next logical task]
+
+What would you like to work on today?
 ```
 
-Keep it warm, concise, and action-oriented!
+Keep it energetic, clear, and action-oriented!

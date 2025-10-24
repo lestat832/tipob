@@ -1,9 +1,9 @@
 ---
-description: End session with context save and git push
+description: End session with context save (local commits only, no push)
 tags: [session, workflow, gitignored]
 ---
 
-# End Session Protocol
+# End Session Protocol (No Push)
 
 You are ending a work session. Follow these steps in order:
 
@@ -74,7 +74,7 @@ grep -r "DEPRECATED\|TODO: remove\|OUTDATED" .claude/references/ CLAUDE.md 2>/de
 - Issues found: List specific warnings with recommendations
 - No CLAUDE.md: Skip silently
 
-## 4. Commit and Push Changes
+## 4. Commit Changes Locally (NO PUSH)
 
 If there are any changes in the git working directory:
 
@@ -92,7 +92,9 @@ git commit -m "$(cat <<'EOF'
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
-)" && git push
+)"
+
+# DO NOT PUSH - Keep commits local only
 ```
 
 ## 5. Friendly Goodbye
@@ -108,7 +110,7 @@ Provide a warm, encouraging sign-off:
 ⏭️  Next session:
 - [next tasks]
 
-💾 Session saved and changes pushed to remote
+💾 Session saved and changes committed locally (not pushed to remote)
 
 🌙 Rest well! Your progress is saved and ready to pick up exactly where you left off.
 
