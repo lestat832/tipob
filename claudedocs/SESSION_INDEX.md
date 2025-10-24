@@ -68,9 +68,10 @@ Fixed critical PvP mode UX issues discovered during testing:
 ## Next Steps Priority
 
 ### Immediate
+- **Reload VS Code for Serena MCP** - Use Cmd+Shift+P → "Developer: Reload Window"
 - Share PRODUCT_OVERVIEW.md with partner
 - Gather partner feedback on implementation
-- Test context optimization system (`/hello` and smart loading)
+- Thoroughly test PvP mode with all fixes
 
 ### Planned Features
 - Sound effects and music
