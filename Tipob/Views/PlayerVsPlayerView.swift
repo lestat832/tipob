@@ -12,7 +12,7 @@ struct PlayerVsPlayerView: View {
 
     // Game state
     @State private var sequence: [GestureType] = []
-    @State private var currentRound: Int = 0
+    @State private var currentRound: Int = 1
     @State private var currentPlayer: Int = 1
     @State private var gameOver: Bool = false
     @State private var winner: String? = nil
@@ -24,6 +24,9 @@ struct PlayerVsPlayerView: View {
     // Visual state for showing gestures
     @State private var showGestureAnimation: Bool = false
     @State private var animatedGesture: GestureType? = nil
+
+    // Repeat phase state
+    @State private var isAddingGesture: Bool = false
 
     // Timing
     @State private var timeRemaining: TimeInterval = 3.0
@@ -79,6 +82,12 @@ struct PlayerVsPlayerView: View {
                     resultsView
                 }
             }
+        }
+        .detectSwipes { gesture in
+            handleGesture(gesture)
+        }
+        .detectTaps { gesture in
+            handleGesture(gesture)
         }
     }
 
@@ -202,20 +211,14 @@ struct PlayerVsPlayerView: View {
 
             Spacer()
         }
-        .detectSwipes { gesture in
-            handleFirstGesture(gesture)
-        }
-        .detectTaps { gesture in
-            handleFirstGesture(gesture)
-        }
     }
 
     // MARK: - Repeat Phase View
 
     private var repeatPhaseView: some View {
         VStack(spacing: 30) {
-            // Current player indicator
-            Text("\(currentPlayerName): Repeat the Chain")
+            // Current player indicator - changes based on mode
+            Text(isAddingGesture ? "\(currentPlayerName): Now Add Gesture #\(sequence.count + 1)!" : "\(currentPlayerName): Repeat the Chain")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
@@ -236,8 +239,13 @@ struct PlayerVsPlayerView: View {
                 timeRemaining: $timeRemaining
             )
 
-            // Progress indicator
-            if currentGestureIndex < sequence.count {
+            // Progress indicator - changes based on mode
+            if isAddingGesture {
+                Text("Add your gesture")
+                    .font(.system(size: 20, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.9))
+                    .padding(.top, 20)
+            } else if currentGestureIndex < sequence.count {
                 Text("Gesture \(currentGestureIndex + 1) of \(sequence.count)")
                     .font(.system(size: 20, weight: .medium, design: .rounded))
                     .foregroundColor(.white.opacity(0.9))
@@ -246,21 +254,16 @@ struct PlayerVsPlayerView: View {
 
             Spacer()
 
-            // Progress dots
+            // Progress dots - shows extra dot when in adding mode
             HStack(spacing: 10) {
-                ForEach(0..<sequence.count, id: \.self) { index in
+                let totalDots = isAddingGesture ? sequence.count + 1 : sequence.count
+                ForEach(0..<totalDots, id: \.self) { index in
                     Circle()
                         .fill(index < currentGestureIndex ? Color.green : Color.white.opacity(0.3))
                         .frame(width: 12, height: 12)
                 }
             }
             .padding(.bottom, 60)
-        }
-        .detectSwipes { gesture in
-            handleRepeatGesture(gesture)
-        }
-        .detectTaps { gesture in
-            handleRepeatGesture(gesture)
         }
     }
 
@@ -303,12 +306,6 @@ struct PlayerVsPlayerView: View {
             }
 
             Spacer()
-        }
-        .detectSwipes { gesture in
-            handleAddGesture(gesture)
-        }
-        .detectTaps { gesture in
-            handleAddGesture(gesture)
         }
     }
 
@@ -416,6 +413,20 @@ struct PlayerVsPlayerView: View {
         currentPlayer == 1 ? player1Name : player2Name
     }
 
+    // Unified gesture handler - routes to appropriate phase handler
+    private func handleGesture(_ gesture: GestureType) {
+        switch gamePhase {
+        case .firstGesture:
+            handleFirstGesture(gesture)
+        case .repeatPhase:
+            handleRepeatGesture(gesture)  // Now handles both repeat and add
+        case .addGesture:
+            handleAddGesture(gesture)  // Only used for Round 1 Player 1
+        default:
+            break  // Ignore gestures in nameEntry/results
+        }
+    }
+
     private func startGame() {
         // Load stats
         longestSequence = PersistenceManager.shared.loadPvPLongestSequence()
@@ -468,6 +479,7 @@ struct PlayerVsPlayerView: View {
         currentGestureIndex = 0
         userBuffer = []
         timeRemaining = perGestureTime
+        isAddingGesture = false  // Reset adding mode
         gamePhase = .repeatPhase
         startTimer()
     }
@@ -490,27 +502,48 @@ struct PlayerVsPlayerView: View {
     private func handleRepeatGesture(_ gesture: GestureType) {
         guard gamePhase == .repeatPhase else { return }
 
-        if currentGestureIndex < sequence.count && sequence[currentGestureIndex] == gesture {
-            // Correct gesture
-            userBuffer.append(gesture)
+        if !isAddingGesture {
+            // Still repeating sequence
+            if currentGestureIndex < sequence.count && sequence[currentGestureIndex] == gesture {
+                // Correct gesture
+                userBuffer.append(gesture)
+                currentGestureIndex += 1
+                HapticManager.shared.impact()
+
+                if currentGestureIndex >= sequence.count {
+                    // Player completed repeat - transition to add mode
+                    stopTimer()
+                    showSuccessAndTransitionToAdd()
+                } else {
+                    // Reset timer for next gesture
+                    timeRemaining = perGestureTime
+                }
+            } else {
+                // Wrong gesture - immediate loss
+                handleWrongGesture()
+            }
+        } else {
+            // Player is adding new gesture
+            sequence.append(gesture)
             currentGestureIndex += 1
             HapticManager.shared.impact()
 
-            if currentGestureIndex >= sequence.count {
-                // Player completed sequence successfully
-                stopTimer()
-                showSuccessAndMoveToAdd()
-            } else {
-                // Reset timer for next gesture
-                timeRemaining = perGestureTime
+            // Immediately exit adding mode to prevent title flash
+            isAddingGesture = false
+
+            // Update session best if needed
+            if sequence.count > longestSequence {
+                longestSequence = sequence.count
+                PersistenceManager.shared.savePvPLongestSequence(longestSequence)
             }
-        } else {
-            // Wrong gesture - immediate loss
-            handleWrongGesture()
+
+            // Show success and switch player
+            stopTimer()
+            showSuccessAndSwitchPlayer()
         }
     }
 
-    private func showSuccessAndMoveToAdd() {
+    private func showSuccessAndTransitionToAdd() {
         flashColor = .green
         HapticManager.shared.success()
 
@@ -518,8 +551,29 @@ struct PlayerVsPlayerView: View {
             flashColor = .clear
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            gamePhase = .addGesture
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            // Player 2 NEVER adds - only Player 1 builds the sequence
+            if currentPlayer == 2 {
+                switchToNextPlayer()
+            } else {
+                // Player 1: Transition to adding mode (stay on repeat screen)
+                isAddingGesture = true
+                timeRemaining = perGestureTime
+                startTimer()
+            }
+        }
+    }
+
+    private func showSuccessAndSwitchPlayer() {
+        flashColor = .green
+        HapticManager.shared.success()
+
+        withAnimation(.easeInOut(duration: 0.3)) {
+            flashColor = .clear
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            switchToNextPlayer()
         }
     }
 
@@ -558,7 +612,11 @@ struct PlayerVsPlayerView: View {
 
     private func switchToNextPlayer() {
         currentPlayer = currentPlayer == 1 ? 2 : 1
-        currentRound += 1
+
+        // Only increment round when completing a full cycle (P2 → P1)
+        if currentPlayer == 1 {
+            currentRound += 1
+        }
 
         // Update difficulty
         perGestureTime = calculatePerGestureTime(round: currentRound)

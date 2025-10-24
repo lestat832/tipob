@@ -1,23 +1,25 @@
 # Tipob Project - Session Index
 
 **Last Updated**: October 23, 2025
-**Project Status**: Phase 1 Complete + Context Optimization Implemented
+**Project Status**: Phase 1 Complete + PvP UX Refined
 
 ## Latest Session Info
 
 **Session Date**: October 23, 2025
-**Session Type**: Context Optimization Implementation
-**Duration**: ~90 minutes
+**Session Type**: PvP Mode Bug Fixes - UX Polish
+**Duration**: ~60 minutes
 **Branch**: main
-**Last Commit**: Pending (context optimization system)
+**Last Commit**: Pending (PvP bug fixes)
 
 ### Session Summary
-Implemented complete reference file system with automatic maintenance (nova_scholartrail pattern):
-- Created project CLAUDE.md (203 lines, ~6K bytes)
-- Extracted 5 focused reference files (~41K total, loaded on-demand)
-- Added automatic daily health checks and monthly audits
-- Implemented smart reference loading system
-- **Result**: 75% reduction in typical context usage (40K → 10K tokens)
+Fixed critical PvP mode UX issues discovered during testing:
+1. **Full-screen gesture detection** - Moved detection from VStack to ZStack level
+2. **Player 1 "Add Gesture" flash bug** - Prevented confusing message before player switch
+3. **Round counter off-by-one error** - Fixed mismatch between round number and progress dots
+
+**Key Changes:**
+- `PlayerVsPlayerView.swift`: Unified gesture handler, immediate `isAddingGesture` reset, round counter initialization fix
+- **Result**: Smooth PvP gameplay with accurate visual feedback
 
 ## Quick Reference
 
@@ -35,12 +37,12 @@ Implemented complete reference file system with automatic maintenance (nova_scho
 - **References**: `.claude/references/` (5 files, loaded on-demand)
 
 ### Recent Work (October 2025)
-1. **Oct 23**: Implemented context optimization system (75% token reduction)
-2. **Oct 21**: Created product overview document for partner collaboration
-3. **Oct 21**: Fixed slash command configuration (global vs project-local)
-4. **Oct 20**: Implemented Game vs Player vs Player mode with fair sequence replay
-5. **Oct 20**: Added 3 touch gestures (Tap, Double Tap, Long Press)
-6. **Oct 20**: Implemented Memory Mode with sequence memorization
+1. **Oct 23**: Fixed PvP UX bugs (gesture detection, round counter, title flash)
+2. **Oct 23**: Implemented context optimization system (75% token reduction)
+3. **Oct 21**: Created product overview document for partner collaboration
+4. **Oct 21**: Fixed slash command configuration (global vs project-local)
+5. **Oct 20**: Implemented Game vs Player vs Player mode with fair sequence replay
+6. **Oct 20**: Added 3 touch gestures (Tap, Double Tap, Long Press)
 
 ## Project Context
 
