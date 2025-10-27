@@ -175,8 +175,8 @@ struct TutorialView: View {
             showRetry = true
         }
 
-        // Haptic feedback
-        HapticManager.shared.error()
+        // Failure feedback (sound + haptic)
+        FailureFeedbackManager.shared.playFailureFeedback()
 
         // Hide retry message after 1 second
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {

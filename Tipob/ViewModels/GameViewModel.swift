@@ -133,7 +133,7 @@ class GameViewModel: ObservableObject {
         gameModel.updateBestStreak()
         PersistenceManager.shared.saveBestStreak(gameModel.bestStreak)
         flashColor = .red
-        HapticManager.shared.error()
+        FailureFeedbackManager.shared.playFailureFeedback()
 
         withAnimation(.easeInOut(duration: GameConfiguration.flashAnimationDuration)) {
             flashColor = .clear
@@ -198,7 +198,7 @@ class GameViewModel: ObservableObject {
         classicModeModel.updateBestScore()
         PersistenceManager.shared.saveClassicBestScore(classicModeModel.bestScore)
         flashColor = .red
-        HapticManager.shared.error()
+        FailureFeedbackManager.shared.playFailureFeedback()
 
         withAnimation(.easeInOut(duration: GameConfiguration.flashAnimationDuration)) {
             flashColor = .clear

@@ -166,10 +166,16 @@ struct GameVsPlayerVsPlayerView: View {
 
     private var watchSequenceView: some View {
         VStack(spacing: 40) {
+            // Player turn indicator
+            Text("\(nextPlayerName)'s Turn Up Next!")
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .foregroundColor(.yellow)
+                .padding(.top, 60)
+
             Text("Watch the Sequence!")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
-                .padding(.top, 80)
+                .padding(.top, 10)
 
             Text("Round \(currentRound)")
                 .font(.system(size: 24, weight: .semibold, design: .rounded))
@@ -326,6 +332,10 @@ struct GameVsPlayerVsPlayerView: View {
         currentPlayer == 1 ? player1Name : player2Name
     }
 
+    private var nextPlayerName: String {
+        nextPlayer == 1 ? player1Name : player2Name
+    }
+
     private func startGame() {
         // Reset everything
         sequence = []
@@ -480,7 +490,7 @@ struct GameVsPlayerVsPlayerView: View {
         }
 
         flashColor = .red
-        HapticManager.shared.error()
+        FailureFeedbackManager.shared.playFailureFeedback()
 
         withAnimation(.easeInOut(duration: GameConfiguration.flashAnimationDuration)) {
             flashColor = .clear

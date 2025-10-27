@@ -632,9 +632,9 @@ struct PlayerVsPlayerView: View {
         winner = currentPlayer == 1 ? player2Name : player1Name
         updateWinStats(winningPlayer: currentPlayer == 1 ? 2 : 1)
 
-        // Show error flash
+        // Show error flash and failure feedback
         flashColor = .red
-        HapticManager.shared.error()
+        FailureFeedbackManager.shared.playFailureFeedback()
 
         withAnimation(.easeInOut(duration: 0.3)) {
             flashColor = .clear
@@ -654,9 +654,9 @@ struct PlayerVsPlayerView: View {
         winner = currentPlayer == 1 ? player2Name : player1Name
         updateWinStats(winningPlayer: currentPlayer == 1 ? 2 : 1)
 
-        // Show error flash
+        // Show error flash and failure feedback
         flashColor = .red
-        HapticManager.shared.error()
+        FailureFeedbackManager.shared.playFailureFeedback()
 
         withAnimation(.easeInOut(duration: 0.3)) {
             flashColor = .clear

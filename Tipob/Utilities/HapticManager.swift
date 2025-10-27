@@ -5,11 +5,13 @@ class HapticManager {
     private let notificationGenerator = UINotificationFeedbackGenerator()
     private let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
     private let lightImpactGenerator = UIImpactFeedbackGenerator(style: .light)
+    private let heavyImpactGenerator = UIImpactFeedbackGenerator(style: .heavy)
 
     private init() {
         notificationGenerator.prepare()
         impactGenerator.prepare()
         lightImpactGenerator.prepare()
+        heavyImpactGenerator.prepare()
     }
 
     func success() {
@@ -53,6 +55,15 @@ class HapticManager {
             longPress()
         default:
             impact()
+        }
+    }
+
+    // Failure feedback: two strong pulses with 100ms gap
+    // Creates distinct "buzz" pattern that's clearly different from success
+    func playFailureFeedback() {
+        heavyImpactGenerator.impactOccurred(intensity: 1.0)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.heavyImpactGenerator.impactOccurred(intensity: 1.0)
         }
     }
 }
