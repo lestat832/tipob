@@ -89,6 +89,9 @@ struct PlayerVsPlayerView: View {
         .detectTaps { gesture in
             handleGesture(gesture)
         }
+        .detectPinchNative {
+            handleGesture(.pinch)
+        }
     }
 
     // MARK: - Name Entry View

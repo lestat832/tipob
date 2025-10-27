@@ -57,4 +57,5 @@ struct GameConfiguration {
     static var sequenceGapDuration: TimeInterval = 0.2
     static var transitionDelay: TimeInterval = 0.5
     static var flashAnimationDuration: TimeInterval = 0.3
+    static var pinchMinimumChange: CGFloat = 0.08  // 8% inward change for hybrid pinch detection (threshold + velocity)
 }

@@ -44,6 +44,11 @@ class HapticManager {
         impactGenerator.impactOccurred(intensity: 0.7)
     }
 
+    // Pinch gesture: medium-soft impact (feels like compression)
+    func pinch() {
+        impactGenerator.impactOccurred(intensity: 0.65)
+    }
+
     // Helper to trigger appropriate haptic based on gesture type
     func gestureHaptic(for gesture: GestureType) {
         switch gesture {
@@ -53,6 +58,8 @@ class HapticManager {
             doubleTap()
         case .longPress:
             longPress()
+        case .pinch:
+            pinch()
         default:
             impact()
         }

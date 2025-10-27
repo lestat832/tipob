@@ -62,5 +62,8 @@ struct ClassicModeView: View {
         .detectTaps { gesture in
             viewModel.handleClassicModeGesture(gesture)
         }
+        .detectPinchNative {
+            viewModel.handleClassicModeGesture(.pinch)
+        }
     }
 }

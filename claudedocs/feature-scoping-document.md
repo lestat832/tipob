@@ -1,8 +1,8 @@
 # Tipob Feature Scoping Document
-**Date**: October 10, 2025 (Updated: October 21, 2025)
+**Date**: October 10, 2025 (Updated: October 27, 2025)
 **Project**: Tipob - iOS SwiftUI Bop-It Style Game
 **Purpose**: Comprehensive feature planning and decision framework
-**Status**: Phase 1 Partially Complete
+**Status**: Phase 1 MVP Complete - Ready for Partner Review
 
 ---
 
@@ -30,8 +30,9 @@
 | **Single Tap ⊙** | TapGesture with disambiguation | Easy | ✅ Implemented 2025-10-20 |
 | **Double Tap ◎** | TapGesture with timing window | Easy | ✅ Implemented 2025-10-20 |
 | **Long Press ⏺** | LongPressGesture (600ms) | Easy | ✅ Implemented 2025-10-20 |
+| **Pinch 🤏** | Native UIPinchGestureRecognizer | Easy | ✅ Implemented 2025-10-27 |
 
-**Total Gestures**: 7 (4 swipes + 3 touch gestures)
+**Total Gestures**: 8 (4 swipes + 3 touch gestures + 1 multi-touch gesture)
 
 ### Tier 1: High Priority - Easy Implementation 🟢
 
@@ -67,47 +68,31 @@
 
 ---
 
-### Tier 2: Medium Priority - Moderate Complexity 🟡
+### Planned Gesture Roadmap 🎯
 
-#### Multi-Touch Gestures
+The following gestures have been evaluated and prioritized for future implementation:
+
+#### Tier 1: High-Priority Multi-Touch Gestures 🟢
 | Gesture | Implementation | Complexity | Engagement | Accessibility | Priority |
 |---------|---------------|------------|------------|---------------|----------|
-| **Pinch** | `MagnificationGesture()` | Low | High | Poor | P1 |
-| **Rotate** | `RotationGesture()` | Low | High | Poor | P1 |
-| **Spread** | MagnificationGesture (inverse pinch) | Low | Medium | Poor | P2 |
+| **Spread 🫱🫲** | Native UIPinchGestureRecognizer (inverse) | Low | High | Poor | P1 |
+| **Rotate 🔄** | Native UIRotationGestureRecognizer | Low | High | Poor | P1 |
 
-**Implementation Notes**:
-```swift
-// Pinch/Spread Example
-.gesture(
-    MagnificationGesture()
-        .onEnded { scale in
-            if scale < 0.9 {
-                viewModel.handleGesture(.pinch)
-            } else if scale > 1.1 {
-                viewModel.handleGesture(.spread)
-            }
-        }
-)
+**Implementation Notes:**
+- Use native UIKit gesture recognizers (proven reliable, following pinch implementation success)
+- Spread: Same recognizer as pinch, detect `scale > 1.1`
+- Rotate: `UIRotationGestureRecognizer`, detect angle change > 30°
 
-// Rotate Example
-.gesture(
-    RotationGesture()
-        .onEnded { angle in
-            if abs(angle.degrees) > 30 {
-                viewModel.handleGesture(.rotate)
-            }
-        }
-)
-```
-
-#### Motion-Based Gestures
+#### Tier 2: Medium-Priority Motion Gestures 🟡
 | Gesture | Implementation | Complexity | Engagement | Accessibility | Priority |
 |---------|---------------|------------|------------|---------------|----------|
-| **Shake** | CMMotionManager + acceleration threshold | Medium | Very High | Poor | P0 |
-| **Tilt Left/Right** | CMMotionManager + device orientation | Medium | High | Poor | P1 |
-| **Flip** | CMMotionManager + gravity vector | Medium | Medium | Very Poor | P3 |
-| **Raise/Lower** | CMMotionManager + altitude change | High | Low | Very Poor | P4 |
+| **Shake 📳** | CMMotionManager + acceleration threshold | Medium | Very High | Poor | P1 |
+| **Tilt Left ↺** | CMMotionManager + device orientation | Medium | High | Poor | P2 |
+| **Tilt Right ↻** | CMMotionManager + device orientation | Medium | High | Poor | P2 |
+| **Flip 🔁** | CMMotionManager + gravity vector | Medium | Medium | Very Poor | P3 |
+| **Raise ⬆️** | CMMotionManager + altitude change | High | Low | Very Poor | P4 |
+| **Lower ⬇️** | CMMotionManager + altitude change | High | Low | Very Poor | P4 |
+| **Freeze 🧊** | CMMotionManager + stillness detection | Medium | Medium | Poor | P3 |
 
 **Recommendation**: Start with Shake only (most engaging, iconic Bop-It gesture)
 **Estimated Effort**: 4-8 hours (includes CMMotionManager setup)
@@ -147,41 +132,33 @@ class MotionManager: ObservableObject {
 
 ---
 
-### Tier 3: Advanced - High Complexity 🔴
+### Tier 3: Advanced - Cognitive & Audio Gestures 🔴
 
-#### Pattern Recognition
+#### Cognitive & Sensory Gestures 🎨🎤💨
 | Gesture | Implementation | Complexity | Engagement | Accessibility | Priority |
 |---------|---------------|------------|------------|---------------|----------|
-| **Draw Circle** | Vision framework + shape recognition | High | Medium | Poor | P3 |
-| **Draw Square** | Vision framework + shape recognition | High | Medium | Poor | P3 |
-| **Draw Triangle** | Vision framework + shape recognition | High | Medium | Poor | P3 |
-| **Custom Path** | Path tracking + ML model | Very High | Low | Very Poor | P5 |
+| **Blow 💨** | AVAudioRecorder + frequency analysis | High | High | Poor | P3 |
+| **Whistle 🎵** | AVAudioRecorder + pitch detection | High | Medium | Poor | P3 |
+| **Voice Commands 🎤** | Speech recognition framework | Medium | High | Excellent | P2 |
+| **Color Recognition 🎨** | AVCaptureSession + color detection | High | Medium | Poor | P4 |
+| **Cover Camera 📷** | AVCaptureSession + brightness detection | Medium | Low | Poor | P5 |
 
-**Recommendation**: Defer until post-launch, requires ML expertise
-**Estimated Effort**: 40-80 hours (includes ML model training)
-**Risk**: High (recognition accuracy issues)
+**Recommendation**:
+- Voice commands for accessibility (P2)
+- Blow/whistle as novelty features for later (P3)
+- Color recognition experimental (P4)
 
-#### Sensor-Based
-| Gesture | Implementation | Complexity | Engagement | Accessibility | Priority |
-|---------|---------------|------------|------------|---------------|----------|
-| **Blow/Whistle** | AVAudioRecorder + frequency analysis | High | High | Poor | P2 |
-| **Cover Camera** | AVCaptureSession + brightness detection | Medium | Medium | Poor | P4 |
-| **Volume Buttons** | Hardware button monitoring | Low | Low | Good | P5 |
-| **3D Touch** | `.onLongPressGesture` with pressure | Low | Medium | Poor | P3 |
+**Estimated Effort**: 6-16 hours each
+**Risk**: Medium (permissions, false positives, device compatibility)
 
-**Recommendation**: Blow/Whistle could be fun novelty feature for later
-**Estimated Effort**: 8-16 hours
-**Risk**: Medium (microphone permission, false positives)
+#### Pattern Recognition (Deferred)
+| Gesture | Implementation | Complexity | Priority |
+|---------|---------------|------------|----------|
+| **Draw Circle** | Vision + ML | Very High | P5 |
+| **Draw Square** | Vision + ML | Very High | P5 |
+| **Draw Triangle** | Vision + ML | Very High | P5 |
 
-#### Accessibility Gestures
-| Gesture | Implementation | Complexity | Engagement | Accessibility | Priority |
-|---------|---------------|------------|------------|---------------|----------|
-| **Voice Commands** | Speech recognition framework | Medium | High | Excellent | P1 |
-| **Switch Control** | iOS accessibility API integration | High | Low | Excellent | P2 |
-
-**Recommendation**: Voice commands essential for accessibility compliance
-**Estimated Effort**: 6-12 hours
-**Risk**: Low (Apple provides good APIs)
+**Recommendation**: Defer indefinitely - too complex, low engagement/effort ratio
 
 ---
 
@@ -229,31 +206,42 @@ class MotionManager: ObservableObject {
 **Goal**: Increase engagement and replayability
 **Priority**: 🔴 Critical Path
 
-#### 1.1 Gesture Expansion
+#### 1.1 Gesture Expansion ✅
 - [x] **Tap gesture ⊙** (1 hour) - ✅ Completed 2025-10-20 (Actual: 0.5 hours)
 - [x] **Double tap gesture ◎** (1 hour) - ✅ Completed 2025-10-20 (Actual: 0.5 hours)
 - [x] **Long press gesture ⏺** (1 hour) - ✅ Completed 2025-10-20 (Actual: 0.5 hours)
-- [ ] **Shake gesture** (6-8 hours) - Deferred
-  - CMMotionManager integration
-  - Threshold calibration
-  - Battery optimization
-  - Privacy permission handling
+- [x] **Pinch gesture 🤏** (6-8 hours) - ✅ Completed 2025-10-27 (Actual: 8 hours)
+  - Native UIPinchGestureRecognizer implementation
+  - UIViewRepresentable wrapper pattern
+  - Gesture coexistence with tap/swipe
+  - Indigo color + compress animation
+  - Applied to all 5 game modes
 
-**Implementation Notes (2025-10-20)**:
-- Created SwipeGestureModifier for swipe detection with angle calculation
-- Implemented tap disambiguation (300ms window for double-tap detection)
-- All touch gestures working via SwiftUI native gesture recognizers (.simultaneousGesture() for coexistence)
-- Total implementation time: ~2.5 hours (vs estimated 4 hours)
+**Implementation Notes**:
+- **2025-10-20**: Created SwipeGestureModifier and TapGestureModifier for coexistence
+- **2025-10-27**: Attempted SwiftUI MagnificationGesture (failed - 10% recognition rate)
+- **2025-10-27**: Migrated to native UIKit UIPinchGestureRecognizer (success - 90%+ recognition)
+- **Key Learning**: For complex multi-touch gestures, native UIKit recognizers are significantly more reliable than SwiftUI gesture APIs
 
 **Acceptance Criteria** (Complete):
-- [x] Tap, double tap, long press detected reliably
-- [x] Haptic feedback unique to each gesture type (using existing system)
-- [x] Gestures coexist without conflicts (simultaneousGesture() implementation)
-- [ ] Tutorial screens for new gestures (deferred)
-- [ ] Shake gesture implementation (deferred)
-- [ ] Settings to disable motion gestures (deferred)
+- [x] All 8 gestures detected reliably (4 swipes + 3 touch + 1 pinch)
+- [x] Haptic feedback unique to each gesture type
+- [x] Gestures coexist without conflicts
+- [x] Tutorial mode includes all 8 gestures (2 rounds × 8 gestures)
+- [x] Applied to all game modes (Classic ⚡, Memory 🧠, Tutorial, PvP 👥, Game vs PvP)
+- [x] Unified failure feedback (sound + haptic)
 
-**Status**: 3 of 3 touch gestures complete. Shake gesture deferred to focus on touch-based gestures first.
+**Status**: ✅ Phase 1 gesture expansion complete - 8 gestures total
+
+**Next Gestures Roadmap** (in priority order):
+1. **Spread 🫱🫲** (P1) - Use same UIKit recognizer as pinch
+2. **Rotate 🔄** (P1) - UIRotationGestureRecognizer
+3. **Shake 📳** (P1) - CMMotionManager (most requested)
+4. **Tilt Left/Right ↺↻** (P2) - Device orientation
+5. **Voice Commands 🎤** (P2) - Accessibility feature
+6. **Blow/Whistle 💨** (P3) - Audio detection
+7. **Freeze 🧊** (P3) - Stillness detection
+8. **Color Reading 🎨** (P4) - Camera + ML
 
 ---
 
@@ -1302,13 +1290,14 @@ Priority Score = (User Value × 2) + (Business Impact × 1.5) + (Ease × 1) + (A
 |---------|------|---------|--------|
 | 1.0 | 2025-10-10 | Initial scoping document | Claude Code |
 | 2.0 | 2025-10-21 | Updated implementation status: 7 gestures complete (4 swipes + 3 touch), Memory Mode 🧠 and Game vs Player vs Player 👥 complete | Claude Code |
+| 3.0 | 2025-10-27 | Updated to 8 gestures (added Pinch 🤏 via native UIKit), Phase 1 MVP complete, added gesture roadmap with priorities | Claude Code |
 
 ---
 
-**Document Status**: ✅ Ready for Review
-**Document Version**: 2.0
-**Last Updated**: 2025-10-21
-**Next Review Date**: After Phase 1 completion
+**Document Status**: ✅ Ready for Partner Review
+**Document Version**: 3.0
+**Last Updated**: 2025-10-27
+**Next Review Date**: After partner feedback session
 **Owner**: Marc Geraldez
 
 ---

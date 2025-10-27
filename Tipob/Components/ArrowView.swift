@@ -30,6 +30,8 @@ struct ArrowView: View {
             animateDoublePulse()
         case .fillGlow:
             animateFillGlow()
+        case .compress:
+            animateCompress()
         case .singlePulse:
             animateSinglePulse()
         }
@@ -110,6 +112,36 @@ struct ArrowView: View {
         }
     }
 
+    private func animateCompress() {
+        // Start large
+        scale = 1.4
+        opacity = 1.0
+        glowRadius = 25
+
+        // Compress inward animation (300ms - quick squeeze)
+        withAnimation(.easeInOut(duration: 0.3)) {
+            scale = 0.7  // Shrink to 70% (visual pinch effect)
+            glowRadius = 40  // Increase glow as it compresses
+        }
+
+        // Bounce back (200ms spring)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
+                scale = 1.0
+                glowRadius = 20
+            }
+        }
+
+        // Fade out
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.easeInOut(duration: GameConfiguration.sequenceGapDuration)) {
+                scale = 1.0
+                opacity = 0
+                glowRadius = 0
+            }
+        }
+    }
+
     private func colorForGesture(_ gesture: GestureType) -> Color {
         switch gesture.color {
         case "blue": return .blue
@@ -119,6 +151,7 @@ struct ArrowView: View {
         case "yellow": return .yellow
         case "cyan": return .cyan
         case "magenta": return Color(red: 1.0, green: 0.0, blue: 1.0) // Magenta RGB
+        case "indigo": return .indigo
         default: return .gray
         }
     }
