@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 /// UIKit-based pinch/spread gesture recognizer wrapper for reliable detection
-/// Uses single native UIPinchGestureRecognizer to detect both pinch (inward) and spread (outward)
+/// Uses native UIPinchGestureRecognizer for pinch and custom SpreadGestureRecognizer for spread
 struct PinchSpreadGestureView: UIViewRepresentable {
     let onPinch: () -> Void
     let onSpread: () -> Void
@@ -11,14 +11,21 @@ struct PinchSpreadGestureView: UIViewRepresentable {
         let view = UIView()
         view.backgroundColor = .clear
 
-        // Create native iOS pinch gesture recognizer
-        // This recognizer handles both pinch and spread gestures
+        // Pinch gesture: Native iOS recognizer for fingers moving together
         let pinchGesture = UIPinchGestureRecognizer(
             target: context.coordinator,
-            action: #selector(Coordinator.handlePinchSpread(_:))
+            action: #selector(Coordinator.handlePinch(_:))
+        )
+
+        // Spread gesture: Custom recognizer for fingers moving apart from close position
+        let spreadGesture = SpreadGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleSpread(_:))
         )
 
         view.addGestureRecognizer(pinchGesture)
+        view.addGestureRecognizer(spreadGesture)
+
         return view
     }
 
@@ -33,90 +40,36 @@ struct PinchSpreadGestureView: UIViewRepresentable {
     class Coordinator: NSObject {
         let onPinch: () -> Void
         let onSpread: () -> Void
-        var hasTriggered = false
-
-        // Direction-based detection properties
-        var previousScale: CGFloat?
-        var consistentDirectionCount: Int = 0
+        var hasPinchTriggered = false
 
         init(onPinch: @escaping () -> Void, onSpread: @escaping () -> Void) {
             self.onPinch = onPinch
             self.onSpread = onSpread
         }
 
-        @objc func handlePinchSpread(_ gesture: UIPinchGestureRecognizer) {
-            let currentScale = gesture.scale
-
+        @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
             switch gesture.state {
-            case .began:
-                // Initialize tracking for new gesture
-                previousScale = currentScale
-                consistentDirectionCount = 0
-                print("[PinchSpread] ✋ Gesture BEGAN - initial scale: \(String(format: "%.3f", currentScale))")
-
             case .changed:
-                guard let prevScale = previousScale else { return }
-
-                // Calculate scale change (velocity)
-                let scaleChange = currentScale - prevScale
-
-                print("[PinchSpread] 📊 Scale: \(String(format: "%.3f", currentScale)) | Change: \(String(format: "%+.3f", scaleChange)) | Direction count: \(consistentDirectionCount)")
-
-                // Direction-based detection with reversal support:
-                // Positive change = spreading (fingers moving apart)
-                // Negative change = pinching (fingers moving together)
-                // Allow direction changes before gesture triggers
-
-                if scaleChange > 0.01 {
-                    // Spreading motion detected
-                    if consistentDirectionCount < 0 {
-                        // Was pinching, now spreading - reset counter
-                        print("[PinchSpread] 🔄 Direction REVERSED from pinch to spread | Resetting counter")
-                        consistentDirectionCount = 0
-                    }
-
-                    consistentDirectionCount += 1
-                    print("[PinchSpread] ↗️ Spreading motion | Count: \(consistentDirectionCount)")
-
-                    if consistentDirectionCount >= 3 && !hasTriggered {
-                        hasTriggered = true
-                        print("[PinchSpread] 🫱🫲 SPREAD TRIGGERED after \(consistentDirectionCount) consistent frames at scale \(String(format: "%.3f", currentScale))")
-                        onSpread()
-                    }
-
-                } else if scaleChange < -0.01 {
-                    // Pinching motion detected
-                    if consistentDirectionCount > 0 {
-                        // Was spreading, now pinching - reset counter
-                        print("[PinchSpread] 🔄 Direction REVERSED from spread to pinch | Resetting counter")
-                        consistentDirectionCount = 0
-                    }
-
-                    consistentDirectionCount -= 1
-                    print("[PinchSpread] ↘️ Pinching motion | Count: \(consistentDirectionCount)")
-
-                    if consistentDirectionCount <= -3 && !hasTriggered {
-                        hasTriggered = true
-                        print("[PinchSpread] 🤏 PINCH TRIGGERED after \(abs(consistentDirectionCount)) consistent frames at scale \(String(format: "%.3f", currentScale))")
-                        onPinch()
-                    }
-
-                } else {
-                    // Scale change too small (noise/jitter), don't update counter
-                    print("[PinchSpread] ⏸️ No significant movement (change: \(String(format: "%.3f", scaleChange)))")
+                // Detect pinch when scale drops below 0.7 (30% reduction)
+                if gesture.scale < 0.7 && !hasPinchTriggered {
+                    hasPinchTriggered = true
+                    onPinch()
                 }
-
-                previousScale = currentScale
 
             case .ended, .cancelled, .failed:
                 // Reset for next gesture
-                print("[PinchSpread] ✅ Gesture ENDED - final scale: \(String(format: "%.3f", currentScale)) | Direction count: \(consistentDirectionCount)")
-                hasTriggered = false
-                previousScale = nil
-                consistentDirectionCount = 0
+                hasPinchTriggered = false
 
             default:
                 break
+            }
+        }
+
+        @objc func handleSpread(_ gesture: SpreadGestureRecognizer) {
+            // Spread gesture recognizer handles all detection logic
+            // Simply trigger callback when gesture is recognized
+            if gesture.state == .recognized {
+                onSpread()
             }
         }
     }
@@ -124,12 +77,12 @@ struct PinchSpreadGestureView: UIViewRepresentable {
 
 extension View {
     /// Adds native UIKit pinch and spread gesture detection
-    /// More reliable than SwiftUI's MagnificationGesture
-    /// Uses single recognizer to detect both inward (pinch) and outward (spread) motions
+    /// Pinch: Native UIPinchGestureRecognizer (fingers moving together)
+    /// Spread: Custom SpreadGestureRecognizer (fingers moving apart from close position)
     func detectPinchSpread(onPinch: @escaping () -> Void, onSpread: @escaping () -> Void) -> some View {
         self.background(
             PinchSpreadGestureView(onPinch: onPinch, onSpread: onSpread)
-                .allowsHitTesting(true)  // Capture pinch/spread gestures
+                .allowsHitTesting(true)
         )
     }
 }
