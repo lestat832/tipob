@@ -32,6 +32,8 @@ struct ArrowView: View {
             animateFillGlow()
         case .compress:
             animateCompress()
+        case .expand:
+            animateExpand()
         case .singlePulse:
             animateSinglePulse()
         }
@@ -142,6 +144,36 @@ struct ArrowView: View {
         }
     }
 
+    private func animateExpand() {
+        // Start small (opposite of compress)
+        scale = 0.7
+        opacity = 1.0
+        glowRadius = 25
+
+        // Expand outward animation (300ms - quick spread)
+        withAnimation(.easeInOut(duration: 0.3)) {
+            scale = 1.4  // Grow to 140% (visual spread effect)
+            glowRadius = 40  // Increase glow as it expands
+        }
+
+        // Bounce back (200ms spring)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
+                scale = 1.0
+                glowRadius = 20
+            }
+        }
+
+        // Fade out
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.easeInOut(duration: GameConfiguration.sequenceGapDuration)) {
+                scale = 1.0
+                opacity = 0
+                glowRadius = 0
+            }
+        }
+    }
+
     private func colorForGesture(_ gesture: GestureType) -> Color {
         switch gesture.color {
         case "blue": return .blue
@@ -152,6 +184,7 @@ struct ArrowView: View {
         case "cyan": return .cyan
         case "magenta": return Color(red: 1.0, green: 0.0, blue: 1.0) // Magenta RGB
         case "indigo": return .indigo
+        case "purple": return .purple
         default: return .gray
         }
     }

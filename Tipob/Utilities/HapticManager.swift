@@ -49,6 +49,15 @@ class HapticManager {
         impactGenerator.impactOccurred(intensity: 0.65)
     }
 
+    // Spread gesture: two expanding pulses (light → medium)
+    // Creates opposite feeling to pinch (expansion vs compression)
+    func spread() {
+        lightImpactGenerator.impactOccurred()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.075) { [weak self] in
+            self?.impactGenerator.impactOccurred(intensity: 0.8)
+        }
+    }
+
     // Helper to trigger appropriate haptic based on gesture type
     func gestureHaptic(for gesture: GestureType) {
         switch gesture {
@@ -60,6 +69,8 @@ class HapticManager {
             longPress()
         case .pinch:
             pinch()
+        case .spread:
+            spread()
         default:
             impact()
         }

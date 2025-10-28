@@ -53,8 +53,9 @@ struct GamePlayView: View {
         .detectTaps { gesture in
             viewModel.handleGesture(gesture)
         }
-        .detectPinchNative {
-            viewModel.handleGesture(.pinch)
-        }
+        .detectPinchSpread(
+            onPinch: { viewModel.handleGesture(.pinch) },
+            onSpread: { viewModel.handleGesture(.spread) }
+        )
     }
 }

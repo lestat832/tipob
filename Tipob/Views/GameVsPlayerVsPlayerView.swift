@@ -256,9 +256,10 @@ struct GameVsPlayerVsPlayerView: View {
         .detectTaps { gesture in
             handleGesture(gesture)
         }
-        .detectPinchNative {
-            handleGesture(.pinch)
-        }
+        .detectPinchSpread(
+            onPinch: { handleGesture(.pinch) },
+            onSpread: { handleGesture(.spread) }
+        )
     }
 
     // MARK: - Results View

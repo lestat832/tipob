@@ -14,7 +14,7 @@ struct TutorialView: View {
     @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
 
     // Tutorial gesture sequence (fixed order)
-    let tutorialGestures: [GestureType] = [.up, .down, .left, .right, .tap, .doubleTap, .longPress, .pinch]
+    let tutorialGestures: [GestureType] = [.up, .down, .left, .right, .tap, .doubleTap, .longPress, .pinch, .spread]
 
     var currentGesture: GestureType {
         tutorialGestures[currentGestureIndex]
@@ -112,9 +112,10 @@ struct TutorialView: View {
             .detectTaps { gesture in
                 handleGesture(gesture)
             }
-            .detectPinchNative {
-                handleGesture(.pinch)
-            }
+            .detectPinchSpread(
+                onPinch: { handleGesture(.pinch) },
+                onSpread: { handleGesture(.spread) }
+            )
 
             // Completion view overlay
             if showCompletionSheet {
@@ -250,6 +251,8 @@ struct TutorialView: View {
             return "Press and hold"
         case .pinch:
             return "Pinch inward with two fingers"
+        case .spread:
+            return "Spread outward with two fingers"
         }
     }
 
@@ -271,6 +274,8 @@ struct TutorialView: View {
             return Color(red: 1.0, green: 0.0, blue: 1.0) // Magenta RGB
         case "indigo":
             return .indigo
+        case "purple":
+            return .purple
         default:
             return .white
         }
