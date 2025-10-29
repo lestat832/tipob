@@ -72,5 +72,9 @@ struct ClassicModeView: View {
             onTiltLeft: { viewModel.handleClassicModeGesture(.tiltLeft) },
             onTiltRight: { viewModel.handleClassicModeGesture(.tiltRight) }
         )
+        .detectRaise(
+            onRaise: { viewModel.handleClassicModeGesture(.raise) },
+            onLower: { viewModel.handleClassicModeGesture(.lower) }
+        )
     }
 }

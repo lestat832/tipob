@@ -44,6 +44,10 @@ struct ArrowView: View {
             animateTiltLeft()
         case .tiltRight:
             animateTiltRight()
+        case .raiseUp:
+            animateRaiseUp()
+        case .lowerDown:
+            animateLowerDown()
         case .singlePulse:
             animateSinglePulse()
         }
@@ -280,6 +284,70 @@ struct ArrowView: View {
         }
     }
 
+    private func animateRaiseUp() {
+        // Raise animation - upward slide with spring pop
+        opacity = 1.0
+        scale = 1.0
+        glowRadius = 20
+        offset = CGSize(width: 0, height: 40)  // Start below
+
+        // Slide upward with overshoot
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+            offset = CGSize(width: 0, height: -20)  // Move up and overshoot
+            scale = 1.3
+            glowRadius = 30
+        }
+
+        // Settle back to center
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
+                offset = .zero
+                scale = 1.0
+                glowRadius = 20
+            }
+        }
+
+        // Fade out
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                opacity = 0
+                glowRadius = 0
+            }
+        }
+    }
+
+    private func animateLowerDown() {
+        // Lower animation - downward slide with settle
+        opacity = 1.0
+        scale = 1.0
+        glowRadius = 20
+        offset = CGSize(width: 0, height: -40)  // Start above
+
+        // Slide downward
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+            offset = CGSize(width: 0, height: 20)  // Move down and overshoot
+            scale = 1.3
+            glowRadius = 30
+        }
+
+        // Settle back to center
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
+                offset = .zero
+                scale = 1.0
+                glowRadius = 20
+            }
+        }
+
+        // Fade out
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                opacity = 0
+                glowRadius = 0
+            }
+        }
+    }
+
     private func colorForGesture(_ gesture: GestureType) -> Color {
         switch gesture.color {
         case "blue": return .blue
@@ -293,6 +361,7 @@ struct ArrowView: View {
         case "purple": return .purple
         case "teal": return .teal
         case "brown": return .brown
+        case "mint": return .mint  // Light green for raise
         default: return .gray
         }
     }

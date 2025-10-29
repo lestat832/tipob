@@ -63,5 +63,9 @@ struct GamePlayView: View {
             onTiltLeft: { viewModel.handleGesture(.tiltLeft) },
             onTiltRight: { viewModel.handleGesture(.tiltRight) }
         )
+        .detectRaise(
+            onRaise: { viewModel.handleGesture(.raise) },
+            onLower: { viewModel.handleGesture(.lower) }
+        )
     }
 }

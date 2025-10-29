@@ -13,6 +13,8 @@ enum GestureType: CaseIterable {
     case shake
     case tiltLeft
     case tiltRight
+    case raise
+    case lower
 
     var symbol: String {
         switch self {
@@ -28,6 +30,8 @@ enum GestureType: CaseIterable {
         case .shake: return "📳"
         case .tiltLeft: return "◀"
         case .tiltRight: return "▶"
+        case .raise: return "⬆️"
+        case .lower: return "⬇️"
         }
     }
 
@@ -45,6 +49,8 @@ enum GestureType: CaseIterable {
         case .shake: return "teal"
         case .tiltLeft: return "purple"
         case .tiltRight: return "brown"
+        case .raise: return "mint"  // Light green
+        case .lower: return "orange"
         }
     }
 
@@ -62,6 +68,8 @@ enum GestureType: CaseIterable {
         case .shake: return "Shake"
         case .tiltLeft: return "Tilt Left"
         case .tiltRight: return "Tilt Right"
+        case .raise: return "Raise"
+        case .lower: return "Lower"
         }
     }
 
@@ -75,6 +83,8 @@ enum GestureType: CaseIterable {
         case .shake: return .vibrate
         case .tiltLeft: return .tiltLeft
         case .tiltRight: return .tiltRight
+        case .raise: return .raiseUp
+        case .lower: return .lowerDown
         default: return .singlePulse
         }
     }
@@ -88,5 +98,7 @@ enum GestureType: CaseIterable {
         case vibrate
         case tiltLeft
         case tiltRight
+        case raiseUp
+        case lowerDown
     }
 }

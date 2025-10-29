@@ -266,6 +266,10 @@ struct GameVsPlayerVsPlayerView: View {
             onTiltLeft: { handleGesture(.tiltLeft) },
             onTiltRight: { handleGesture(.tiltRight) }
         )
+        .detectRaise(
+            onRaise: { handleGesture(.raise) },
+            onLower: { handleGesture(.lower) }
+        )
     }
 
     // MARK: - Results View

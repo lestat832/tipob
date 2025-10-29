@@ -84,6 +84,16 @@ class HapticManager {
         impactGenerator.impactOccurred(intensity: 0.75)
     }
 
+    // Raise gesture: light impact (uplifting sensation)
+    func raise() {
+        lightImpactGenerator.impactOccurred()
+    }
+
+    // Lower gesture: medium impact (grounding sensation)
+    func lower() {
+        impactGenerator.impactOccurred(intensity: 0.75)
+    }
+
     // Helper to trigger appropriate haptic based on gesture type
     func gestureHaptic(for gesture: GestureType) {
         switch gesture {
@@ -103,6 +113,10 @@ class HapticManager {
             tiltLeft()
         case .tiltRight:
             tiltRight()
+        case .raise:
+            raise()
+        case .lower:
+            lower()
         default:
             impact()
         }

@@ -64,14 +64,24 @@ struct PinchGestureView: UIViewRepresentable {
 
         @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
             switch gesture.state {
+            case .began:
+                print("🔍 Pinch: Began - scale=\(String(format: "%.2f", gesture.scale))")
+
             case .changed:
+                // Debug logging for scale tracking
+                if gesture.scale < 0.9 {
+                    print("🔍 Pinch: Scale=\(String(format: "%.2f", gesture.scale)) - triggered=\(hasPinchTriggered)")
+                }
+
                 // Detect pinch when scale drops below 0.7 (30% reduction)
                 if gesture.scale < 0.7 && !hasPinchTriggered {
+                    print("✅ Pinch detected! Scale=\(String(format: "%.2f", gesture.scale))")
                     hasPinchTriggered = true
                     onPinch()
                 }
 
             case .ended, .cancelled, .failed:
+                print("🔍 Pinch: Ended - final scale=\(String(format: "%.2f", gesture.scale))")
                 // Reset for next gesture
                 hasPinchTriggered = false
 

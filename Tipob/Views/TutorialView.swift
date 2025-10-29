@@ -14,7 +14,7 @@ struct TutorialView: View {
     @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
 
     // Tutorial gesture sequence (fixed order)
-    let tutorialGestures: [GestureType] = [.up, .down, .left, .right, .tap, .doubleTap, .longPress, .pinch, .shake, .tiltLeft, .tiltRight]
+    let tutorialGestures: [GestureType] = [.up, .down, .left, .right, .tap, .doubleTap, .longPress, .pinch, .shake, .tiltLeft, .tiltRight, .raise, .lower]
 
     var currentGesture: GestureType {
         tutorialGestures[currentGestureIndex]
@@ -121,6 +121,10 @@ struct TutorialView: View {
             .detectTilts(
                 onTiltLeft: { handleGesture(.tiltLeft) },
                 onTiltRight: { handleGesture(.tiltRight) }
+            )
+            .detectRaise(
+                onRaise: { handleGesture(.raise) },
+                onLower: { handleGesture(.lower) }
             )
 
             // Completion view overlay
@@ -265,6 +269,10 @@ struct TutorialView: View {
             return "Tilt your phone to the left"
         case .tiltRight:
             return "Tilt your phone to the right"
+        case .raise:
+            return "Lift the phone upward"
+        case .lower:
+            return "Move the phone downward"
         }
     }
 
@@ -292,6 +300,8 @@ struct TutorialView: View {
             return .teal
         case "brown":
             return .brown
+        case "mint":
+            return .mint  // Light green for raise
         default:
             return .white
         }
