@@ -97,8 +97,10 @@ struct PinchGestureModifier: ViewModifier {
     }
 }
 
+/*  // DUPLICATE: Extension moved to PinchGestureView.swift (UIKit-based)
 extension View {
     func detectPinch(onPinch: @escaping () -> Void) -> some View {
         modifier(PinchGestureModifier(onPinch: onPinch))
     }
 }
+*/

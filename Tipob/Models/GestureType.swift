@@ -9,7 +9,10 @@ enum GestureType: CaseIterable {
     case doubleTap
     case longPress
     case pinch
-    case spread
+    // case spread  // SPREAD: Temporarily disabled - detection issues with close finger start
+    case shake
+    case tiltLeft
+    case tiltRight
 
     var symbol: String {
         switch self {
@@ -21,7 +24,10 @@ enum GestureType: CaseIterable {
         case .doubleTap: return "◎"
         case .longPress: return "⏺"
         case .pinch: return "🤏"
-        case .spread: return "🫱🫲"
+        // case .spread: return "🫱🫲"  // SPREAD: Temporarily disabled
+        case .shake: return "📳"
+        case .tiltLeft: return "◀"
+        case .tiltRight: return "▶"
         }
     }
 
@@ -35,7 +41,10 @@ enum GestureType: CaseIterable {
         case .doubleTap: return "cyan"
         case .longPress: return "magenta"
         case .pinch: return "indigo"
-        case .spread: return "purple"
+        // case .spread: return "purple"  // SPREAD: Temporarily disabled
+        case .shake: return "teal"
+        case .tiltLeft: return "purple"
+        case .tiltRight: return "brown"
         }
     }
 
@@ -49,7 +58,10 @@ enum GestureType: CaseIterable {
         case .doubleTap: return "Double Tap"
         case .longPress: return "Long Press"
         case .pinch: return "Pinch"
-        case .spread: return "Spread"
+        // case .spread: return "Spread"  // SPREAD: Temporarily disabled
+        case .shake: return "Shake"
+        case .tiltLeft: return "Tilt Left"
+        case .tiltRight: return "Tilt Right"
         }
     }
 
@@ -59,7 +71,10 @@ enum GestureType: CaseIterable {
         case .doubleTap: return .doublePulse
         case .longPress: return .fillGlow
         case .pinch: return .compress
-        case .spread: return .expand
+        // case .spread: return .expand  // SPREAD: Temporarily disabled
+        case .shake: return .vibrate
+        case .tiltLeft: return .tiltLeft
+        case .tiltRight: return .tiltRight
         default: return .singlePulse
         }
     }
@@ -69,6 +84,9 @@ enum GestureType: CaseIterable {
         case doublePulse
         case fillGlow
         case compress
-        case expand
+        // case expand  // SPREAD: Temporarily disabled
+        case vibrate
+        case tiltLeft
+        case tiltRight
     }
 }

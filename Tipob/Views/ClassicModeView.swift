@@ -62,9 +62,15 @@ struct ClassicModeView: View {
         .detectTaps { gesture in
             viewModel.handleClassicModeGesture(gesture)
         }
-        .detectPinchSpread(
-            onPinch: { viewModel.handleClassicModeGesture(.pinch) },
-            onSpread: { viewModel.handleClassicModeGesture(.spread) }
+        .detectPinch(
+            onPinch: { viewModel.handleClassicModeGesture(.pinch) }
+        )
+        .detectShake(
+            onShake: { viewModel.handleClassicModeGesture(.shake) }
+        )
+        .detectTilts(
+            onTiltLeft: { viewModel.handleClassicModeGesture(.tiltLeft) },
+            onTiltRight: { viewModel.handleClassicModeGesture(.tiltRight) }
         )
     }
 }

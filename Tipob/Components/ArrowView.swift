@@ -6,6 +6,8 @@ struct ArrowView: View {
     @State private var scale: CGFloat = 1.0
     @State private var opacity: Double = 0.0
     @State private var glowRadius: CGFloat = 0
+    @State private var offset: CGSize = .zero
+    @State private var rotationAngle: Double = 0.0
 
     var body: some View {
         Text(gesture.symbol)
@@ -14,6 +16,8 @@ struct ArrowView: View {
             .scaleEffect(scale)
             .opacity(opacity)
             .shadow(color: colorForGesture(gesture).opacity(0.6), radius: glowRadius)
+            .offset(offset)
+            .rotationEffect(.degrees(rotationAngle))
             .onAppear {
                 if isAnimating {
                     animateIn()
@@ -32,8 +36,14 @@ struct ArrowView: View {
             animateFillGlow()
         case .compress:
             animateCompress()
-        case .expand:
-            animateExpand()
+        // case .expand:  // SPREAD: Temporarily disabled
+        //     animateExpand()
+        case .vibrate:
+            animateVibrate()
+        case .tiltLeft:
+            animateTiltLeft()
+        case .tiltRight:
+            animateTiltRight()
         case .singlePulse:
             animateSinglePulse()
         }
@@ -144,6 +154,7 @@ struct ArrowView: View {
         }
     }
 
+    /*  // SPREAD: Temporarily disabled - detection issues
     private func animateExpand() {
         // Start small (opposite of compress)
         scale = 0.7
@@ -173,6 +184,101 @@ struct ArrowView: View {
             }
         }
     }
+    */
+
+    private func animateVibrate() {
+        // Rapid side-to-side shake animation
+        opacity = 1.0
+        scale = 1.0
+        glowRadius = 20
+
+        // Quick vibrate sequence (4 shakes in 400ms)
+        for i in 0..<4 {
+            let delay = Double(i) * 0.1
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                withAnimation(.linear(duration: 0.05)) {
+                    self.offset = CGSize(width: i % 2 == 0 ? 10 : -10, height: 0)
+                }
+            }
+        }
+
+        // Return to center
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
+                self.offset = .zero
+            }
+        }
+
+        // Fade out
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                self.opacity = 0
+                self.glowRadius = 0
+            }
+        }
+    }
+
+    private func animateTiltLeft() {
+        // Tilt left animation - rotate counterclockwise
+        opacity = 1.0
+        scale = 1.2
+        glowRadius = 25
+
+        // Tilt to the left (negative rotation)
+        withAnimation(.easeInOut(duration: 0.4)) {
+            rotationAngle = -30  // 30 degrees counterclockwise
+            scale = 1.3
+            glowRadius = 35
+        }
+
+        // Return to upright
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                rotationAngle = 0
+                scale = 1.0
+                glowRadius = 20
+            }
+        }
+
+        // Fade out
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                opacity = 0
+                glowRadius = 0
+            }
+        }
+    }
+
+    private func animateTiltRight() {
+        // Tilt right animation - rotate clockwise
+        opacity = 1.0
+        scale = 1.2
+        glowRadius = 25
+
+        // Tilt to the right (positive rotation)
+        withAnimation(.easeInOut(duration: 0.4)) {
+            rotationAngle = 30  // 30 degrees clockwise
+            scale = 1.3
+            glowRadius = 35
+        }
+
+        // Return to upright
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                rotationAngle = 0
+                scale = 1.0
+                glowRadius = 20
+            }
+        }
+
+        // Fade out
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                opacity = 0
+                glowRadius = 0
+            }
+        }
+    }
 
     private func colorForGesture(_ gesture: GestureType) -> Color {
         switch gesture.color {
@@ -185,6 +291,8 @@ struct ArrowView: View {
         case "magenta": return Color(red: 1.0, green: 0.0, blue: 1.0) // Magenta RGB
         case "indigo": return .indigo
         case "purple": return .purple
+        case "teal": return .teal
+        case "brown": return .brown
         default: return .gray
         }
     }

@@ -53,9 +53,15 @@ struct GamePlayView: View {
         .detectTaps { gesture in
             viewModel.handleGesture(gesture)
         }
-        .detectPinchSpread(
-            onPinch: { viewModel.handleGesture(.pinch) },
-            onSpread: { viewModel.handleGesture(.spread) }
+        .detectPinch(
+            onPinch: { viewModel.handleGesture(.pinch) }
+        )
+        .detectShake(
+            onShake: { viewModel.handleGesture(.shake) }
+        )
+        .detectTilts(
+            onTiltLeft: { viewModel.handleGesture(.tiltLeft) },
+            onTiltRight: { viewModel.handleGesture(.tiltRight) }
         )
     }
 }

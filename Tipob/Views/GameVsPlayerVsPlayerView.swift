@@ -256,9 +256,15 @@ struct GameVsPlayerVsPlayerView: View {
         .detectTaps { gesture in
             handleGesture(gesture)
         }
-        .detectPinchSpread(
-            onPinch: { handleGesture(.pinch) },
-            onSpread: { handleGesture(.spread) }
+        .detectPinch(
+            onPinch: { handleGesture(.pinch) }
+        )
+        .detectShake(
+            onShake: { handleGesture(.shake) }
+        )
+        .detectTilts(
+            onTiltLeft: { handleGesture(.tiltLeft) },
+            onTiltRight: { handleGesture(.tiltRight) }
         )
     }
 

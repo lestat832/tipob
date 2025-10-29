@@ -49,6 +49,7 @@ class HapticManager {
         impactGenerator.impactOccurred(intensity: 0.65)
     }
 
+    /*  // SPREAD: Temporarily disabled - detection issues
     // Spread gesture: two expanding pulses (light → medium)
     // Creates opposite feeling to pinch (expansion vs compression)
     func spread() {
@@ -56,6 +57,31 @@ class HapticManager {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.075) { [weak self] in
             self?.impactGenerator.impactOccurred(intensity: 0.8)
         }
+    }
+    */
+
+    // Shake gesture: rapid succession of pulses (simulates vibration)
+    func shake() {
+        // Quick succession of light impacts (3 quick pulses)
+        for i in 0..<3 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.1) { [weak self] in
+                self?.lightImpactGenerator.impactOccurred()
+            }
+        }
+        // Final strong pulse
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            self?.impactGenerator.impactOccurred(intensity: 1.0)
+        }
+    }
+
+    // Tilt Left gesture: medium impact (steering sensation)
+    func tiltLeft() {
+        impactGenerator.impactOccurred(intensity: 0.75)
+    }
+
+    // Tilt Right gesture: medium impact (steering sensation)
+    func tiltRight() {
+        impactGenerator.impactOccurred(intensity: 0.75)
     }
 
     // Helper to trigger appropriate haptic based on gesture type
@@ -69,8 +95,14 @@ class HapticManager {
             longPress()
         case .pinch:
             pinch()
-        case .spread:
-            spread()
+        // case .spread:  // SPREAD: Temporarily disabled
+        //     spread()
+        case .shake:
+            shake()
+        case .tiltLeft:
+            tiltLeft()
+        case .tiltRight:
+            tiltRight()
         default:
             impact()
         }

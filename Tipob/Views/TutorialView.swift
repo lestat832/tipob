@@ -14,7 +14,7 @@ struct TutorialView: View {
     @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
 
     // Tutorial gesture sequence (fixed order)
-    let tutorialGestures: [GestureType] = [.up, .down, .left, .right, .tap, .doubleTap, .longPress, .pinch, .spread]
+    let tutorialGestures: [GestureType] = [.up, .down, .left, .right, .tap, .doubleTap, .longPress, .pinch, .shake, .tiltLeft, .tiltRight]
 
     var currentGesture: GestureType {
         tutorialGestures[currentGestureIndex]
@@ -112,9 +112,15 @@ struct TutorialView: View {
             .detectTaps { gesture in
                 handleGesture(gesture)
             }
-            .detectPinchSpread(
-                onPinch: { handleGesture(.pinch) },
-                onSpread: { handleGesture(.spread) }
+            .detectPinch(
+                onPinch: { handleGesture(.pinch) }
+            )
+            .detectShake(
+                onShake: { handleGesture(.shake) }
+            )
+            .detectTilts(
+                onTiltLeft: { handleGesture(.tiltLeft) },
+                onTiltRight: { handleGesture(.tiltRight) }
             )
 
             // Completion view overlay
@@ -251,8 +257,14 @@ struct TutorialView: View {
             return "Press and hold"
         case .pinch:
             return "Pinch inward with two fingers"
-        case .spread:
-            return "Spread outward with two fingers"
+        // case .spread:  // SPREAD: Temporarily disabled
+        //     return "Spread outward with two fingers"
+        case .shake:
+            return "Shake your device"
+        case .tiltLeft:
+            return "Tilt your phone to the left"
+        case .tiltRight:
+            return "Tilt your phone to the right"
         }
     }
 
@@ -276,6 +288,10 @@ struct TutorialView: View {
             return .indigo
         case "purple":
             return .purple
+        case "teal":
+            return .teal
+        case "brown":
+            return .brown
         default:
             return .white
         }
