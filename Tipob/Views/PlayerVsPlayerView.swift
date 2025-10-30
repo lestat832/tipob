@@ -83,6 +83,7 @@ struct PlayerVsPlayerView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .detectSwipes { gesture in
             handleGesture(gesture)
         }

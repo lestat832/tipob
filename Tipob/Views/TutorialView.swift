@@ -38,7 +38,7 @@ struct TutorialView: View {
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
 
-                    Text("Round \(completedRounds + 1) of 2")
+                    Text("Round \(completedRounds + 1) of 1")
                         .font(.system(size: 18, weight: .medium, design: .rounded))
                         .foregroundColor(.white.opacity(0.8))
                 }
@@ -54,6 +54,14 @@ struct TutorialView: View {
                         .font(.system(size: 120))
                         .foregroundColor(gestureColor(for: currentGesture))
                         .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+                        .onAppear {
+                            // Set expected gesture for coordinator (Tutorial Mode only)
+                            GestureCoordinator.shared.expectedGesture = currentGesture
+                        }
+                        .onChange(of: currentGesture) {
+                            // Update expected gesture when it changes
+                            GestureCoordinator.shared.expectedGesture = currentGesture
+                        }
 
                     // Instruction text
                     Text(instructionText(for: currentGesture))
@@ -141,6 +149,10 @@ struct TutorialView: View {
                 .transition(.opacity)
             }
         }
+        .onDisappear {
+            // Clear expected gesture when leaving Tutorial Mode
+            GestureCoordinator.shared.clearExpectedGesture()
+        }
     }
 
     // MARK: - Gesture Handling
@@ -159,6 +171,9 @@ struct TutorialView: View {
     }
 
     private func handleCorrectGesture() {
+        // Clear expected gesture after successful detection
+        GestureCoordinator.shared.clearExpectedGesture()
+
         // Hide retry message if showing
         showRetry = false
 
@@ -215,8 +230,8 @@ struct TutorialView: View {
     private func completeRound() {
         completedRounds += 1
 
-        if completedRounds >= 2 {
-            // Show completion sheet after 2 rounds
+        if completedRounds >= 1 {
+            // Show completion sheet after 1 round
             showCompletionSheet = true
         } else {
             // Start next round

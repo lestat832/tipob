@@ -59,6 +59,12 @@ class ShakeGestureManager: ObservableObject {
         let now = Date()
         guard now.timeIntervalSince(lastShakeTime) > shakeCooldown else { return }
 
+        // Check gesture coordinator before triggering
+        guard GestureCoordinator.shared.shouldAllowGesture(.shake) else {
+            // Suppressed - don't trigger
+            return
+        }
+
         lastShakeTime = now
         shakeCallback?()
     }

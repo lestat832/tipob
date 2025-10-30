@@ -38,6 +38,13 @@ struct SwipeGestureModifier: ViewModifier {
 
         let angle = atan2(deltaY, deltaX)
         let gesture = determineGesture(from: angle)
+
+        // Check gesture coordinator before triggering
+        guard GestureCoordinator.shared.shouldAllowGesture(gesture) else {
+            // Suppressed - don't trigger
+            return
+        }
+
         onSwipe(gesture)
     }
 

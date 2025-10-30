@@ -2,7 +2,8 @@ import Foundation
 import CoreMotion
 import Combine
 
-/// Manages raise and lower gesture detection using device accelerometer
+/// Manages raise and lower gesture detection using gravity-projected acceleration
+/// Detects vertical hand movement (up/down) regardless of phone orientation
 class RaiseGestureManager: ObservableObject {
     static let shared = RaiseGestureManager()
 
@@ -15,24 +16,24 @@ class RaiseGestureManager: ObservableObject {
     private var sustainedRaiseStartTime: Date?
     private var sustainedLowerStartTime: Date?
 
-    // Detection thresholds (user spec)
-    private let accelerationThreshold: Double = 0.6  // Tunable threshold
-    private let spikeThreshold: Double = 1.0         // Single spike detection
+    // Detection thresholds (gravity-projected acceleration)
+    private let accelerationThreshold: Double = 0.4  // Tunable threshold (gravity-projected values are typically smaller)
+    private let spikeThreshold: Double = 0.8         // Single spike detection
     private let sustainedDuration: TimeInterval = 0.1 // 100ms (80-120ms range)
     private let gestureCooldown: TimeInterval = 0.5   // Prevent rapid triggers
-    private let updateInterval: TimeInterval = 1.0 / 60.0  // 60 Hz sampling
+    private let updateInterval: TimeInterval = 1.0 / 30.0  // 30 Hz sampling
 
     private init() {
         setupMotionManager()
     }
 
     private func setupMotionManager() {
-        guard motionManager.isAccelerometerAvailable else {
-            print("⚠️ Accelerometer not available on this device")
+        guard motionManager.isDeviceMotionAvailable else {
+            print("⚠️ Device Motion not available on this device")
             return
         }
 
-        motionManager.accelerometerUpdateInterval = updateInterval
+        motionManager.deviceMotionUpdateInterval = updateInterval
     }
 
     /// Start monitoring for raise and lower gestures
@@ -40,26 +41,39 @@ class RaiseGestureManager: ObservableObject {
         raiseCallback = onRaise
         lowerCallback = onLower
 
-        motionManager.startAccelerometerUpdates(to: .main) { [weak self] data, error in
-            guard let self = self, let data = data else { return }
+        motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, error in
+            guard let self = self, let motion = motion else { return }
 
-            // Get user acceleration (device motion minus gravity)
-            // Positive Y = device moving upward, Negative Y = device moving downward
-            let accelY = data.acceleration.y
+            // Get acceleration and gravity vectors (both in device coordinate system)
+            let ax = motion.userAcceleration.x
+            let ay = motion.userAcceleration.y
+            let az = motion.userAcceleration.z
+            let gx = motion.gravity.x
+            let gy = motion.gravity.y
+            let gz = motion.gravity.z
+
+            // Calculate gravity magnitude for normalization
+            let gravityMagnitude = sqrt(gx*gx + gy*gy + gz*gz)
+
+            // Project acceleration onto gravity axis using dot product
+            // This gives acceleration along vertical axis (world coordinates)
+            // Positive = moving AGAINST gravity (upward) = RAISE
+            // Negative = moving WITH gravity (downward) = LOWER
+            let accelAlongGravity = (ax*gx + ay*gy + az*gz) / gravityMagnitude
 
             // Debug logging for threshold tuning
-            if abs(accelY) > self.accelerationThreshold {
-                print("🔍 RaiseGesture: accelY = \(String(format: "%.2f", accelY))")
+            if abs(accelAlongGravity) > self.accelerationThreshold {
+                print("🔍 RaiseGesture: accelAlongGravity = \(String(format: "%.2f", accelAlongGravity))")
             }
 
-            // Process acceleration data
-            self.processAcceleration(accelY)
+            // Process gravity-projected acceleration
+            self.processAcceleration(accelAlongGravity)
         }
     }
 
     /// Stop monitoring raise and lower gestures
     func stopMonitoring() {
-        motionManager.stopAccelerometerUpdates()
+        motionManager.stopDeviceMotionUpdates()
         raiseCallback = nil
         lowerCallback = nil
         sustainedRaiseStartTime = nil
@@ -130,12 +144,22 @@ class RaiseGestureManager: ObservableObject {
     }
 
     private func handleRaiseDetected() {
+        guard GestureCoordinator.shared.shouldAllowGesture(.raise) else {
+            // Suppressed - reset and don't trigger
+            sustainedRaiseStartTime = nil
+            return
+        }
         lastGestureTime = Date()
         sustainedRaiseStartTime = nil
         raiseCallback?()
     }
 
     private func handleLowerDetected() {
+        guard GestureCoordinator.shared.shouldAllowGesture(.lower) else {
+            // Suppressed - reset and don't trigger
+            sustainedLowerStartTime = nil
+            return
+        }
         lastGestureTime = Date()
         sustainedLowerStartTime = nil
         lowerCallback?()

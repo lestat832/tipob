@@ -90,15 +90,25 @@ class TiltGestureManager: ObservableObject {
         guard tiltHoldDuration >= tiltDuration else { return }
         guard now.timeIntervalSince(lastTiltTime) > tiltCooldown else { return }
 
-        // Trigger appropriate callback
+        // Check gesture coordinator before triggering
         switch currentTiltDirection {
         case .left:
+            guard GestureCoordinator.shared.shouldAllowGesture(.tiltLeft) else {
+                // Suppressed - reset and don't trigger
+                tiltStartTime = nil
+                return
+            }
             lastTiltTime = now
             tiltStartTime = nil
             currentTiltDirection = .neutral
             tiltLeftCallback?()
 
         case .right:
+            guard GestureCoordinator.shared.shouldAllowGesture(.tiltRight) else {
+                // Suppressed - reset and don't trigger
+                tiltStartTime = nil
+                return
+            }
             lastTiltTime = now
             tiltStartTime = nil
             currentTiltDirection = .neutral

@@ -29,7 +29,11 @@ struct TapDetectionModifier: ViewModifier {
                         singleTapTimer?.cancel()
                         tapCount = 0
                         longPressDetected = true
-                        onTap(.longPress)
+
+                        // Check gesture coordinator before triggering
+                        if GestureCoordinator.shared.shouldAllowGesture(.longPress) {
+                            onTap(.longPress)
+                        }
 
                         // Reset flag after a delay
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -50,17 +54,21 @@ struct TapDetectionModifier: ViewModifier {
                     // Wait to see if a second tap comes
                     let workItem = DispatchWorkItem { [tapCount] in
                         if tapCount == 1 {
-                            // Only one tap received - it's a single tap
-                            onTap(.tap)
+                            // Only one tap received - check if allowed
+                            if GestureCoordinator.shared.shouldAllowGesture(.tap) {
+                                onTap(.tap)
+                            }
                         }
                         self.tapCount = 0
                     }
                     singleTapTimer = workItem
                     DispatchQueue.main.asyncAfter(deadline: .now() + doubleTapWindow, execute: workItem)
                 } else if tapCount == 2 {
-                    // Second tap received - it's a double tap
+                    // Second tap received - check if allowed
                     singleTapTimer?.cancel()
-                    onTap(.doubleTap)
+                    if GestureCoordinator.shared.shouldAllowGesture(.doubleTap) {
+                        onTap(.doubleTap)
+                    }
                     tapCount = 0
                 }
             }

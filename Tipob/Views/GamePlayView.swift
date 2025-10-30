@@ -47,6 +47,7 @@ struct GamePlayView: View {
                 .padding(.bottom, 50)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .detectSwipes { gesture in
             viewModel.handleGesture(gesture)
         }

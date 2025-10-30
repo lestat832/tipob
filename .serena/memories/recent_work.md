@@ -1,57 +1,36 @@
-# Recent Work Highlights
+# Recent Work - Tipob Project
 
-## Latest Achievement (Oct 27, 2025)
-**Unified Failure Feedback System** - Complete audio + haptic feedback implementation
+## Latest Session Accomplishments
 
-### Key Accomplishments
-1. **Multi-sensory feedback** - Combined sound and haptic for clear failure indication
-2. **Consistent UX** - Same feedback pattern across all 5 game modes
-3. **Iterative improvement** - Quick response to user testing feedback (sound ID change)
-4. **Enhanced clarity** - Player name indicator helps with turn management
+### Gesture Detection Fixes (Oct 30, 2025)
+- **Raise/Lower Gestures:** Successfully implemented gravity-based detection that works in any phone orientation
+- **Gesture Suppression:** Built GestureCoordinator system to prevent conflicts in Tutorial Mode
+- **Tutorial UX:** Reduced from 2 rounds to 1 for better first-time experience
 
-### Technical Patterns Learned
+### Critical Discovery: View Architecture Impact on Gestures
+**Problem Pattern:** Gestures work in some views but not others despite identical modifier calls
+**Root Cause:** Modifier placement matters - apply to content layer (VStack), not container layer (ZStack)
+**Lesson Learned:** When debugging gesture issues, check WHERE modifiers are applied, not just WHAT modifiers are used
 
-#### System Sound Selection
-- SystemSoundID values vary in reliability across devices
-- SMS/Alert sounds (1073, 1006) more reliable than basic sounds (1053)
-- Physical device testing essential for sound/haptic verification
-- AVAudioSession configuration important for sound playback
+### SwiftUI Patterns Learned
+1. **Gesture Layer Targeting:**
+   - ✅ Correct: `VStack { content }.frame(...).detectPinch()`
+   - ❌ Wrong: `ZStack { background + VStack }.frame(...).detectPinch()`
+   
+2. **Full-Screen Touch Reception:**
+   - `.frame(maxWidth: .infinity, maxHeight: .infinity)` required on gesture-detecting view
+   - Ensures touches received anywhere on screen, not just over visible UI
 
-#### Feedback Coordination
-- Singleton managers for centralized feedback control
-- Separate concerns: Sound, Haptic, Coordination
-- Fire simultaneously for maximum impact
-- Clean API: single method call for all feedback
+3. **iOS 17.0 Deprecation:**
+   - Old: `.onChange(of: value) { newValue in ... }`
+   - New: `.onChange(of: value) { ... }` (newValue accessible via closure scope)
 
-#### UX Enhancement Patterns
-- Visual + Audio + Haptic = comprehensive feedback
-- Player context during transitions reduces confusion
-- Yellow text for player indicators (matches winner announcement)
-- Computed properties for clean player name access
+## Ongoing Work
+- Standardizing view architecture across all game modes
+- Ensuring consistent gesture detection behavior
 
-### Code Quality Practices
-- Zero warnings maintained
-- Clean separation of concerns (3 manager classes)
-- Consistent naming conventions
-- Comprehensive comments explaining "why"
-- Physical device testing verified
-
-### Recent Commits (Last 5)
-1. `a6866c3` - feat: Add unified failure feedback system (Oct 27)
-2. `7596b04` - config: Streamline to direct Serena MCP integration (Oct 23)
-3. `be8b9e3` - docs: Update session documentation (Oct 23)
-4. `cdb0ce6` - fix: Resolve PvP mode UX issues (Oct 23)
-5. `4c7b269` - docs: Update session documentation (Oct 23)
-
-### Project Status
-- **Phase:** MVP Complete + Polishing
-- **Gestures:** 7 total (all working)
-- **Game Modes:** 5 complete (Classic, Memory, Tutorial, PvP, Game vs PvP)
-- **Feedback Systems:** Visual ✅ Audio ✅ Haptic ✅
-- **Next:** User testing feedback, sound effects expansion
-
-### Collaboration Notes
-- User provides clear, actionable feedback
-- Quick iteration cycles (implement → test → refine)
-- Physical device testing catches issues simulator misses
-- UX improvements based on real gameplay experience
+## Project Context
+- **Phase:** MVP Feature Complete - Gesture System Refinement
+- **Gestures:** 13 total (4 swipes, 3 taps, 1 pinch, 1 shake, 2 tilts, 2 raise/lower)
+- **Game Modes:** Tutorial, Classic, Memory, PvP
+- **Architecture:** MVVM with SwiftUI

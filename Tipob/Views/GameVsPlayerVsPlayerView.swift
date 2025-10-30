@@ -250,6 +250,7 @@ struct GameVsPlayerVsPlayerView: View {
             }
             .padding(.bottom, 60)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .detectSwipes { gesture in
             handleGesture(gesture)
         }

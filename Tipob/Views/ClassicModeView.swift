@@ -56,6 +56,7 @@ struct ClassicModeView: View {
                     .padding(.bottom, 50)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .detectSwipes { gesture in
             viewModel.handleClassicModeGesture(gesture)
         }
