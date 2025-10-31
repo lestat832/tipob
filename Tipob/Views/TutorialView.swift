@@ -14,7 +14,17 @@ struct TutorialView: View {
     @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
 
     // Tutorial gesture sequence (fixed order)
-    let tutorialGestures: [GestureType] = [.up, .down, .left, .right, .tap, .doubleTap, .longPress, .pinch, .shake, .tiltLeft, .tiltRight, .raise, .lower]
+    let tutorialGestures: [GestureType] = [
+        .up, .down, .left, .right, .tap, .doubleTap, .longPress, .pinch, .shake, .tiltLeft, .tiltRight, .raise, .lower,
+        .stroop(
+            wordColor: .red,      // Display word "RED"
+            textColor: .blue,     // In BLUE color
+            upColor: .blue,       // BLUE → ↑ (correct answer: swipe UP)
+            downColor: .yellow,   // YELLOW → ↓
+            leftColor: .red,      // RED → ←
+            rightColor: .green    // GREEN → →
+        )
+    ]
 
     var currentGesture: GestureType {
         tutorialGestures[currentGestureIndex]
@@ -49,19 +59,39 @@ struct TutorialView: View {
 
                 // Main gesture prompt area
                 VStack(spacing: 30) {
-                    // Large gesture symbol
-                    Text(currentGesture.symbol)
-                        .font(.system(size: 120))
-                        .foregroundColor(gestureColor(for: currentGesture))
-                        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-                        .onAppear {
-                            // Set expected gesture for coordinator (Tutorial Mode only)
-                            GestureCoordinator.shared.expectedGesture = currentGesture
-                        }
-                        .onChange(of: currentGesture) {
-                            // Update expected gesture when it changes
-                            GestureCoordinator.shared.expectedGesture = currentGesture
-                        }
+                    // Large gesture symbol or Stroop prompt
+                    if case .stroop(let wordColor, let textColor, let upColor, let downColor, let leftColor, let rightColor) = currentGesture {
+                        StroopPromptView(
+                            wordColor: wordColor,
+                            textColor: textColor,
+                            upColor: upColor,
+                            downColor: downColor,
+                            leftColor: leftColor,
+                            rightColor: rightColor,
+                            isAnimating: false
+                        )
+                            .onAppear {
+                                // Set expected gesture for coordinator (Tutorial Mode only)
+                                GestureCoordinator.shared.expectedGesture = currentGesture
+                            }
+                            .onChange(of: currentGesture) {
+                                // Update expected gesture when it changes
+                                GestureCoordinator.shared.expectedGesture = currentGesture
+                            }
+                    } else {
+                        Text(currentGesture.symbol)
+                            .font(.system(size: 120))
+                            .foregroundColor(gestureColor(for: currentGesture))
+                            .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+                            .onAppear {
+                                // Set expected gesture for coordinator (Tutorial Mode only)
+                                GestureCoordinator.shared.expectedGesture = currentGesture
+                            }
+                            .onChange(of: currentGesture) {
+                                // Update expected gesture when it changes
+                                GestureCoordinator.shared.expectedGesture = currentGesture
+                            }
+                    }
 
                     // Instruction text
                     Text(instructionText(for: currentGesture))
@@ -161,13 +191,34 @@ struct TutorialView: View {
         // Ignore gestures during success animation
         guard !showSuccess else { return }
 
-        if gesture == currentGesture {
+        if isGestureCorrect(gesture, expected: currentGesture) {
             // Correct gesture!
             handleCorrectGesture()
         } else {
             // Incorrect gesture
             handleIncorrectGesture()
         }
+    }
+
+    /// Validates if a gesture matches the expected gesture, handling Stroop special logic
+    private func isGestureCorrect(_ userGesture: GestureType, expected: GestureType) -> Bool {
+        // For Stroop gestures: find which direction the text color is assigned to
+        if case .stroop(_, let textColor, let upColor, let downColor, let leftColor, let rightColor) = expected {
+            // Find which direction has the text color and check if user swiped that way
+            if textColor == upColor {
+                return userGesture == .up
+            } else if textColor == downColor {
+                return userGesture == .down
+            } else if textColor == leftColor {
+                return userGesture == .left
+            } else if textColor == rightColor {
+                return userGesture == .right
+            }
+            return false
+        }
+
+        // For all other gestures: direct equality check
+        return userGesture == expected
     }
 
     private func handleCorrectGesture() {
@@ -288,6 +339,8 @@ struct TutorialView: View {
             return "Lift the phone upward"
         case .lower:
             return "Move the phone downward"
+        case .stroop:
+            return "Swipe in the direction of the COLOR you see, not the word"
         }
     }
 

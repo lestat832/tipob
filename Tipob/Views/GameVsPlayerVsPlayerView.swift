@@ -183,13 +183,27 @@ struct GameVsPlayerVsPlayerView: View {
 
             Spacer()
 
-            // Gesture display
+            // Gesture display (conditionally render Stroop or ArrowView)
             if showingGestureIndex < sequence.count {
-                ArrowView(
-                    gesture: sequence[showingGestureIndex],
-                    isAnimating: true
-                )
-                .id(showingGestureIndex)
+                let currentGesture = sequence[showingGestureIndex]
+                if case .stroop(let wordColor, let textColor, let upColor, let downColor, let leftColor, let rightColor) = currentGesture {
+                    StroopPromptView(
+                        wordColor: wordColor,
+                        textColor: textColor,
+                        upColor: upColor,
+                        downColor: downColor,
+                        leftColor: leftColor,
+                        rightColor: rightColor,
+                        isAnimating: true
+                    )
+                    .id(showingGestureIndex)
+                } else {
+                    ArrowView(
+                        gesture: currentGesture,
+                        isAnimating: true
+                    )
+                    .id(showingGestureIndex)
+                }
             }
 
             Spacer()
@@ -367,8 +381,8 @@ struct GameVsPlayerVsPlayerView: View {
     private func startNewRound() {
         currentRound += 1
 
-        // Add new gesture to sequence
-        let newGesture = GestureType.allCases.randomElement() ?? .up
+        // Add new gesture to sequence (equal distribution: 1/14 chance for each gesture type)
+        let newGesture = GestureType.random()
         sequence.append(newGesture)
 
         // Reset player results
@@ -446,7 +460,7 @@ struct GameVsPlayerVsPlayerView: View {
     private func handleGesture(_ gesture: GestureType) {
         guard gamePhase == .playerTurn else { return }
 
-        if currentGestureIndex < sequence.count && sequence[currentGestureIndex] == gesture {
+        if currentGestureIndex < sequence.count && isGestureCorrect(gesture, expected: sequence[currentGestureIndex]) {
             // Correct gesture
             userBuffer.append(gesture)
             currentGestureIndex += 1
@@ -463,6 +477,27 @@ struct GameVsPlayerVsPlayerView: View {
             // Wrong gesture
             recordPlayerFailure()
         }
+    }
+
+    /// Validates if a gesture matches the expected gesture, handling Stroop special logic
+    private func isGestureCorrect(_ userGesture: GestureType, expected: GestureType) -> Bool {
+        // For Stroop gestures: find which direction the text color is assigned to
+        if case .stroop(_, let textColor, let upColor, let downColor, let leftColor, let rightColor) = expected {
+            // Find which direction has the text color and check if user swiped that way
+            if textColor == upColor {
+                return userGesture == .up
+            } else if textColor == downColor {
+                return userGesture == .down
+            } else if textColor == leftColor {
+                return userGesture == .left
+            } else if textColor == rightColor {
+                return userGesture == .right
+            }
+            return false
+        }
+
+        // For all other gestures: direct equality check
+        return userGesture == expected
     }
 
     private func recordPlayerSuccess() {

@@ -1,6 +1,6 @@
 import Foundation
 
-enum GestureType: CaseIterable {
+enum GestureType: Equatable {
     case up
     case down
     case left
@@ -15,6 +15,53 @@ enum GestureType: CaseIterable {
     case tiltRight
     case raise
     case lower
+    case stroop(
+        wordColor: ColorType,      // The word to display (e.g., "RED")
+        textColor: ColorType,      // The color the word is displayed in
+        upColor: ColorType,        // Which color is assigned to UP direction
+        downColor: ColorType,      // Which color is assigned to DOWN direction
+        leftColor: ColorType,      // Which color is assigned to LEFT direction
+        rightColor: ColorType      // Which color is assigned to RIGHT direction
+    )
+
+    /// All basic gestures (excluding Stroop) for random selection
+    static var allBasicGestures: [GestureType] {
+        return [.up, .down, .left, .right, .tap, .doubleTap, .longPress,
+                .pinch, .shake, .tiltLeft, .tiltRight, .raise, .lower]
+    }
+
+    /// Generates a random Stroop gesture with mismatched word and text colors
+    /// and randomly assigns the 4 colors to the 4 directions
+    static func randomStroop() -> GestureType {
+        let allColors = ColorType.allCases
+        let wordColor = allColors.randomElement()!
+        var textColor = allColors.randomElement()!
+
+        // Ensure word and text colors are different (creates the Stroop effect)
+        while textColor == wordColor {
+            textColor = allColors.randomElement()!
+        }
+
+        // Shuffle all 4 colors and assign to the 4 directions
+        let shuffledColors = allColors.shuffled()
+
+        return .stroop(
+            wordColor: wordColor,
+            textColor: textColor,
+            upColor: shuffledColors[0],
+            downColor: shuffledColors[1],
+            leftColor: shuffledColors[2],
+            rightColor: shuffledColors[3]
+        )
+    }
+
+    /// Returns a random gesture with equal distribution across all 14 types
+    /// Each gesture (13 basic + 1 Stroop) has 1/14 (~7.14%) probability
+    static func random() -> GestureType {
+        var pool = allBasicGestures  // 13 basic gestures
+        pool.append(.randomStroop()) // Add 1 Stroop instance
+        return pool.randomElement()! // Equal 1/14 chance for each
+    }
 
     var symbol: String {
         switch self {
@@ -32,6 +79,7 @@ enum GestureType: CaseIterable {
         case .tiltRight: return "▶"
         case .raise: return "⬆️"
         case .lower: return "⬇️"
+        case .stroop: return "🎨"
         }
     }
 
@@ -51,6 +99,7 @@ enum GestureType: CaseIterable {
         case .tiltRight: return "brown"
         case .raise: return "mint"  // Light green
         case .lower: return "orange"
+        case .stroop: return "rainbow"
         }
     }
 
@@ -70,6 +119,7 @@ enum GestureType: CaseIterable {
         case .tiltRight: return "Tilt Right"
         case .raise: return "Raise"
         case .lower: return "Lower"
+        case .stroop: return "Color-Swipe"
         }
     }
 
@@ -85,6 +135,7 @@ enum GestureType: CaseIterable {
         case .tiltRight: return .tiltRight
         case .raise: return .raiseUp
         case .lower: return .lowerDown
+        case .stroop: return .stroopFlash
         default: return .singlePulse
         }
     }
@@ -100,5 +151,6 @@ enum GestureType: CaseIterable {
         case tiltRight
         case raiseUp
         case lowerDown
+        case stroopFlash
     }
 }

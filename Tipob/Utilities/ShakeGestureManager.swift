@@ -43,6 +43,7 @@ class ShakeGestureManager: ObservableObject {
 
             // Detect shake (sharp acceleration change)
             if magnitude > self.accelerationThreshold {
+                print("[\(Date().logTimestamp)] 🔍 Shake magnitude: \(String(format: "%.2f", magnitude))G (threshold: \(self.accelerationThreshold)G)")
                 self.handleShakeDetected()
             }
         }
@@ -57,14 +58,18 @@ class ShakeGestureManager: ObservableObject {
     private func handleShakeDetected() {
         // Apply cooldown to prevent multiple triggers
         let now = Date()
-        guard now.timeIntervalSince(lastShakeTime) > shakeCooldown else { return }
-
-        // Check gesture coordinator before triggering
-        guard GestureCoordinator.shared.shouldAllowGesture(.shake) else {
-            // Suppressed - don't trigger
+        guard now.timeIntervalSince(lastShakeTime) > shakeCooldown else {
+            print("[\(Date().logTimestamp)] ⏸️ Shake suppressed (cooldown: \(String(format: "%.1f", now.timeIntervalSince(lastShakeTime)))s / \(shakeCooldown)s)")
             return
         }
 
+        // Check gesture coordinator before triggering
+        guard GestureCoordinator.shared.shouldAllowGesture(.shake) else {
+            print("[\(Date().logTimestamp)] ⏸️ Shake suppressed by coordinator")
+            return
+        }
+
+        print("[\(Date().logTimestamp)] 🎯 Shake detected")
         lastShakeTime = now
         shakeCallback?()
     }

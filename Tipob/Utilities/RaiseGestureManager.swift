@@ -63,7 +63,7 @@ class RaiseGestureManager: ObservableObject {
 
             // Debug logging for threshold tuning
             if abs(accelAlongGravity) > self.accelerationThreshold {
-                print("🔍 RaiseGesture: accelAlongGravity = \(String(format: "%.2f", accelAlongGravity))")
+                print("[\(Date().logTimestamp)] 🔍 Raise/Lower: accel = \(String(format: "%.2f", accelAlongGravity))G (threshold: \(self.accelerationThreshold)G)")
             }
 
             // Process gravity-projected acceleration
@@ -92,7 +92,7 @@ class RaiseGestureManager: ObservableObject {
         if accelY > accelerationThreshold {
             // Spike detection: immediate trigger if strong enough
             if accelY > spikeThreshold {
-                print("✅ Raise detected (spike): \(String(format: "%.2f", accelY))")
+                print("[\(Date().logTimestamp)] ✅ Raise detected (spike): \(String(format: "%.2f", accelY))")
                 handleRaiseDetected()
                 return
             }
@@ -103,7 +103,7 @@ class RaiseGestureManager: ObservableObject {
             } else if let startTime = sustainedRaiseStartTime {
                 let duration = now.timeIntervalSince(startTime)
                 if duration >= sustainedDuration {
-                    print("✅ Raise detected (sustained): \(String(format: "%.2f", accelY)) for \(Int(duration * 1000))ms")
+                    print("[\(Date().logTimestamp)] ✅ Raise detected (sustained): \(String(format: "%.2f", accelY)) for \(Int(duration * 1000))ms")
                     handleRaiseDetected()
                     sustainedRaiseStartTime = nil
                 }
@@ -116,7 +116,7 @@ class RaiseGestureManager: ObservableObject {
         } else if accelY < -accelerationThreshold {
             // Spike detection: immediate trigger if strong enough
             if accelY < -spikeThreshold {
-                print("✅ Lower detected (spike): \(String(format: "%.2f", accelY))")
+                print("[\(Date().logTimestamp)] ✅ Lower detected (spike): \(String(format: "%.2f", accelY))")
                 handleLowerDetected()
                 return
             }
@@ -127,7 +127,7 @@ class RaiseGestureManager: ObservableObject {
             } else if let startTime = sustainedLowerStartTime {
                 let duration = now.timeIntervalSince(startTime)
                 if duration >= sustainedDuration {
-                    print("✅ Lower detected (sustained): \(String(format: "%.2f", accelY)) for \(Int(duration * 1000))ms")
+                    print("[\(Date().logTimestamp)] ✅ Lower detected (sustained): \(String(format: "%.2f", accelY)) for \(Int(duration * 1000))ms")
                     handleLowerDetected()
                     sustainedLowerStartTime = nil
                 }

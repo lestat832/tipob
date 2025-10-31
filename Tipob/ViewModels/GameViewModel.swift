@@ -175,7 +175,7 @@ class GameViewModel: ObservableObject {
 
         timer?.invalidate()
 
-        if gesture == currentGesture {
+        if isGestureCorrect(gesture, expected: currentGesture) {
             // Correct gesture
             classicModeModel.recordSuccess()
             flashColor = .green
@@ -191,6 +191,27 @@ class GameViewModel: ObservableObject {
             // Wrong gesture
             classicModeGameOver()
         }
+    }
+
+    /// Validates if a gesture matches the expected gesture, handling Stroop special logic
+    private func isGestureCorrect(_ userGesture: GestureType, expected: GestureType) -> Bool {
+        // For Stroop gestures: find which direction the text color is assigned to
+        if case .stroop(_, let textColor, let upColor, let downColor, let leftColor, let rightColor) = expected {
+            // Find which direction has the text color and check if user swiped that way
+            if textColor == upColor {
+                return userGesture == .up
+            } else if textColor == downColor {
+                return userGesture == .down
+            } else if textColor == leftColor {
+                return userGesture == .left
+            } else if textColor == rightColor {
+                return userGesture == .right
+            }
+            return false
+        }
+
+        // For all other gestures: direct equality check
+        return userGesture == expected
     }
 
     private func classicModeGameOver() {

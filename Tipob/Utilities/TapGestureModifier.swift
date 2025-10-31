@@ -32,7 +32,10 @@ struct TapDetectionModifier: ViewModifier {
 
                         // Check gesture coordinator before triggering
                         if GestureCoordinator.shared.shouldAllowGesture(.longPress) {
+                            print("[\(Date().logTimestamp)] 🎯 Long Press detected")
                             onTap(.longPress)
+                        } else {
+                            print("[\(Date().logTimestamp)] ⏸️ Long Press suppressed by coordinator")
                         }
 
                         // Reset flag after a delay
@@ -46,6 +49,7 @@ struct TapDetectionModifier: ViewModifier {
                 guard !longPressDetected else { return }
 
                 tapCount += 1
+                print("[\(Date().logTimestamp)] 🔍 Tap count: \(tapCount)")
 
                 // Cancel any pending single tap
                 singleTapTimer?.cancel()
@@ -56,7 +60,10 @@ struct TapDetectionModifier: ViewModifier {
                         if tapCount == 1 {
                             // Only one tap received - check if allowed
                             if GestureCoordinator.shared.shouldAllowGesture(.tap) {
+                                print("[\(Date().logTimestamp)] 🎯 Single Tap detected")
                                 onTap(.tap)
+                            } else {
+                                print("[\(Date().logTimestamp)] ⏸️ Single Tap suppressed by coordinator")
                             }
                         }
                         self.tapCount = 0
@@ -67,7 +74,10 @@ struct TapDetectionModifier: ViewModifier {
                     // Second tap received - check if allowed
                     singleTapTimer?.cancel()
                     if GestureCoordinator.shared.shouldAllowGesture(.doubleTap) {
+                        print("[\(Date().logTimestamp)] 🎯 Double Tap detected")
                         onTap(.doubleTap)
+                    } else {
+                        print("[\(Date().logTimestamp)] ⏸️ Double Tap suppressed by coordinator")
                     }
                     tapCount = 0
                 }

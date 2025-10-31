@@ -20,7 +20,13 @@ struct GameModel {
         round += 1
         userBuffer = []
         currentGestureIndex = 0
-        sequence.append(GestureType.allCases.randomElement(using: &randomNumberGenerator) ?? .up)
+
+        // Equal distribution: 1/14 chance for each gesture type
+        var pool = GestureType.allBasicGestures  // 13 basic gestures
+        pool.append(.randomStroop())  // Add 1 Stroop instance
+        let newGesture = pool.randomElement(using: &randomNumberGenerator) ?? .up
+
+        sequence.append(newGesture)
         timeRemaining = Double(sequence.count) * GameConfiguration.perGestureTime
     }
 
@@ -30,7 +36,25 @@ struct GameModel {
 
     func isCurrentGestureCorrect(_ gesture: GestureType) -> Bool {
         guard currentGestureIndex < sequence.count else { return false }
-        return sequence[currentGestureIndex] == gesture
+        let expectedGesture = sequence[currentGestureIndex]
+
+        // For Stroop gestures: find which direction the text color is assigned to
+        if case .stroop(_, let textColor, let upColor, let downColor, let leftColor, let rightColor) = expectedGesture {
+            // Find which direction has the text color and check if user swiped that way
+            if textColor == upColor {
+                return gesture == .up
+            } else if textColor == downColor {
+                return gesture == .down
+            } else if textColor == leftColor {
+                return gesture == .left
+            } else if textColor == rightColor {
+                return gesture == .right
+            }
+            return false
+        }
+
+        // For all other gestures: direct equality check
+        return expectedGesture == gesture
     }
 
     mutating func moveToNextGesture() {

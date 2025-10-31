@@ -27,10 +27,23 @@ struct ClassicModeView: View {
 
                 Spacer()
 
-                // Large gesture display with color-coded arrows
+                // Large gesture display with color-coded arrows or Stroop prompt
                 if let currentGesture = viewModel.classicModeModel.currentGesture {
-                    ArrowView(gesture: currentGesture, isAnimating: false)
+                    if case .stroop(let wordColor, let textColor, let upColor, let downColor, let leftColor, let rightColor) = currentGesture {
+                        StroopPromptView(
+                            wordColor: wordColor,
+                            textColor: textColor,
+                            upColor: upColor,
+                            downColor: downColor,
+                            leftColor: leftColor,
+                            rightColor: rightColor,
+                            isAnimating: false
+                        )
                         .transition(.scale)
+                    } else {
+                        ArrowView(gesture: currentGesture, isAnimating: false)
+                            .transition(.scale)
+                    }
                 }
 
                 Spacer()
@@ -55,27 +68,27 @@ struct ClassicModeView: View {
                     .foregroundColor(.white.opacity(0.8))
                     .padding(.bottom, 50)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .detectSwipes { gesture in
+                viewModel.handleClassicModeGesture(gesture)
+            }
+            .detectTaps { gesture in
+                viewModel.handleClassicModeGesture(gesture)
+            }
+            .detectPinch(
+                onPinch: { viewModel.handleClassicModeGesture(.pinch) }
+            )
+            .detectShake(
+                onShake: { viewModel.handleClassicModeGesture(.shake) }
+            )
+            .detectTilts(
+                onTiltLeft: { viewModel.handleClassicModeGesture(.tiltLeft) },
+                onTiltRight: { viewModel.handleClassicModeGesture(.tiltRight) }
+            )
+            .detectRaise(
+                onRaise: { viewModel.handleClassicModeGesture(.raise) },
+                onLower: { viewModel.handleClassicModeGesture(.lower) }
+            )
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .detectSwipes { gesture in
-            viewModel.handleClassicModeGesture(gesture)
-        }
-        .detectTaps { gesture in
-            viewModel.handleClassicModeGesture(gesture)
-        }
-        .detectPinch(
-            onPinch: { viewModel.handleClassicModeGesture(.pinch) }
-        )
-        .detectShake(
-            onShake: { viewModel.handleClassicModeGesture(.shake) }
-        )
-        .detectTilts(
-            onTiltLeft: { viewModel.handleClassicModeGesture(.tiltLeft) },
-            onTiltRight: { viewModel.handleClassicModeGesture(.tiltRight) }
-        )
-        .detectRaise(
-            onRaise: { viewModel.handleClassicModeGesture(.raise) },
-            onLower: { viewModel.handleClassicModeGesture(.lower) }
-        )
     }
 }

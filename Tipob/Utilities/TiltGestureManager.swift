@@ -88,16 +88,24 @@ class TiltGestureManager: ObservableObject {
 
         // Verify tilt duration and cooldown
         guard tiltHoldDuration >= tiltDuration else { return }
-        guard now.timeIntervalSince(lastTiltTime) > tiltCooldown else { return }
+        guard now.timeIntervalSince(lastTiltTime) > tiltCooldown else {
+            print("[\(Date().logTimestamp)] ⏸️ Tilt suppressed (cooldown)")
+            return
+        }
 
+        // Convert roll to degrees for logging
+        let degrees = roll * 180 / .pi
+        
         // Check gesture coordinator before triggering
         switch currentTiltDirection {
         case .left:
             guard GestureCoordinator.shared.shouldAllowGesture(.tiltLeft) else {
+                print("[\(Date().logTimestamp)] ⏸️ Tilt Left suppressed by coordinator")
                 // Suppressed - reset and don't trigger
                 tiltStartTime = nil
                 return
             }
+            print("[\(Date().logTimestamp)] 🎯 Tilt Left detected - angle: \(String(format: "%.1f", degrees))°")
             lastTiltTime = now
             tiltStartTime = nil
             currentTiltDirection = .neutral
@@ -105,10 +113,12 @@ class TiltGestureManager: ObservableObject {
 
         case .right:
             guard GestureCoordinator.shared.shouldAllowGesture(.tiltRight) else {
+                print("[\(Date().logTimestamp)] ⏸️ Tilt Right suppressed by coordinator")
                 // Suppressed - reset and don't trigger
                 tiltStartTime = nil
                 return
             }
+            print("[\(Date().logTimestamp)] 🎯 Tilt Right detected - angle: \(String(format: "%.1f", degrees))°")
             lastTiltTime = now
             tiltStartTime = nil
             currentTiltDirection = .neutral

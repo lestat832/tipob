@@ -48,6 +48,8 @@ struct ArrowView: View {
             animateRaiseUp()
         case .lowerDown:
             animateLowerDown()
+        case .stroopFlash:
+            animateStroopFlash()
         case .singlePulse:
             animateSinglePulse()
         }
@@ -348,6 +350,43 @@ struct ArrowView: View {
         }
     }
 
+    private func animateStroopFlash() {
+        // Stroop animation - brief color pulse (symbol only, actual Stroop uses StroopPromptView)
+        opacity = 1.0
+        scale = 1.0
+        glowRadius = 20
+
+        // Quick pulse
+        withAnimation(.easeInOut(duration: 0.3)) {
+            scale = 1.2
+            glowRadius = 30
+        }
+
+        // Intense flash
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                glowRadius = 45
+                scale = 1.3
+            }
+        }
+
+        // Return to normal
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
+                glowRadius = 20
+                scale = 1.0
+            }
+        }
+
+        // Fade out
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                opacity = 0
+                glowRadius = 0
+            }
+        }
+    }
+
     private func colorForGesture(_ gesture: GestureType) -> Color {
         switch gesture.color {
         case "blue": return .blue
@@ -362,6 +401,7 @@ struct ArrowView: View {
         case "teal": return .teal
         case "brown": return .brown
         case "mint": return .mint  // Light green for raise
+        case "rainbow": return .pink  // Fallback color for Stroop symbol
         default: return .gray
         }
     }

@@ -21,11 +21,25 @@ struct SequenceDisplayView: View {
                 Spacer()
 
                 if viewModel.showingGestureIndex < viewModel.gameModel.sequence.count {
-                    ArrowView(
-                        gesture: viewModel.gameModel.sequence[viewModel.showingGestureIndex],
-                        isAnimating: true
-                    )
-                    .id(viewModel.showingGestureIndex)
+                    let currentGesture = viewModel.gameModel.sequence[viewModel.showingGestureIndex]
+                    if case .stroop(let wordColor, let textColor, let upColor, let downColor, let leftColor, let rightColor) = currentGesture {
+                        StroopPromptView(
+                            wordColor: wordColor,
+                            textColor: textColor,
+                            upColor: upColor,
+                            downColor: downColor,
+                            leftColor: leftColor,
+                            rightColor: rightColor,
+                            isAnimating: true
+                        )
+                        .id(viewModel.showingGestureIndex)
+                    } else {
+                        ArrowView(
+                            gesture: currentGesture,
+                            isAnimating: true
+                        )
+                        .id(viewModel.showingGestureIndex)
+                    }
                 }
 
                 Spacer()

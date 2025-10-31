@@ -1,36 +1,31 @@
-# Recent Work - Tipob Project
+# Recent Work Highlights
 
-## Latest Session Accomplishments
+## Stroop Color-Swipe Gesture - Implementation Complete (Oct 30-31, 2025)
 
-### Gesture Detection Fixes (Oct 30, 2025)
-- **Raise/Lower Gestures:** Successfully implemented gravity-based detection that works in any phone orientation
-- **Gesture Suppression:** Built GestureCoordinator system to prevent conflicts in Tutorial Mode
-- **Tutorial UX:** Reduced from 2 rounds to 1 for better first-time experience
+### Major Accomplishments
+1. **Equal gesture distribution** - All 14 gestures now 7.14% probability (was 10% Stroop, 6.92% others)
+2. **Random color mappings** - Each Stroop instance randomly assigns 4 colors to 4 directions
+3. **Visual UI system** - Directional color labels show player which color maps to which swipe
+4. **Validation logic** - All game modes (Classic, Memory, PvP, Tutorial) properly validate Stroop gestures
 
-### Critical Discovery: View Architecture Impact on Gestures
-**Problem Pattern:** Gestures work in some views but not others despite identical modifier calls
-**Root Cause:** Modifier placement matters - apply to content layer (VStack), not container layer (ZStack)
-**Lesson Learned:** When debugging gesture issues, check WHERE modifiers are applied, not just WHAT modifiers are used
+### Key Pattern Learned
+**Enum Associated Values Pattern**: When extending enum cases with associated values, ALL pattern matching sites must be updated:
+- TutorialView, SequenceDisplayView, ClassicModeView, GameVsPlayerVsPlayerView
+- Miss one → build failures or logic bugs
 
-### SwiftUI Patterns Learned
-1. **Gesture Layer Targeting:**
-   - ✅ Correct: `VStack { content }.frame(...).detectPinch()`
-   - ❌ Wrong: `ZStack { background + VStack }.frame(...).detectPinch()`
-   
-2. **Full-Screen Touch Reception:**
-   - `.frame(maxWidth: .infinity, maxHeight: .infinity)` required on gesture-detecting view
-   - Ensures touches received anywhere on screen, not just over visible UI
+### Debugging Lessons
+**Gesture Detection Bug Root Cause**:
+- Direct equality (`gesture == currentGesture`) doesn't work with enum associated values
+- `.up` != `.stroop(wordColor: .red, textColor: .blue, ...)`
+- Solution: Pattern matching with `case .stroop(_, let textColor, ...)` to extract values
 
-3. **iOS 17.0 Deprecation:**
-   - Old: `.onChange(of: value) { newValue in ... }`
-   - New: `.onChange(of: value) { ... }` (newValue accessible via closure scope)
+### UI/Layout Insights
+**SwiftUI Layout Constraints**:
+- HStack with fixed offsets → elements pushed off screen
+- Solution: VStack + Spacer for natural distribution
+- `.fixedSize()` prevents text wrapping but needs careful spacing
+- Vertical labels work better than horizontal for narrow elements
 
-## Ongoing Work
-- Standardizing view architecture across all game modes
-- Ensuring consistent gesture detection behavior
-
-## Project Context
-- **Phase:** MVP Feature Complete - Gesture System Refinement
-- **Gestures:** 13 total (4 swipes, 3 taps, 1 pinch, 1 shake, 2 tilts, 2 raise/lower)
-- **Game Modes:** Tutorial, Classic, Memory, PvP
-- **Architecture:** MVVM with SwiftUI
+### Files Modified This Session
+- `TutorialView.swift` - Added Stroop gesture validation
+- `StroopPromptView.swift` - Redesigned layout (vertical labels, smaller fonts)

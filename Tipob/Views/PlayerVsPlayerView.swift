@@ -82,28 +82,28 @@ struct PlayerVsPlayerView: View {
                     resultsView
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .detectSwipes { gesture in
+                handleGesture(gesture)
+            }
+            .detectTaps { gesture in
+                handleGesture(gesture)
+            }
+            .detectPinch(
+                onPinch: { handleGesture(.pinch) }
+            )
+            .detectShake(
+                onShake: { handleGesture(.shake) }
+            )
+            .detectTilts(
+                onTiltLeft: { handleGesture(.tiltLeft) },
+                onTiltRight: { handleGesture(.tiltRight) }
+            )
+            .detectRaise(
+                onRaise: { handleGesture(.raise) },
+                onLower: { handleGesture(.lower) }
+            )
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .detectSwipes { gesture in
-            handleGesture(gesture)
-        }
-        .detectTaps { gesture in
-            handleGesture(gesture)
-        }
-        .detectPinch(
-            onPinch: { handleGesture(.pinch) }
-        )
-        .detectShake(
-            onShake: { handleGesture(.shake) }
-        )
-        .detectTilts(
-            onTiltLeft: { handleGesture(.tiltLeft) },
-            onTiltRight: { handleGesture(.tiltRight) }
-        )
-        .detectRaise(
-            onRaise: { handleGesture(.raise) },
-            onLower: { handleGesture(.lower) }
-        )
     }
 
     // MARK: - Name Entry View

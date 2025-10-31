@@ -17,13 +17,12 @@ struct ClassicModeModel {
         reactionTime = ClassicModeModel.initialReactionTime
         gesturesSinceSpeedUp = 0
         // Generate initial gesture immediately so it's ready when view renders
-        currentGesture = GestureType.allCases.randomElement()!
+        generateRandomGesture()
     }
 
     mutating func generateRandomGesture() {
-        let allGestures = GestureType.allCases
-        let randomGesture = allGestures.randomElement()!
-        currentGesture = randomGesture
+        // Equal distribution: 1/14 chance for each gesture type
+        currentGesture = GestureType.random()
     }
 
     mutating func recordSuccess() {

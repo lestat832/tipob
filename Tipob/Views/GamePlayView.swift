@@ -46,27 +46,27 @@ struct GamePlayView: View {
                 }
                 .padding(.bottom, 50)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .detectSwipes { gesture in
+                viewModel.handleGesture(gesture)
+            }
+            .detectTaps { gesture in
+                viewModel.handleGesture(gesture)
+            }
+            .detectPinch(
+                onPinch: { viewModel.handleGesture(.pinch) }
+            )
+            .detectShake(
+                onShake: { viewModel.handleGesture(.shake) }
+            )
+            .detectTilts(
+                onTiltLeft: { viewModel.handleGesture(.tiltLeft) },
+                onTiltRight: { viewModel.handleGesture(.tiltRight) }
+            )
+            .detectRaise(
+                onRaise: { viewModel.handleGesture(.raise) },
+                onLower: { viewModel.handleGesture(.lower) }
+            )
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .detectSwipes { gesture in
-            viewModel.handleGesture(gesture)
-        }
-        .detectTaps { gesture in
-            viewModel.handleGesture(gesture)
-        }
-        .detectPinch(
-            onPinch: { viewModel.handleGesture(.pinch) }
-        )
-        .detectShake(
-            onShake: { viewModel.handleGesture(.shake) }
-        )
-        .detectTilts(
-            onTiltLeft: { viewModel.handleGesture(.tiltLeft) },
-            onTiltRight: { viewModel.handleGesture(.tiltRight) }
-        )
-        .detectRaise(
-            onRaise: { viewModel.handleGesture(.raise) },
-            onLower: { viewModel.handleGesture(.lower) }
-        )
     }
 }

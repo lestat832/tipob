@@ -41,10 +41,11 @@ struct SwipeGestureModifier: ViewModifier {
 
         // Check gesture coordinator before triggering
         guard GestureCoordinator.shared.shouldAllowGesture(gesture) else {
-            // Suppressed - don't trigger
+            print("[\(Date().logTimestamp)] ⏸️ Swipe \(gesture.displayName) suppressed by coordinator")
             return
         }
 
+        print("[\(Date().logTimestamp)] 🎯 Swipe \(gesture.displayName) detected - distance: \(Int(distance))px, velocity: \(Int(velocity))px/s")
         onSwipe(gesture)
     }
 
