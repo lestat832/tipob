@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PlayerVsPlayerView: View {
     @ObservedObject var viewModel: GameViewModel
+    @AppStorage("discreetModeEnabled") private var discreetModeEnabled = false
 
     // Game phases
     @State private var gamePhase: PvPGamePhase = .nameEntry

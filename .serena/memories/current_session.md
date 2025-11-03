@@ -1,39 +1,45 @@
-# Session Summary - 2025-10-31
+# Session Summary - 2025-11-03
 
 ## Completed Tasks
-- ✅ Fixed critical Stroop gesture detection bug in TutorialView
-  - TutorialView was using direct equality comparison (gesture == currentGesture)
-  - This never matched Stroop gestures (.up != .stroop(...))
-  - Added `isGestureCorrect()` validation function with Stroop-aware logic
-  - Now finds which direction has text color and validates user swiped that way
-
-- ✅ Fixed Stroop layout issues in StroopPromptView
-  - Changed left/right labels from horizontal → vertical layout (per user request)
-  - Reduced center word font: 100pt → 70pt (prevents truncation)
-  - Reduced padding: 60 → 40 (top/bottom), 20 → 10 (left/right)
-  - Added `.fixedSize()` to all labels to prevent wrapping
-  - All color labels now visible without cutoff
-
-## Testing Results
-User confirmed:
-- Gesture detection now works (swipe up registers correctly for BLUE→UP mapping)
-- Layout improved with vertical left/right labels
-- All labels visible on screen
+- ✅ Implemented Discreet Mode toggle feature for Tipob
+- ✅ Created GesturePoolManager.swift utility class for gesture filtering
+- ✅ Added UserDefaults persistence for discreet mode setting
+- ✅ Updated all game modes (Classic, Memory, Game vs PvP, Player vs Player) to respect discreet mode
+- ✅ Fixed Tutorial mode to always use full gesture set (14 gestures)
+- ✅ Added conditional UI toggle that hides in Tutorial mode
+- ✅ Fixed compiler warnings (var → let, iOS 17 onChange deprecation)
+- ✅ Completed rollback of failed unified motion gesture classifier implementation
 
 ## Implementation Details
-**Files Modified:**
-1. `TutorialView.swift` - Added Stroop gesture validation (lines 203-222)
-2. `StroopPromptView.swift` - Redesigned layout with vertical labels and smaller fonts
 
-## Next Session
-- User will test full Stroop implementation across all game modes
-- May need further layout tweaks based on testing
-- Consider adding Stroop to tutorial instruction text improvements
+### Discreet Mode Feature
+**Files Created:**
+- `Tipob/Utilities/GesturePoolManager.swift` - Manages gesture pools for different modes
+
+**Files Modified:**
+- `MenuView.swift` - Added toggle with conditional visibility (hidden in Tutorial)
+- `GameViewModel.swift` - Added discreetModeEnabled property
+- `ClassicModeModel.swift` - Updated gesture generation to use pool
+- `GameModel.swift` - Updated Memory Mode to use pool
+- `GameVsPlayerVsPlayerView.swift` - Added discreet mode support
+- `PlayerVsPlayerView.swift` - Added discreet mode support
+
+### Gesture Distribution
+- **Discreet Mode (9 gestures)**: up, down, left, right, tap, doubleTap, longPress, pinch, stroop
+- **Unhinged Mode (14 gestures)**: All discreet + shake, tiltLeft, tiltRight, raise, lower
+- **Tutorial Mode**: Always uses all 14 gestures regardless of toggle
 
 ## Key Decisions
-- Vertical layout for left/right labels prevents horizontal overflow
-- 70pt font size balances visibility with space constraints
-- Used same validation pattern as GameModel/GameViewModel for consistency
+- Tutorial mode intentionally excluded from discreet mode filtering to ensure complete onboarding
+- Discreet mode toggle UI hidden when Tutorial mode selected for clarity
+- Player vs Player Build Mode naturally excludes Stroop (players create sequences manually)
+- UserDefaults key: `"discreetModeEnabled"` for persistence
+
+## Next Session
+- Test discreet mode across all game modes on physical device
+- Verify motion gestures (shake, tilt, raise, lower) properly excluded in discreet mode
+- Confirm Stroop gestures appear correctly in both modes
+- Consider adding visual indicator in-game showing current mode
 
 ## Blockers/Issues
-- None - all reported issues resolved
+- None - all features implemented and working

@@ -9,6 +9,7 @@ class GameViewModel: ObservableObject {
     @Published var timeRemaining: TimeInterval = 0
     @Published var flashColor: Color = .clear
     @Published var isClassicMode: Bool = false
+    @Published var discreetModeEnabled: Bool = false
 
     private var timer: Timer?
     var randomNumberGenerator: RandomNumberGenerator = SystemRandomNumberGenerator()
@@ -48,7 +49,7 @@ class GameViewModel: ObservableObject {
     func startGame() {
         isClassicMode = false
         gameModel.reset()
-        gameModel.startNewRound(with: &randomNumberGenerator)
+        gameModel.startNewRound(with: &randomNumberGenerator, discreetMode: discreetModeEnabled)
         gameState = .showSequence
         showingGestureIndex = 0
 
@@ -121,7 +122,7 @@ class GameViewModel: ObservableObject {
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + GameConfiguration.transitionDelay) {
-            self.gameModel.startNewRound(with: &self.randomNumberGenerator)
+            self.gameModel.startNewRound(with: &self.randomNumberGenerator, discreetMode: self.discreetModeEnabled)
             self.gameState = .showSequence
             self.showingGestureIndex = 0
             self.showNextGestureInSequence()
@@ -152,7 +153,7 @@ class GameViewModel: ObservableObject {
     // MARK: - Classic Mode Methods
 
     private func showNextClassicGesture() {
-        classicModeModel.generateRandomGesture()
+        classicModeModel.generateRandomGesture(discreetMode: discreetModeEnabled)
         timeRemaining = classicModeModel.reactionTime
         startClassicModeCountdown()
         // Explicitly notify SwiftUI of the change

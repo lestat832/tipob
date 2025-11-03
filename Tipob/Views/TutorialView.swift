@@ -119,29 +119,24 @@ struct TutorialView: View {
                         Text("Try Again!")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
                             .foregroundColor(.red)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(.white.opacity(0.95))
+                            )
                             .transition(.opacity)
                     }
                 }
 
                 Spacer()
 
-                // Progress indicators
-                VStack(spacing: 15) {
-                    Text("Gesture \(currentGestureIndex + 1) of \(tutorialGestures.count)")
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(.white.opacity(0.8))
-
-                    // Gesture completion dots
-                    HStack(spacing: 12) {
-                        ForEach(0..<tutorialGestures.count, id: \.self) { index in
-                            Circle()
-                                .fill(index < currentGestureIndex ? Color.green : Color.white.opacity(0.3))
-                                .frame(width: 14, height: 14)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 50)
+                // Progress indicator
+                Text("Gesture \(currentGestureIndex + 1) of \(tutorialGestures.count)")
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white.opacity(0.9))
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 50)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .detectSwipes { gesture in

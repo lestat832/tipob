@@ -16,14 +16,13 @@ struct GameModel {
         currentGestureIndex = 0
     }
 
-    mutating func startNewRound(with randomNumberGenerator: inout RandomNumberGenerator) {
+    mutating func startNewRound(with randomNumberGenerator: inout RandomNumberGenerator, discreetMode: Bool = false) {
         round += 1
         userBuffer = []
         currentGestureIndex = 0
 
-        // Equal distribution: 1/14 chance for each gesture type
-        var pool = GestureType.allBasicGestures  // 13 basic gestures
-        pool.append(.randomStroop())  // Add 1 Stroop instance
+        // Get appropriate gesture pool based on discreet mode
+        let pool = GesturePoolManager.gestures(forDiscreetMode: discreetMode)
         let newGesture = pool.randomElement(using: &randomNumberGenerator) ?? .up
 
         sequence.append(newGesture)

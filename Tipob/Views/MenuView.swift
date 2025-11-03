@@ -6,6 +6,7 @@ struct MenuView: View {
     @State private var isAnimating = false
     @State private var showingModeSheet = false
     @AppStorage("selectedGameMode") private var selectedModeRawValue: String = GameMode.classic.rawValue
+    @AppStorage("discreetModeEnabled") private var discreetModeEnabled = false
 
     private var selectedMode: GameMode {
         return GameMode(rawValue: selectedModeRawValue) ?? .memory
@@ -87,6 +88,41 @@ struct MenuView: View {
                         buttonScale = 1.1
                     }
                 }
+
+                // Discreet Mode Toggle (hidden for Tutorial mode)
+                if selectedMode != .tutorial {
+                    VStack(spacing: 12) {
+                        Toggle(isOn: $discreetModeEnabled) {
+                            HStack(spacing: 8) {
+                                Text("Discreet Mode")
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.white)
+                                Text("🤫")
+                                    .font(.system(size: 20))
+                            }
+                        }
+                        .tint(.white)
+                        .padding(.horizontal, 30)
+                        .padding(.vertical, 15)
+                        .background(
+                            RoundedRectangle(cornerRadius: 15)
+                                .fill(Color.white.opacity(0.2))
+                        )
+                        .onChange(of: discreetModeEnabled) { _, newValue in
+                            HapticManager.shared.impact()
+                            // Update ViewModel's discreet mode setting
+                            viewModel.discreetModeEnabled = newValue
+                        }
+
+                        // Tooltip
+                        Text(discreetModeEnabled ? "Touch-only gestures enabled" : "All physical gestures enabled")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                    }
+                    .padding(.bottom, 20)
+                }
             }
 
             // Floating Game Mode Menu Icon
@@ -124,6 +160,10 @@ struct MenuView: View {
                 get: { selectedMode },
                 set: { selectedModeRawValue = $0.rawValue }
             ))
+        }
+        .onAppear {
+            // Initialize ViewModel's discreet mode setting on appear
+            viewModel.discreetModeEnabled = discreetModeEnabled
         }
     }
 }

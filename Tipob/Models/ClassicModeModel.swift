@@ -20,9 +20,10 @@ struct ClassicModeModel {
         generateRandomGesture()
     }
 
-    mutating func generateRandomGesture() {
-        // Equal distribution: 1/14 chance for each gesture type
-        currentGesture = GestureType.random()
+    mutating func generateRandomGesture(discreetMode: Bool = false) {
+        // Get appropriate gesture pool based on discreet mode
+        let gesturePool = GesturePoolManager.gestures(forDiscreetMode: discreetMode)
+        currentGesture = gesturePool.randomElement()
     }
 
     mutating func recordSuccess() {

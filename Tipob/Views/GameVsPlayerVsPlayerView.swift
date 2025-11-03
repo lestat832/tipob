@@ -2,6 +2,7 @@ import SwiftUI
 
 struct GameVsPlayerVsPlayerView: View {
     @ObservedObject var viewModel: GameViewModel
+    @AppStorage("discreetModeEnabled") private var discreetModeEnabled = false
 
     // Game phases
     @State private var gamePhase: PvPGamePhase = .nameEntry
@@ -381,8 +382,9 @@ struct GameVsPlayerVsPlayerView: View {
     private func startNewRound() {
         currentRound += 1
 
-        // Add new gesture to sequence (equal distribution: 1/14 chance for each gesture type)
-        let newGesture = GestureType.random()
+        // Get appropriate gesture pool based on discreet mode
+        let gesturePool = GesturePoolManager.gestures(forDiscreetMode: discreetModeEnabled)
+        let newGesture = gesturePool.randomElement() ?? .up
         sequence.append(newGesture)
 
         // Reset player results

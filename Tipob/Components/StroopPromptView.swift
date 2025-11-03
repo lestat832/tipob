@@ -39,6 +39,7 @@ struct StroopPromptView: View {
                             )
                     )
                     .fixedSize()
+                    .frame(minWidth: 80)
             }
             .padding(.top, 40)
 
@@ -62,6 +63,7 @@ struct StroopPromptView: View {
                                 )
                         )
                         .fixedSize()
+                        .frame(minWidth: 80)
                     Text("←")
                         .font(.system(size: 40, weight: .heavy))
                         .foregroundColor(.white)
@@ -112,6 +114,7 @@ struct StroopPromptView: View {
                                 )
                         )
                         .fixedSize()
+                        .frame(minWidth: 80)
                 }
                 .padding(.trailing, 10)
             }
@@ -138,6 +141,7 @@ struct StroopPromptView: View {
                             )
                     )
                     .fixedSize()
+                    .frame(minWidth: 80)
             }
             .padding(.bottom, 40)
         }
