@@ -1,45 +1,64 @@
 # Session Summary - 2025-11-03
 
 ## Completed Tasks
-- ✅ Implemented Discreet Mode toggle feature for Tipob
-- ✅ Created GesturePoolManager.swift utility class for gesture filtering
-- ✅ Added UserDefaults persistence for discreet mode setting
-- ✅ Updated all game modes (Classic, Memory, Game vs PvP, Player vs Player) to respect discreet mode
-- ✅ Fixed Tutorial mode to always use full gesture set (14 gestures)
-- ✅ Added conditional UI toggle that hides in Tutorial mode
-- ✅ Fixed compiler warnings (var → let, iOS 17 onChange deprecation)
-- ✅ Completed rollback of failed unified motion gesture classifier implementation
+- ✅ Strategic git reset to commit 304ce8d (last confirmed working build)
+- ✅ Removed 3 problematic commits that broke touch gesture detection
+- ✅ Verified baseline functionality - all 14 gestures working correctly
+- ✅ Analyzed what was lost and created comprehensive rebuild strategy
 
-## Implementation Details
+## What Was Lost in Reset
+- MotionGestureManager.swift (354 lines) - motion gesture isolation system
+- CMMotionManager conflict fixes (stopAllOldGestureManagers)
+- Layout improvements (compact ClassicModeView, smaller StroopPromptView)
+- Problematic `.allowsHitTesting(false)` changes (good riddance!)
 
-### Discreet Mode Feature
-**Files Created:**
-- `Tipob/Utilities/GesturePoolManager.swift` - Manages gesture pools for different modes
+## Critical Lessons Learned
+- ❌ Don't add `.allowsHitTesting(false)` to 10+ locations without testing each one
+- ❌ Don't make container views transparent when children already are
+- ❌ Lost track of cause/effect with too many simultaneous changes
+- ✅ Strategic revert to working baseline was correct decision
+- ✅ Incremental testing after EACH change is essential
 
-**Files Modified:**
-- `MenuView.swift` - Added toggle with conditional visibility (hidden in Tutorial)
-- `GameViewModel.swift` - Added discreetModeEnabled property
-- `ClassicModeModel.swift` - Updated gesture generation to use pool
-- `GameModel.swift` - Updated Memory Mode to use pool
-- `GameVsPlayerVsPlayerView.swift` - Added discreet mode support
-- `PlayerVsPlayerView.swift` - Added discreet mode support
+## In Progress
+- Planning rebuild of MotionGestureManager
+- Strategy defined for incremental re-implementation
 
-### Gesture Distribution
-- **Discreet Mode (9 gestures)**: up, down, left, right, tap, doubleTap, longPress, pinch, stroop
-- **Unhinged Mode (14 gestures)**: All discreet + shake, tiltLeft, tiltRight, raise, lower
-- **Tutorial Mode**: Always uses all 14 gestures regardless of toggle
+## Next Session Priority
+1. **Phase 1: Rebuild MotionGestureManager** (Core Feature)
+   - Create motion gesture isolation system
+   - Build in conflict fixes from start (stopAllOldGestureManagers)
+   - Test in isolation before integration
+   - Commit and verify
+
+2. **Phase 2: Classic Mode Integration** (Single Mode First)
+   - Add motion activation logic to GameViewModel
+   - Remove motion modifiers from ClassicModeView
+   - Test thoroughly on physical device
+   - Commit if working
+
+3. **Phase 3: Expand to Other Modes** (One at a Time)
+   - Memory Mode → test → commit
+   - PvP Mode → test → commit
+   - Player vs Player Build → test → commit
 
 ## Key Decisions
-- Tutorial mode intentionally excluded from discreet mode filtering to ensure complete onboarding
-- Discreet mode toggle UI hidden when Tutorial mode selected for clarity
-- Player vs Player Build Mode naturally excludes Stroop (players create sequences manually)
-- UserDefaults key: `"discreetModeEnabled"` for persistence
+- Chose safest revert option (Option A - back to 304ce8d)
+- Prioritized working baseline over preserving broken code
+- Decided on full rebuild approach vs cherry-picking commits
+- Will NOT add `.allowsHitTesting(false)` unless confirmed blocking
 
-## Next Session
-- Test discreet mode across all game modes on physical device
-- Verify motion gestures (shake, tilt, raise, lower) properly excluded in discreet mode
-- Confirm Stroop gestures appear correctly in both modes
-- Consider adding visual indicator in-game showing current mode
+## Rebuild Principles
+✅ One change at a time
+✅ Test after every step
+✅ Incremental integration (one game mode at a time)
+✅ Don't fix what isn't broken
+✅ User approval before commits
 
 ## Blockers/Issues
-- None - all features implemented and working
+- None - clean slate with working baseline
+
+## Current State
+- Branch: main (at commit 304ce8d)
+- Working directory: Clean
+- All 14 gestures: Working correctly
+- Ready for incremental rebuild
