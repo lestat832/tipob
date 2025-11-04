@@ -1,53 +1,91 @@
-# Session Summary - 2025-11-03
+# Session Summary - 2025-11-04
 
 ## Completed Tasks
-- ✅ Strategic git reset to commit 304ce8d (last confirmed working build)
-- ✅ Removed 3 problematic commits that broke touch gesture detection
-- ✅ Verified baseline functionality - all 14 gestures working correctly
-- ✅ Analyzed what was lost and created comprehensive rebuild strategy
-
-## What Was Lost in Reset
-- MotionGestureManager.swift (354 lines) - motion gesture isolation system
-- CMMotionManager conflict fixes (stopAllOldGestureManagers)
-- Layout improvements (compact ClassicModeView, smaller StroopPromptView)
-- Problematic `.allowsHitTesting(false)` changes (good riddance!)
-
-## Critical Lessons Learned
-- ❌ Don't add `.allowsHitTesting(false)` to 10+ locations without testing each one
-- ❌ Don't make container views transparent when children already are
-- ❌ Lost track of cause/effect with too many simultaneous changes
-- ✅ Strategic revert to working baseline was correct decision
-- ✅ Incremental testing after EACH change is essential
+- ✅ Successfully loaded previous session context from Serena memories
+- ✅ Reviewed detailed rebuild plan for MotionGestureManager
+- ✅ **Phase 1 Complete**: Created MotionGestureManager.swift (~440 lines)
+  - Implemented singleton pattern with single CMMotionManager instance
+  - Built-in conflict cleanup (`stopAllOldGestureManagers()`)
+  - All 4 motion detection methods implemented:
+    - `startShakeDetection()` - Copied from ShakeGestureManager
+    - `startTiltDetection()` - Copied from TiltGestureManager (handles both left/right)
+    - `startRaiseDetection()` - Copied from RaiseGestureManager
+    - `startLowerDetection()` - Copied from LowerGestureManager
+  - Only ONE detector active at a time (core isolation principle)
+  - Opened project in Xcode for user to build
 
 ## In Progress
-- Planning rebuild of MotionGestureManager
-- Strategy defined for incremental re-implementation
+- **Phase 1 Final Step**: User building project in Xcode to verify compilation
+- Awaiting build results before proceeding to Phase 2
 
 ## Next Session Priority
-1. **Phase 1: Rebuild MotionGestureManager** (Core Feature)
-   - Create motion gesture isolation system
-   - Build in conflict fixes from start (stopAllOldGestureManagers)
-   - Test in isolation before integration
-   - Commit and verify
 
-2. **Phase 2: Classic Mode Integration** (Single Mode First)
-   - Add motion activation logic to GameViewModel
-   - Remove motion modifiers from ClassicModeView
-   - Test thoroughly on physical device
-   - Commit if working
+### Immediate: Complete Phase 1
+1. **User builds project in Xcode** (Cmd+B)
+2. **Verify no compilation errors**
+3. **Report any issues** if build fails
 
-3. **Phase 3: Expand to Other Modes** (One at a Time)
-   - Memory Mode → test → commit
-   - PvP Mode → test → commit
-   - Player vs Player Build → test → commit
+### Phase 2: Classic Mode Integration
+Once Phase 1 verified working:
+
+**Step 2.1: Modify GameViewModel.swift**
+- Add `motionGestureManager` property
+- Modify `showNextClassicGesture()` to activate motion detectors
+- Deactivate when touch gesture expected
+
+**Step 2.2: Modify ClassicModeView.swift**
+- Remove individual motion modifiers (`.detectShake()`, `.detectTilt()`, etc.)
+- Keep only touch gesture modifiers
+- Test on physical device with all gesture types
+
+**Step 2.3: Test & Commit**
+- Verify all 14 gestures work correctly
+- Verify motion gestures don't conflict
+- Verify touch gestures fail when motion expected
+- Commit: "feat: Add motion gesture isolation to Classic Mode"
+
+### Phase 3: Expand to Other Modes (One at a Time)
+- Memory Mode integration → test → commit
+- PvP Mode integration → test → commit
+- Player vs Player Build integration → test → commit
+
+### Phase 4: Layout Polish (Optional)
+- Only if UX needs improvement
+- Compact ClassicModeView layout
+- Smaller StroopPromptView fonts
 
 ## Key Decisions
-- Chose safest revert option (Option A - back to 304ce8d)
-- Prioritized working baseline over preserving broken code
-- Decided on full rebuild approach vs cherry-picking commits
-- Will NOT add `.allowsHitTesting(false)` unless confirmed blocking
+- Chose full rebuild approach over cherry-picking old commits
+- Consolidated 4 separate gesture managers into 1 centralized manager
+- Built-in conflict cleanup from the start (lessons learned from rollback)
+- Isolation principle: Only ONE motion detector active at any time
+- Wrong gesture type triggers `onWrongGesture` callback (immediate game over)
 
-## Rebuild Principles
+## Architecture Highlights
+
+**MotionGestureManager Design:**
+```swift
+// Public API
+func activateDetector(
+    for gesture: GestureType,
+    onDetected: @escaping () -> Void,
+    onWrongGesture: @escaping () -> Void
+)
+
+func deactivateAllDetectors()
+
+// Internal cleanup (called automatically)
+private func stopAllOldGestureManagers()
+```
+
+**Key Features:**
+- Single CMMotionManager instance (no conflicts!)
+- Callbacks for success and wrong gesture detection
+- State tracking per gesture type
+- Gesture coordinator integration maintained
+- Cooldown periods prevent rapid re-triggers
+
+## Rebuild Principles (Maintained)
 ✅ One change at a time
 ✅ Test after every step
 ✅ Incremental integration (one game mode at a time)
@@ -55,10 +93,14 @@
 ✅ User approval before commits
 
 ## Blockers/Issues
-- None - clean slate with working baseline
+- None - Phase 1 file creation successful
+- Awaiting user build verification in Xcode
+
+## Files Created This Session
+- `Tipob/Utilities/MotionGestureManager.swift` (~440 lines)
 
 ## Current State
-- Branch: main (at commit 304ce8d)
-- Working directory: Clean
-- All 14 gestures: Working correctly
-- Ready for incremental rebuild
+- Branch: main (at commit 304ce8d + uncommitted MotionGestureManager.swift)
+- Working directory: 1 new file added
+- All 14 gestures: Still working (baseline unchanged)
+- Project opened in Xcode for user build verification
