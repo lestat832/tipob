@@ -5,11 +5,13 @@ struct MenuView: View {
     @State private var buttonScale: CGFloat = 1.0
     @State private var isAnimating = false
     @State private var showingModeSheet = false
-    @AppStorage("selectedGameMode") private var selectedModeRawValue: String = GameMode.classic.rawValue
+    @State private var showingLeaderboard = false
+    @State private var showingDiscreetInfo = false
+    @AppStorage("selectedGameMode") private var selectedModeRawValue: String = GameMode.tutorial.rawValue
     @AppStorage("discreetModeEnabled") private var discreetModeEnabled = false
 
     private var selectedMode: GameMode {
-        return GameMode(rawValue: selectedModeRawValue) ?? .memory
+        return GameMode(rawValue: selectedModeRawValue) ?? .tutorial
     }
 
     var body: some View {
@@ -26,27 +28,84 @@ struct MenuView: View {
                     .font(.system(size: 64, weight: .black, design: .rounded))
                     .foregroundColor(.white)
                     .shadow(radius: 10)
+                    .padding(.top, 60)
 
-                // Show appropriate best score based on selected mode
-                if selectedMode == .classic && viewModel.classicModeModel.bestScore > 0 {
-                    Text("Best Score: \(viewModel.classicModeModel.bestScore)")
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white.opacity(0.9))
-                } else if selectedMode == .memory && viewModel.gameModel.bestStreak > 0 {
-                    Text("Best Streak: \(viewModel.gameModel.bestStreak)")
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white.opacity(0.9))
+                // Combined Game Mode Pill + Discreet Toggle + Leaderboard
+                HStack(spacing: 10) {
+                    // Clickable Game Mode Pill
+                    Button(action: {
+                        HapticManager.shared.impact()
+                        showingModeSheet = true
+                    }) {
+                        HStack(spacing: 8) {
+                            Text(selectedMode.emoji)
+                                .font(.system(size: 20))
+                            Text(selectedMode.rawValue)
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule()
+                                .fill(Color.white.opacity(0.25))
+                        )
+                    }
+
+                    // Compact Discreet Mode Toggle
+                    if selectedMode != .tutorial {
+                        HStack(spacing: 6) {
+                            Text("🤫")
+                                .font(.system(size: 18))
+                            Toggle("", isOn: $discreetModeEnabled)
+                                .labelsHidden()
+                                .tint(.white)
+
+                            // Info button
+                            Button(action: {
+                                HapticManager.shared.impact()
+                                showingDiscreetInfo = true
+                            }) {
+                                Image(systemName: "info.circle")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(
+                            Capsule()
+                                .fill(Color.white.opacity(0.25))
+                        )
+                        .onChange(of: discreetModeEnabled) { _, newValue in
+                            HapticManager.shared.impact()
+                            viewModel.discreetModeEnabled = newValue
+                        }
+                    }
+
+                    // Leaderboard Icon
+                    Button(action: {
+                        HapticManager.shared.impact()
+                        showingLeaderboard = true
+                    }) {
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [.yellow.opacity(0.8), .orange.opacity(0.8)]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 44, height: 44)
+                                .shadow(color: .black.opacity(0.2), radius: 3, x: 0, y: 2)
+
+                            Text("🏆")
+                                .font(.system(size: 20))
+                        }
+                    }
                 }
-
-                Text("\(selectedMode.emoji) \(selectedMode.rawValue)")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.8))
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 8)
-                    .background(
-                        Capsule()
-                            .fill(Color.white.opacity(0.2))
-                    )
+                .padding(.horizontal, 20)
 
                 Button(action: {
                     HapticManager.shared.impact()
@@ -88,71 +147,6 @@ struct MenuView: View {
                         buttonScale = 1.1
                     }
                 }
-
-                // Discreet Mode Toggle (hidden for Tutorial mode)
-                if selectedMode != .tutorial {
-                    VStack(spacing: 12) {
-                        Toggle(isOn: $discreetModeEnabled) {
-                            HStack(spacing: 8) {
-                                Text("Discreet Mode")
-                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.white)
-                                Text("🤫")
-                                    .font(.system(size: 20))
-                            }
-                        }
-                        .tint(.white)
-                        .padding(.horizontal, 30)
-                        .padding(.vertical, 15)
-                        .background(
-                            RoundedRectangle(cornerRadius: 15)
-                                .fill(Color.white.opacity(0.2))
-                        )
-                        .onChange(of: discreetModeEnabled) { _, newValue in
-                            HapticManager.shared.impact()
-                            // Update ViewModel's discreet mode setting
-                            viewModel.discreetModeEnabled = newValue
-                        }
-
-                        // Tooltip
-                        Text(discreetModeEnabled ? "Touch-only gestures enabled" : "All physical gestures enabled")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(.white.opacity(0.7))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 40)
-                    }
-                    .padding(.bottom, 20)
-                }
-            }
-
-            // Floating Game Mode Menu Icon
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        HapticManager.shared.impact()
-                        showingModeSheet = true
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [.white, .white.opacity(0.8)]),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 60, height: 60)
-                                .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 2)
-
-                            Text("🎮")
-                                .font(.system(size: 32))
-                        }
-                    }
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 20)
-                }
             }
         }
         .sheet(isPresented: $showingModeSheet) {
@@ -160,6 +154,14 @@ struct MenuView: View {
                 get: { selectedMode },
                 set: { selectedModeRawValue = $0.rawValue }
             ))
+        }
+        .sheet(isPresented: $showingLeaderboard) {
+            LeaderboardView()
+        }
+        .alert("Discreet Mode", isPresented: $showingDiscreetInfo) {
+            Button("Got it!", role: .cancel) {}
+        } message: {
+            Text("Filters out physical motion gestures (raise, lower) and keeps only touch gestures (swipe, tap). Perfect for playing in public!")
         }
         .onAppear {
             // Initialize ViewModel's discreet mode setting on appear

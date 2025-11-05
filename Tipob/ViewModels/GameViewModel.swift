@@ -10,6 +10,7 @@ class GameViewModel: ObservableObject {
     @Published var flashColor: Color = .clear
     @Published var isClassicMode: Bool = false
     @Published var discreetModeEnabled: Bool = false
+    @Published var isNewHighScore: Bool = false
 
     private var timer: Timer?
     var randomNumberGenerator: RandomNumberGenerator = SystemRandomNumberGenerator()
@@ -53,6 +54,9 @@ class GameViewModel: ObservableObject {
         gameState = .showSequence
         showingGestureIndex = 0
 
+        // Stop old gesture managers (cleanup from Tutorial/other modes)
+        MotionGestureManager.shared.stopAllOldGestureManagers()
+
         // Add initial delay so player can read "Watch the sequence!" message
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.showNextGestureInSequence()
@@ -80,6 +84,10 @@ class GameViewModel: ObservableObject {
         gameState = .awaitInput
         gameModel.currentGestureIndex = 0
         timeRemaining = GameConfiguration.perGestureTime
+
+        // Activate motion detector for first expected gesture
+        activateMemoryModeDetector()
+
         startCountdown()
     }
 
@@ -104,6 +112,8 @@ class GameViewModel: ObservableObject {
             if gameModel.hasCompletedSequence() {
                 successfulRound()
             } else {
+                // Move to next gesture - update detector for next expected gesture
+                activateMemoryModeDetector()
                 timeRemaining = GameConfiguration.perGestureTime
             }
         } else {
@@ -131,6 +141,14 @@ class GameViewModel: ObservableObject {
 
     private func gameOver() {
         timer?.invalidate()
+
+        // Calculate final score (Memory Mode uses round number)
+        let finalScore = gameModel.round
+
+        // Check if new high score and add to leaderboard
+        isNewHighScore = LeaderboardManager.shared.isNewHighScore(finalScore, mode: .memory)
+        LeaderboardManager.shared.addScore(finalScore, for: .memory)
+
         gameModel.updateBestStreak()
         PersistenceManager.shared.saveBestStreak(gameModel.bestStreak)
         flashColor = .red
@@ -140,6 +158,9 @@ class GameViewModel: ObservableObject {
             flashColor = .clear
         }
 
+        // Deactivate all motion detectors
+        MotionGestureManager.shared.deactivateAllDetectors()
+
         gameState = .gameOver
     }
 
@@ -148,16 +169,63 @@ class GameViewModel: ObservableObject {
         gameModel.reset()
         classicModeModel.reset()
         flashColor = .clear
+        isNewHighScore = false
+        MotionGestureManager.shared.deactivateAllDetectors()
+    }
+
+    // MARK: - Memory Mode Methods
+
+    private func activateMemoryModeDetector() {
+        // Get current expected gesture from sequence
+        guard gameModel.currentGestureIndex < gameModel.sequence.count else { return }
+        let expectedGesture = gameModel.sequence[gameModel.currentGestureIndex]
+
+        // Activate motion detector if motion gesture expected
+        if expectedGesture.isMotionGesture {
+            MotionGestureManager.shared.activateDetector(
+                for: expectedGesture,
+                onDetected: { [weak self] in
+                    self?.handleGesture(expectedGesture)
+                },
+                onWrongGesture: { [weak self] in
+                    self?.gameOver()
+                }
+            )
+        } else {
+            // Touch gesture expected - deactivate motion detectors
+            MotionGestureManager.shared.deactivateAllDetectors()
+        }
     }
 
     // MARK: - Classic Mode Methods
 
     private func showNextClassicGesture() {
+        // Generate gesture
         classicModeModel.generateRandomGesture(discreetMode: discreetModeEnabled)
+
+        // Stop old gesture managers (cleanup from Tutorial/other modes)
+        MotionGestureManager.shared.stopAllOldGestureManagers()
+
+        // Activate motion detector if motion gesture expected
+        if let currentGesture = classicModeModel.currentGesture,
+           currentGesture.isMotionGesture {
+            MotionGestureManager.shared.activateDetector(
+                for: currentGesture,
+                onDetected: { [weak self] in
+                    self?.handleClassicModeGesture(currentGesture)
+                },
+                onWrongGesture: { [weak self] in
+                    self?.classicModeGameOver()
+                }
+            )
+        } else {
+            // Touch gesture expected - deactivate motion detectors
+            MotionGestureManager.shared.deactivateAllDetectors()
+        }
+
+        // Start countdown
         timeRemaining = classicModeModel.reactionTime
         startClassicModeCountdown()
-        // Explicitly notify SwiftUI of the change
-        objectWillChange.send()
     }
 
     private func startClassicModeCountdown() {
@@ -217,6 +285,14 @@ class GameViewModel: ObservableObject {
 
     private func classicModeGameOver() {
         timer?.invalidate()
+
+        // Calculate final score (Classic Mode uses score)
+        let finalScore = classicModeModel.score
+
+        // Check if new high score and add to leaderboard
+        isNewHighScore = LeaderboardManager.shared.isNewHighScore(finalScore, mode: .classic)
+        LeaderboardManager.shared.addScore(finalScore, for: .classic)
+
         classicModeModel.updateBestScore()
         PersistenceManager.shared.saveClassicBestScore(classicModeModel.bestScore)
         flashColor = .red

@@ -37,6 +37,10 @@ struct GameVsPlayerVsPlayerView: View {
     // Track which player should go next after sequence
     @State private var nextPlayer: Int = 1
 
+    // Leaderboard
+    @State private var isNewHighScore: Bool = false
+    @State private var showingLeaderboard: Bool = false
+
     enum PvPGamePhase {
         case nameEntry
         case watchSequence
@@ -275,27 +279,30 @@ struct GameVsPlayerVsPlayerView: View {
         .detectPinch(
             onPinch: { handleGesture(.pinch) }
         )
-        .detectShake(
-            onShake: { handleGesture(.shake) }
-        )
-        .detectTilts(
-            onTiltLeft: { handleGesture(.tiltLeft) },
-            onTiltRight: { handleGesture(.tiltRight) }
-        )
-        .detectRaise(
-            onRaise: { handleGesture(.raise) },
-            onLower: { handleGesture(.lower) }
-        )
     }
 
     // MARK: - Results View
 
     private var resultsView: some View {
         VStack(spacing: 40) {
+            // High Score Banner (if new high score)
+            if isNewHighScore {
+                VStack(spacing: 8) {
+                    Text("🏆")
+                        .font(.system(size: 50))
+
+                    Text("NEW HIGH SCORE!")
+                        .font(.system(size: 24, weight: .black, design: .rounded))
+                        .foregroundColor(.yellow)
+                        .shadow(color: .orange, radius: 8)
+                }
+                .padding(.top, 40)
+            }
+
             Text(gameOver ? "Game Over!" : "")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
-                .padding(.top, 60)
+                .padding(.top, isNewHighScore ? 0 : 60)
 
             Spacer()
 
@@ -330,29 +337,65 @@ struct GameVsPlayerVsPlayerView: View {
             VStack(spacing: 20) {
                 // Play Again button
                 Button(action: playAgain) {
-                    Text("Play Again")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
-                        .background(
-                            RoundedRectangle(cornerRadius: 15)
-                                .fill(Color.white.opacity(0.3))
-                        )
+                    HStack {
+                        Image(systemName: "arrow.clockwise.circle.fill")
+                            .font(.title2)
+                        Text("Play Again")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .background(
+                        RoundedRectangle(cornerRadius: 15)
+                            .fill(Color.green)
+                    )
                 }
                 .padding(.horizontal, 30)
 
-                // Back to Menu button
-                Button(action: {
-                    viewModel.resetToMenu()
-                }) {
-                    Text("Back to Menu")
-                        .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white.opacity(0.8))
+                HStack(spacing: 15) {
+                    // Back to Menu button
+                    Button(action: {
+                        viewModel.resetToMenu()
+                    }) {
+                        HStack {
+                            Image(systemName: "house.fill")
+                            Text("Home")
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 25)
                         .padding(.vertical, 15)
+                        .background(
+                            Capsule()
+                                .fill(Color.white.opacity(0.3))
+                        )
+                    }
+
+                    // Leaderboard button
+                    Button(action: {
+                        showingLeaderboard = true
+                    }) {
+                        HStack {
+                            Image(systemName: "trophy.fill")
+                            Text("Leaderboard")
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 25)
+                        .padding(.vertical, 15)
+                        .background(
+                            Capsule()
+                                .fill(Color.yellow.opacity(0.4))
+                        )
+                    }
                 }
+                .padding(.horizontal, 20)
             }
             .padding(.bottom, 40)
+        }
+        .sheet(isPresented: $showingLeaderboard) {
+            LeaderboardView()
         }
     }
 
@@ -367,6 +410,9 @@ struct GameVsPlayerVsPlayerView: View {
     }
 
     private func startGame() {
+        // Stop old gesture managers (cleanup from Tutorial/other modes)
+        MotionGestureManager.shared.stopAllOldGestureManagers()
+
         // Reset everything
         sequence = []
         currentRound = 0
@@ -382,8 +428,8 @@ struct GameVsPlayerVsPlayerView: View {
     private func startNewRound() {
         currentRound += 1
 
-        // Get appropriate gesture pool based on discreet mode
-        let gesturePool = GesturePoolManager.gestures(forDiscreetMode: discreetModeEnabled)
+        // Get appropriate gesture pool based on discreet mode (excludes Stroop for Game vs PvP)
+        let gesturePool = GesturePoolManager.gesturesWithoutStroop(discreetMode: discreetModeEnabled)
         let newGesture = gesturePool.randomElement() ?? .up
         sequence.append(newGesture)
 
@@ -441,6 +487,10 @@ struct GameVsPlayerVsPlayerView: View {
         userBuffer = []
         timeRemaining = perGestureTime
         gamePhase = .playerTurn
+
+        // Activate motion detector for first expected gesture
+        activateGameVsPvPDetector()
+
         startTimer()
     }
 
@@ -472,7 +522,8 @@ struct GameVsPlayerVsPlayerView: View {
                 // Player completed sequence successfully
                 recordPlayerSuccess()
             } else {
-                // Reset timer for next gesture
+                // Move to next gesture - update detector for next expected gesture
+                activateGameVsPvPDetector()
                 timeRemaining = perGestureTime
             }
         } else {
@@ -566,21 +617,31 @@ struct GameVsPlayerVsPlayerView: View {
         if player1Result == true && player2Result == true {
             // Both passed, continue to next round
             startNewRound()
-        } else if player1Result == false && player2Result == false {
-            // Both failed, it's a draw
-            winner = nil
-            gameOver = true
-            gamePhase = .results
-        } else if player1Result == true && player2Result == false {
-            // Player 1 wins
-            winner = player1Name
-            gameOver = true
-            gamePhase = .results
-        } else if player1Result == false && player2Result == true {
-            // Player 2 wins
-            winner = player2Name
-            gameOver = true
-            gamePhase = .results
+        } else {
+            // Game ends - someone failed
+            // Calculate final score (Game vs PvP uses currentRound)
+            let finalScore = currentRound
+
+            // Check if new high score and add to leaderboard
+            isNewHighScore = LeaderboardManager.shared.isNewHighScore(finalScore, mode: .gameVsPlayerVsPlayer)
+            LeaderboardManager.shared.addScore(finalScore, for: .gameVsPlayerVsPlayer)
+
+            if player1Result == false && player2Result == false {
+                // Both failed, it's a draw
+                winner = nil
+                gameOver = true
+                gamePhase = .results
+            } else if player1Result == true && player2Result == false {
+                // Player 1 wins
+                winner = player1Name
+                gameOver = true
+                gamePhase = .results
+            } else if player1Result == false && player2Result == true {
+                // Player 2 wins
+                winner = player2Name
+                gameOver = true
+                gamePhase = .results
+            }
         }
     }
 
@@ -592,10 +653,35 @@ struct GameVsPlayerVsPlayerView: View {
         player2Result = nil
         winner = nil
         gameOver = false
+        isNewHighScore = false
         currentGestureIndex = 0
         userBuffer = []
         showingSequence = false
         showingGestureIndex = 0
         stopTimer()
+    }
+
+    // MARK: - Motion Gesture Integration
+
+    private func activateGameVsPvPDetector() {
+        // Get current expected gesture from sequence
+        guard currentGestureIndex < sequence.count else { return }
+        let expectedGesture = sequence[currentGestureIndex]
+
+        // Activate motion detector if motion gesture expected
+        if expectedGesture.isMotionGesture {
+            MotionGestureManager.shared.activateDetector(
+                for: expectedGesture,
+                onDetected: {
+                    self.handleGesture(expectedGesture)
+                },
+                onWrongGesture: {
+                    self.recordPlayerFailure()
+                }
+            )
+        } else {
+            // Touch gesture expected - deactivate motion detectors
+            MotionGestureManager.shared.deactivateAllDetectors()
+        }
     }
 }

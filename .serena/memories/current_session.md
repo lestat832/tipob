@@ -1,106 +1,104 @@
 # Session Summary - 2025-11-04
 
 ## Completed Tasks
-- ✅ Successfully loaded previous session context from Serena memories
-- ✅ Reviewed detailed rebuild plan for MotionGestureManager
-- ✅ **Phase 1 Complete**: Created MotionGestureManager.swift (~440 lines)
-  - Implemented singleton pattern with single CMMotionManager instance
-  - Built-in conflict cleanup (`stopAllOldGestureManagers()`)
-  - All 4 motion detection methods implemented:
-    - `startShakeDetection()` - Copied from ShakeGestureManager
-    - `startTiltDetection()` - Copied from TiltGestureManager (handles both left/right)
-    - `startRaiseDetection()` - Copied from RaiseGestureManager
-    - `startLowerDetection()` - Copied from LowerGestureManager
-  - Only ONE detector active at a time (core isolation principle)
-  - Opened project in Xcode for user to build
 
-## In Progress
-- **Phase 1 Final Step**: User building project in Xcode to verify compilation
-- Awaiting build results before proceeding to Phase 2
+### Leaderboard MVP Implementation ✅
+- Created complete local-only leaderboard system for 4 competitive game modes
+- **New Files Created:**
+  - `LeaderboardEntry.swift` - Codable model with UUID, score, timestamp, optional playerName
+  - `LeaderboardManager.swift` - Singleton with JSON persistence to UserDefaults
+  - `LeaderboardView.swift` - Modal UI with segmented control for mode switching
 
-## Next Session Priority
+### Leaderboard Integration ✅
+- Integrated into all 4 game modes (Classic, Memory, Game vs PvP, Player vs Player)
+- Score metrics defined per mode:
+  - Classic: `classicModeModel.score`
+  - Memory: `gameModel.round`
+  - Game vs PvP: `currentRound`
+  - Player vs Player: `sequence.count`
+- Added `isNewHighScore` flag to GameViewModel
+- "NEW HIGH SCORE!" banner with 🏆 trophy animation in GameOverView
+- Leaderboard buttons on GameOverView and MenuView
 
-### Immediate: Complete Phase 1
-1. **User builds project in Xcode** (Cmd+B)
-2. **Verify no compilation errors**
-3. **Report any issues** if build fails
+### Menu Declutter & UX Improvements ✅
+- **Removed cluttered elements:**
+  - Best score/streak display (redundant with leaderboard)
+  - Large 120x120 leaderboard button
+  - Old standalone discreet mode section
+  - Floating bottom-right game mode icon (🎮)
 
-### Phase 2: Classic Mode Integration
-Once Phase 1 verified working:
+- **Added compact new layout:**
+  - Clickable game mode pill (opens mode selector)
+  - Compact discreet mode toggle with info icon (ℹ️)
+  - Info alert explains: "Filters out physical motion gestures (raise, lower) and keeps only touch gestures (swipe, tap). Perfect for playing in public!"
+  - Small 44x44 leaderboard icon at end of row
+  - All controls in one efficient row: `[🎓 Tutorial] [🤫 toggle ℹ️] [🏆]`
 
-**Step 2.1: Modify GameViewModel.swift**
-- Add `motionGestureManager` property
-- Modify `showNextClassicGesture()` to activate motion detectors
-- Deactivate when touch gesture expected
+### FTUE Improvements ✅
+- Tutorial set as default mode for new users
+- Tutorial reordered to first position in GameModeSheet
+- Fixed fallback value from `.memory` to `.tutorial`
 
-**Step 2.2: Modify ClassicModeView.swift**
-- Remove individual motion modifiers (`.detectShake()`, `.detectTilt()`, etc.)
-- Keep only touch gesture modifiers
-- Test on physical device with all gesture types
+## Modified Files
 
-**Step 2.3: Test & Commit**
-- Verify all 14 gestures work correctly
-- Verify motion gestures don't conflict
-- Verify touch gestures fail when motion expected
-- Commit: "feat: Add motion gesture isolation to Classic Mode"
+**New:**
+- `Tipob/Models/LeaderboardEntry.swift`
+- `Tipob/Utilities/LeaderboardManager.swift`
+- `Tipob/Views/LeaderboardView.swift`
 
-### Phase 3: Expand to Other Modes (One at a Time)
-- Memory Mode integration → test → commit
-- PvP Mode integration → test → commit
-- Player vs Player Build integration → test → commit
-
-### Phase 4: Layout Polish (Optional)
-- Only if UX needs improvement
-- Compact ClassicModeView layout
-- Smaller StroopPromptView fonts
+**Modified:**
+- `Tipob/Models/GameState.swift` - Added `.leaderboard` case
+- `Tipob/Models/GameMode.swift` - Reordered Tutorial first
+- `Tipob/Views/MenuView.swift` - Complete layout reorganization
+- `Tipob/Views/ContentView.swift` - Added leaderboard case to switch
+- `Tipob/Views/GameOverView.swift` - High score banner + leaderboard button
+- `Tipob/ViewModels/GameViewModel.swift` - Leaderboard integration
+- `Tipob/Views/GameVsPlayerVsPlayerView.swift` - Leaderboard tracking
+- `Tipob/Views/PlayerVsPlayerView.swift` - Leaderboard tracking
 
 ## Key Decisions
-- Chose full rebuild approach over cherry-picking old commits
-- Consolidated 4 separate gesture managers into 1 centralized manager
-- Built-in conflict cleanup from the start (lessons learned from rollback)
-- Isolation principle: Only ONE motion detector active at any time
-- Wrong gesture type triggers `onWrongGesture` callback (immediate game over)
 
-## Architecture Highlights
+1. **Leaderboard Architecture:**
+   - Local-only persistence (no backend, no GameCenter)
+   - JSON encoding via Codable to UserDefaults
+   - Separate keys per mode: `TipobLeaderboard_{ModeName}`
+   - Top 100 entries kept per leaderboard
+   - Tutorial mode intentionally excluded from leaderboard
 
-**MotionGestureManager Design:**
-```swift
-// Public API
-func activateDetector(
-    for gesture: GestureType,
-    onDetected: @escaping () -> Void,
-    onWrongGesture: @escaping () -> Void
-)
+2. **Menu Layout:**
+   - Consolidated all controls into single row for cleaner UI
+   - Game mode pill no longer stretches full width (compact sizing)
+   - Discreet mode gets helpful info icon with alert explanation
+   - Leaderboard accessible but not prominent
 
-func deactivateAllDetectors()
+3. **FTUE Flow:**
+   - Tutorial as default ensures new users see onboarding first
+   - Tutorial ordered first in mode selector
+   - Discreet mode hidden in Tutorial (not applicable)
 
-// Internal cleanup (called automatically)
-private func stopAllOldGestureManagers()
-```
+## Next Session
 
-**Key Features:**
-- Single CMMotionManager instance (no conflicts!)
-- Callbacks for success and wrong gesture detection
-- State tracking per gesture type
-- Gesture coordinator integration maintained
-- Cooldown periods prevent rapid re-triggers
+**Potential Next Steps:**
+- Test leaderboard on device with fresh install (FTUE validation)
+- Consider adding player names to leaderboard entries
+- Consider statistics dashboard (total games, average scores, etc.)
+- Sound effects and music implementation
+- Additional gestures (shake, pinch, rotate)
+- Achievement system
 
-## Rebuild Principles (Maintained)
-✅ One change at a time
-✅ Test after every step
-✅ Incremental integration (one game mode at a time)
-✅ Don't fix what isn't broken
-✅ User approval before commits
+## Technical Notes
+
+**AppStorage Pattern:**
+- Default values only apply to new users
+- Existing users retain saved preferences
+- `@AppStorage("selectedGameMode")` with fallback ensures consistency
+
+**Leaderboard Persistence:**
+- `LeaderboardManager.shared` auto-loads on init
+- Auto-saves after every score addition
+- Sorted by score descending, then timestamp for ties
+- Safe JSON encoding with error handling
 
 ## Blockers/Issues
-- None - Phase 1 file creation successful
-- Awaiting user build verification in Xcode
 
-## Files Created This Session
-- `Tipob/Utilities/MotionGestureManager.swift` (~440 lines)
-
-## Current State
-- Branch: main (at commit 304ce8d + uncommitted MotionGestureManager.swift)
-- Working directory: 1 new file added
-- All 14 gestures: Still working (baseline unchanged)
-- Project opened in Xcode for user build verification
+None - all requested features implemented successfully ✅

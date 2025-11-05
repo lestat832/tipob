@@ -104,7 +104,7 @@ class MotionGestureManager: ObservableObject {
     }
 
     /// Stop all old independent gesture managers to prevent CMMotionManager conflicts
-    private func stopAllOldGestureManagers() {
+    func stopAllOldGestureManagers() {
         ShakeGestureManager.shared.stopMonitoring()
         TiltGestureManager.shared.stopMonitoring()
         RaiseGestureManager.shared.stopMonitoring()

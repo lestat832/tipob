@@ -1,9 +1,9 @@
 import Foundation
 
 enum GameMode: String, CaseIterable, Identifiable {
+    case tutorial = "Tutorial"
     case classic = "Classic"
     case memory = "Memory"
-    case tutorial = "Tutorial"
     case gameVsPlayerVsPlayer = "Game vs Player vs Player"
     case playerVsPlayer = "Player vs Player"
 

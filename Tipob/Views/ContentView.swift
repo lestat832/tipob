@@ -42,6 +42,10 @@ struct ContentView: View {
             case .gameOver:
                 GameOverView(viewModel: viewModel)
                     .transition(.slide)
+
+            case .leaderboard:
+                LeaderboardView()
+                    .transition(.opacity)
             }
         }
         .animation(.easeInOut(duration: 0.3), value: viewModel.gameState)

@@ -21,8 +21,8 @@ struct GameModel {
         userBuffer = []
         currentGestureIndex = 0
 
-        // Get appropriate gesture pool based on discreet mode
-        let pool = GesturePoolManager.gestures(forDiscreetMode: discreetMode)
+        // Get appropriate gesture pool based on discreet mode (excludes Stroop for Memory Mode)
+        let pool = GesturePoolManager.gesturesWithoutStroop(discreetMode: discreetMode)
         let newGesture = pool.randomElement(using: &randomNumberGenerator) ?? .up
 
         sequence.append(newGesture)

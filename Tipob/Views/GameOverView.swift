@@ -4,6 +4,7 @@ struct GameOverView: View {
     @ObservedObject var viewModel: GameViewModel
     @State private var textScale: CGFloat = 0.5
     @State private var opacity: Double = 0
+    @State private var showingLeaderboard = false
 
     var body: some View {
         ZStack {
@@ -15,6 +16,22 @@ struct GameOverView: View {
             .ignoresSafeArea()
 
             VStack(spacing: 30) {
+                // High Score Banner (if new high score)
+                if viewModel.isNewHighScore {
+                    VStack(spacing: 8) {
+                        Text("🏆")
+                            .font(.system(size: 60))
+
+                        Text("NEW HIGH SCORE!")
+                            .font(.system(size: 28, weight: .black, design: .rounded))
+                            .foregroundColor(.yellow)
+                            .shadow(color: .orange, radius: 10)
+                    }
+                    .scaleEffect(textScale)
+                    .opacity(opacity)
+                    .padding(.bottom, 10)
+                }
+
                 Text("GAME OVER")
                     .font(.system(size: 48, weight: .black, design: .rounded))
                     .foregroundColor(.white)
@@ -57,17 +74,80 @@ struct GameOverView: View {
 
                 Spacer()
 
-                Text("Tap anywhere to continue")
-                    .font(.system(size: 20, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.7))
-                    .padding(.bottom, 50)
-                    .opacity(opacity)
+                // Action Buttons
+                VStack(spacing: 20) {
+                    // Play Again Button
+                    Button(action: {
+                        HapticManager.shared.impact()
+                        if viewModel.isClassicMode {
+                            viewModel.startClassicMode()
+                        } else {
+                            viewModel.startGame()
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.clockwise.circle.fill")
+                                .font(.title2)
+                            Text("Play Again")
+                                .font(.system(size: 22, weight: .bold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 15)
+                        .background(
+                            Capsule()
+                                .fill(Color.green)
+                                .shadow(radius: 5)
+                        )
+                    }
+
+                    HStack(spacing: 15) {
+                        // Home Button
+                        Button(action: {
+                            HapticManager.shared.impact()
+                            viewModel.resetToMenu()
+                        }) {
+                            HStack {
+                                Image(systemName: "house.fill")
+                                Text("Home")
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 30)
+                            .padding(.vertical, 12)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white.opacity(0.3))
+                            )
+                        }
+
+                        // Leaderboard Button
+                        Button(action: {
+                            HapticManager.shared.impact()
+                            showingLeaderboard = true
+                        }) {
+                            HStack {
+                                Image(systemName: "trophy.fill")
+                                Text("Leaderboard")
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 30)
+                            .padding(.vertical, 12)
+                            .background(
+                                Capsule()
+                                    .fill(Color.yellow.opacity(0.4))
+                            )
+                        }
+                    }
+                }
+                .opacity(opacity)
+                .padding(.bottom, 50)
             }
             .padding(.top, 100)
         }
-        .onTapGesture {
-            HapticManager.shared.impact()
-            viewModel.resetToMenu()
+        .sheet(isPresented: $showingLeaderboard) {
+            LeaderboardView()
         }
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {

@@ -123,6 +123,16 @@ enum GestureType: Equatable {
         }
     }
 
+    /// Returns true if this gesture requires motion detection (shake, tilt, raise, lower)
+    var isMotionGesture: Bool {
+        switch self {
+        case .shake, .tiltLeft, .tiltRight, .raise, .lower:
+            return true
+        default:
+            return false
+        }
+    }
+
     var animationStyle: AnimationStyle {
         switch self {
         case .tap: return .singlePulse

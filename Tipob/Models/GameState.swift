@@ -11,4 +11,5 @@ enum GameState {
     case awaitInput
     case judge
     case gameOver
+    case leaderboard
 }

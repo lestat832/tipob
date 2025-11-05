@@ -78,17 +78,6 @@ struct ClassicModeView: View {
             .detectPinch(
                 onPinch: { viewModel.handleClassicModeGesture(.pinch) }
             )
-            .detectShake(
-                onShake: { viewModel.handleClassicModeGesture(.shake) }
-            )
-            .detectTilts(
-                onTiltLeft: { viewModel.handleClassicModeGesture(.tiltLeft) },
-                onTiltRight: { viewModel.handleClassicModeGesture(.tiltRight) }
-            )
-            .detectRaise(
-                onRaise: { viewModel.handleClassicModeGesture(.raise) },
-                onLower: { viewModel.handleClassicModeGesture(.lower) }
-            )
         }
     }
 }

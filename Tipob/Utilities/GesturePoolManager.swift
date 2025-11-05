@@ -43,11 +43,12 @@ class GesturePoolManager {
         return discreetMode ? discreetGestures() : unhingedGestures()
     }
 
-    /// Returns filtered gestures for Player vs Player Build mode
+    /// Returns filtered gestures without Stroop
+    /// Used for Memory Mode, Game vs PvP Mode, and PvP Build Mode
     /// Excludes Stroop gesture regardless of discreet mode setting
     /// - Parameter discreetMode: Whether discreet mode is enabled
     /// - Returns: Gesture pool without Stroop
-    static func gesturesForPvPBuild(discreetMode: Bool) -> [GestureType] {
+    static func gesturesWithoutStroop(discreetMode: Bool) -> [GestureType] {
         let baseGestures = gestures(forDiscreetMode: discreetMode)
         // Filter out Stroop gestures
         return baseGestures.filter { gesture in

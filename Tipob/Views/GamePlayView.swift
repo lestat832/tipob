@@ -56,17 +56,6 @@ struct GamePlayView: View {
             .detectPinch(
                 onPinch: { viewModel.handleGesture(.pinch) }
             )
-            .detectShake(
-                onShake: { viewModel.handleGesture(.shake) }
-            )
-            .detectTilts(
-                onTiltLeft: { viewModel.handleGesture(.tiltLeft) },
-                onTiltRight: { viewModel.handleGesture(.tiltRight) }
-            )
-            .detectRaise(
-                onRaise: { viewModel.handleGesture(.raise) },
-                onLower: { viewModel.handleGesture(.lower) }
-            )
         }
     }
 }

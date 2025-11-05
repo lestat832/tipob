@@ -42,6 +42,10 @@ struct PlayerVsPlayerView: View {
     @State private var player1Wins: Int = 0
     @State private var player2Wins: Int = 0
 
+    // Leaderboard
+    @State private var isNewHighScore: Bool = false
+    @State private var showingLeaderboard: Bool = false
+
     enum PvPGamePhase {
         case nameEntry
         case firstGesture
@@ -92,17 +96,6 @@ struct PlayerVsPlayerView: View {
             }
             .detectPinch(
                 onPinch: { handleGesture(.pinch) }
-            )
-            .detectShake(
-                onShake: { handleGesture(.shake) }
-            )
-            .detectTilts(
-                onTiltLeft: { handleGesture(.tiltLeft) },
-                onTiltRight: { handleGesture(.tiltRight) }
-            )
-            .detectRaise(
-                onRaise: { handleGesture(.raise) },
-                onLower: { handleGesture(.lower) }
             )
         }
     }
@@ -329,10 +322,24 @@ struct PlayerVsPlayerView: View {
 
     private var resultsView: some View {
         VStack(spacing: 40) {
+            // High Score Banner (if new high score)
+            if isNewHighScore {
+                VStack(spacing: 8) {
+                    Text("🏆")
+                        .font(.system(size: 50))
+
+                    Text("NEW HIGH SCORE!")
+                        .font(.system(size: 24, weight: .black, design: .rounded))
+                        .foregroundColor(.yellow)
+                        .shadow(color: .orange, radius: 8)
+                }
+                .padding(.top, 40)
+            }
+
             Text("Game Over!")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
-                .padding(.top, 60)
+                .padding(.top, isNewHighScore ? 0 : 60)
 
             Spacer()
 
@@ -397,29 +404,65 @@ struct PlayerVsPlayerView: View {
             VStack(spacing: 20) {
                 // Play Again button
                 Button(action: playAgain) {
-                    Text("Play Again")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
-                        .background(
-                            RoundedRectangle(cornerRadius: 15)
-                                .fill(Color.white.opacity(0.3))
-                        )
+                    HStack {
+                        Image(systemName: "arrow.clockwise.circle.fill")
+                            .font(.title2)
+                        Text("Play Again")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .background(
+                        RoundedRectangle(cornerRadius: 15)
+                            .fill(Color.green)
+                    )
                 }
                 .padding(.horizontal, 30)
 
-                // Back to Menu button
-                Button(action: {
-                    viewModel.resetToMenu()
-                }) {
-                    Text("Back to Menu")
-                        .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white.opacity(0.8))
+                HStack(spacing: 15) {
+                    // Back to Menu button
+                    Button(action: {
+                        viewModel.resetToMenu()
+                    }) {
+                        HStack {
+                            Image(systemName: "house.fill")
+                            Text("Home")
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 25)
                         .padding(.vertical, 15)
+                        .background(
+                            Capsule()
+                                .fill(Color.white.opacity(0.3))
+                        )
+                    }
+
+                    // Leaderboard button
+                    Button(action: {
+                        showingLeaderboard = true
+                    }) {
+                        HStack {
+                            Image(systemName: "trophy.fill")
+                            Text("Leaderboard")
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 25)
+                        .padding(.vertical, 15)
+                        .background(
+                            Capsule()
+                                .fill(Color.yellow.opacity(0.4))
+                        )
+                    }
                 }
+                .padding(.horizontal, 20)
             }
             .padding(.bottom, 40)
+        }
+        .sheet(isPresented: $showingLeaderboard) {
+            LeaderboardView()
         }
     }
 
@@ -448,6 +491,9 @@ struct PlayerVsPlayerView: View {
         longestSequence = PersistenceManager.shared.loadPvPLongestSequence()
         player1Wins = PersistenceManager.shared.loadPvPPlayer1Wins()
         player2Wins = PersistenceManager.shared.loadPvPPlayer2Wins()
+
+        // Stop old gesture managers (cleanup from Tutorial/other modes)
+        MotionGestureManager.shared.stopAllOldGestureManagers()
 
         // Reset game state
         sequence = []
@@ -497,6 +543,10 @@ struct PlayerVsPlayerView: View {
         timeRemaining = perGestureTime
         isAddingGesture = false  // Reset adding mode
         gamePhase = .repeatPhase
+
+        // Activate motion detector for first expected gesture
+        activatePvPDetector()
+
         startTimer()
     }
 
@@ -531,7 +581,8 @@ struct PlayerVsPlayerView: View {
                     stopTimer()
                     showSuccessAndTransitionToAdd()
                 } else {
-                    // Reset timer for next gesture
+                    // Move to next gesture - update detector for next expected gesture
+                    activatePvPDetector()
                     timeRemaining = perGestureTime
                 }
             } else {
@@ -644,6 +695,13 @@ struct PlayerVsPlayerView: View {
     private func handleWrongGesture() {
         stopTimer()
 
+        // Calculate final score (Player vs Player uses sequence length)
+        let finalScore = sequence.count
+
+        // Check if new high score and add to leaderboard
+        isNewHighScore = LeaderboardManager.shared.isNewHighScore(finalScore, mode: .playerVsPlayer)
+        LeaderboardManager.shared.addScore(finalScore, for: .playerVsPlayer)
+
         // Other player wins
         winner = currentPlayer == 1 ? player2Name : player1Name
         updateWinStats(winningPlayer: currentPlayer == 1 ? 2 : 1)
@@ -665,6 +723,13 @@ struct PlayerVsPlayerView: View {
 
     private func handleTimeout() {
         stopTimer()
+
+        // Calculate final score (Player vs Player uses sequence length)
+        let finalScore = sequence.count
+
+        // Check if new high score and add to leaderboard
+        isNewHighScore = LeaderboardManager.shared.isNewHighScore(finalScore, mode: .playerVsPlayer)
+        LeaderboardManager.shared.addScore(finalScore, for: .playerVsPlayer)
 
         // Other player wins
         winner = currentPlayer == 1 ? player2Name : player1Name
@@ -709,10 +774,35 @@ struct PlayerVsPlayerView: View {
         currentPlayer = 1
         gameOver = false
         winner = nil
+        isNewHighScore = false
         currentGestureIndex = 0
         userBuffer = []
         showGestureAnimation = false
         animatedGesture = nil
         stopTimer()
+    }
+
+    // MARK: - Motion Gesture Integration
+
+    private func activatePvPDetector() {
+        // Get current expected gesture from sequence
+        guard currentGestureIndex < sequence.count else { return }
+        let expectedGesture = sequence[currentGestureIndex]
+
+        // Activate motion detector if motion gesture expected
+        if expectedGesture.isMotionGesture {
+            MotionGestureManager.shared.activateDetector(
+                for: expectedGesture,
+                onDetected: {
+                    self.handleGesture(expectedGesture)
+                },
+                onWrongGesture: {
+                    self.handleWrongGesture()
+                }
+            )
+        } else {
+            // Touch gesture expected - deactivate motion detectors
+            MotionGestureManager.shared.deactivateAllDetectors()
+        }
     }
 }
