@@ -54,6 +54,15 @@ struct PlayerVsPlayerView: View {
         case results
     }
 
+    // MARK: - Computed Properties
+
+    /// Generates dynamic gesture hint based on discreet mode setting
+    /// Uses GesturePoolManager to filter gestures appropriately
+    private var availableGesturesHint: String {
+        let gestures = GesturePoolManager.gesturesWithoutStroop(discreetMode: discreetModeEnabled)
+        return gestures.map { $0.symbol }.joined(separator: " ")
+    }
+
     var body: some View {
         ZStack {
             // Background gradient
@@ -211,8 +220,8 @@ struct PlayerVsPlayerView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
 
-                    // Gesture hint
-                    Text("↑ ↓ ← → ⊙ ◎ ⏺")
+                    // Gesture hint - dynamically updates based on discreet mode
+                    Text(availableGesturesHint)
                         .font(.system(size: 48, weight: .light, design: .rounded))
                         .foregroundColor(.white.opacity(0.5))
                 }
@@ -307,8 +316,8 @@ struct PlayerVsPlayerView: View {
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .foregroundColor(.white.opacity(0.7))
 
-                    // Gesture hint
-                    Text("↑ ↓ ← → ⊙ ◎ ⏺")
+                    // Gesture hint - dynamically updates based on discreet mode
+                    Text(availableGesturesHint)
                         .font(.system(size: 48, weight: .light, design: .rounded))
                         .foregroundColor(.white.opacity(0.5))
                 }
@@ -321,7 +330,8 @@ struct PlayerVsPlayerView: View {
     // MARK: - Results View
 
     private var resultsView: some View {
-        VStack(spacing: 40) {
+        ScrollView {
+            VStack(spacing: 40) {
             // High Score Banner (if new high score)
             if isNewHighScore {
                 VStack(spacing: 8) {
@@ -460,6 +470,7 @@ struct PlayerVsPlayerView: View {
                 .padding(.horizontal, 20)
             }
             .padding(.bottom, 40)
+            }
         }
         .sheet(isPresented: $showingLeaderboard) {
             LeaderboardView()
