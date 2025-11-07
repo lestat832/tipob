@@ -16,10 +16,17 @@ struct GamePlayView: View {
             }
 
             VStack {
-                Text("Swipe!")
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundColor(.gray.opacity(0.5))
-                    .padding(.top, 100)
+                if viewModel.gameModel.currentGestureIndex < viewModel.gameModel.sequence.count {
+                    Text("Go!")
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .foregroundColor(.gray.opacity(0.5))
+                        .padding(.top, 100)
+                } else {
+                    Text("Complete!")
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .foregroundColor(.gray.opacity(0.5))
+                        .padding(.top, 100)
+                }
 
                 Spacer()
 

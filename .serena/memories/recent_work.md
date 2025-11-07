@@ -1,56 +1,55 @@
-# Recent Work Highlights
+# Recent Work Highlights - January 2025
 
-## Latest Accomplishments (Jan 6, 2025)
+## Latest Accomplishments (Jan 6)
 
-### PvP Mode Improvements
-- Fixed dynamic gesture display to show all available gestures based on discreet mode
-- Fixed ScrollView issue preventing access to Play Again button
+### UI/UX Improvements
+- Fixed menu alignment issues (game mode pill, discreet toggle, leaderboard)
+- Removed instruction text clues that broke memory challenge gameplay
+- Improved Stroop screen consistency (arrow/label ordering)
 
-### Critical Discovery: Gesture Detection Architecture
-**Root cause of recurring touch gesture inconsistency identified:**
-- Tutorial mode uses GestureCoordinator.expectedGesture for intelligent filtering
-- Other modes don't set expectedGesture, allowing all gestures to compete
-- This architectural difference explains why Tutorial feels responsive while other modes have detection issues
+### Gesture Detection Analysis
+- Completed comprehensive pipeline analysis (44 files surveyed)
+- Identified dual root cause: 60% timing issues, 40% tolerance issues
+- Documented 13+ tolerance parameters and 50+ timing delays
+- Created 3-tier improvement plan (quick wins → architecture → framework)
 
-## Key Learnings
+## Patterns Learned
 
-### GestureCoordinator Design Pattern
-**Purpose**: Block cross-category CONFLICTING gestures, NOT same-category WRONG gestures
+### SwiftUI Layout Fixes
+- `.fixedSize(horizontal: true, vertical: false)` - Prevents text truncation while maintaining height constraints
+- `.frame(height: 44)` - Standard for consistent button/pill alignment
+- Order matters: fixedSize → padding → frame → background
 
-**Defined Conflicts** (cross-category only):
-- Swipe Up/Down ↔ Tilt Left/Right
-- Swipe Left/Right ↔ Raise/Lower  
-- Shake ↔ Raise/Lower
+### Gesture Detection Architecture
+- **Centralized management wins**: Old independent managers create conflicts
+- **Sensor rate matters**: iOS supports 50-60 Hz, using only 10-30 Hz leaves performance on table
+- **Main thread is precious**: Move sensor processing to background queue
+- **Timing vs Tolerance**: Measure before tuning - timing issues mask tolerance problems
 
-**NOT Conflicts** (same-category):
-- Swipe Up vs Swipe Down (wrong but allowed → player can still lose)
-- Tap vs Double Tap (wrong but allowed → player can still lose)
+### Debugging Complex Systems
+- Use comprehensive analysis before quick fixes
+- Instrument pipeline to identify bottlenecks
+- Consider both code (tolerance) and timing (latency) issues
+- Build diagnostic tools to make problems visible
 
-### Why expectedGesture Makes Detection Better (Not Easier)
-- Blocks accidental cross-category triggers (tilt during swipe, etc.)
-- Reduces false positives and improves detection clarity
-- Does NOT prevent wrong gestures in same category
-- Creates cleaner detection environment like Tutorial
+## Key Technical Insights
 
-## Patterns & Architecture
+1. **CMMotionManager conflicts**: Only one instance should exist per app, multiple compete for hardware
+2. **SwiftUI rendering lag**: 16-33ms per render cycle affects gesture detection on main thread
+3. **Animation overhead**: 24+ scheduled animations per gesture congests main thread
+4. **Timer precision**: 100ms granularity insufficient for sub-second countdowns
 
-### Gesture Detection Layers
-1. **MotionGestureManager** - Ensures only ONE motion detector active (Phase 1 complete)
-2. **GestureCoordinator** - Filters conflicting cross-category gestures (Tutorial only currently)
-3. **Gesture Modifiers** - SwipeGestureModifier, TapGestureModifier (check coordinator)
-4. **PinchGestureView** - UIKit-based pinch (does NOT check coordinator - bug identified)
+## Common Pitfalls Avoided
 
-### Parameter Consistency
-All modes use identical gesture detection parameters:
-- Swipe: 50px min distance, 100px/s velocity (GameConfiguration)
-- DoubleTap: 300ms window
-- LongPress: 700ms
-- Pinch: scale < 0.7
-- Edge buffer: 24px
+- ❌ Don't give UI clues during memory challenges (defeats purpose)
+- ❌ Don't tune tolerance before fixing timing issues (masks root cause)
+- ❌ Don't delete code still referenced elsewhere (check dependencies first)
+- ✅ Do use generic encouraging text ("Go!") instead of revealing hints
+- ✅ Do measure before optimizing (instrumentation reveals truth)
+- ✅ Do fix architecture before fine-tuning parameters
 
-**Difference is NOT parameters - it's GestureCoordinator integration**
+## Next Focus Areas
 
-## Code Quality Achievements
-- Comprehensive architectural analysis completed ✅
-- Root cause documentation for recurring issue ✅
-- Clear comparison table across all 5 game modes ✅
+1. Gesture detection optimization (user to choose quick vs comprehensive approach)
+2. Physical device testing (motion gestures require real hardware)
+3. Metrics collection (measure improvement objectively)

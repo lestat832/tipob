@@ -47,8 +47,12 @@ struct StroopPromptView: View {
 
             // Middle row: Left, Center word, Right
             HStack {
-                // Left: COLOR (vertical)
+                // Left: ← COLOR (vertical)
                 VStack(spacing: 4) {
+                    Text("←")
+                        .font(.system(size: 40, weight: .heavy))
+                        .foregroundColor(.white)
+                        .shadow(color: .black.opacity(0.3), radius: 2)
                     Text(leftColor.displayName)
                         .font(.system(size: 18, weight: .black, design: .rounded))
                         .foregroundColor(leftColor.uiColor)
@@ -64,10 +68,6 @@ struct StroopPromptView: View {
                         )
                         .fixedSize()
                         .frame(minWidth: 80)
-                    Text("←")
-                        .font(.system(size: 40, weight: .heavy))
-                        .foregroundColor(.white)
-                        .shadow(color: .black.opacity(0.3), radius: 2)
                 }
                 .padding(.leading, 10)
 

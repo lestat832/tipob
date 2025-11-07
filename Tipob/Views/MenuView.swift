@@ -43,9 +43,10 @@ struct MenuView: View {
                             Text(selectedMode.rawValue)
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                         }
+                        .fixedSize(horizontal: true, vertical: false)
                         .foregroundColor(.white)
                         .padding(.horizontal, 20)
-                        .padding(.vertical, 12)
+                        .frame(height: 44)
                         .background(
                             Capsule()
                                 .fill(Color.white.opacity(0.25))
@@ -72,7 +73,7 @@ struct MenuView: View {
                             }
                         }
                         .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
+                        .frame(height: 44)
                         .background(
                             Capsule()
                                 .fill(Color.white.opacity(0.25))

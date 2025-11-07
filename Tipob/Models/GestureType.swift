@@ -123,6 +123,31 @@ enum GestureType: Equatable {
         }
     }
 
+    var instructionText: String {
+        switch self {
+        case .up, .down, .left, .right:
+            return "Swipe!"
+        case .tap:
+            return "Tap!"
+        case .doubleTap:
+            return "Double Tap!"
+        case .longPress:
+            return "Long Press!"
+        case .pinch:
+            return "Pinch!"
+        case .shake:
+            return "Shake!"
+        case .tiltLeft, .tiltRight:
+            return "Tilt!"
+        case .raise:
+            return "Raise!"
+        case .lower:
+            return "Lower!"
+        case .stroop:
+            return "Swipe Color!"
+        }
+    }
+
     /// Returns true if this gesture requires motion detection (shake, tilt, raise, lower)
     var isMotionGesture: Bool {
         switch self {
