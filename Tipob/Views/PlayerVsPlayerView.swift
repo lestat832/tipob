@@ -503,9 +503,6 @@ struct PlayerVsPlayerView: View {
         player1Wins = PersistenceManager.shared.loadPvPPlayer1Wins()
         player2Wins = PersistenceManager.shared.loadPvPPlayer2Wins()
 
-        // Stop old gesture managers (cleanup from Tutorial/other modes)
-        MotionGestureManager.shared.stopAllOldGestureManagers()
-
         // Reset game state
         sequence = []
         currentRound = 1

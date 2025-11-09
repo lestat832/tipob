@@ -74,11 +74,11 @@ struct GameModel {
 struct GameConfiguration {
     static var perGestureTime: TimeInterval = 3.0
     static var minSwipeDistance: CGFloat = 50.0
-    static var minSwipeVelocity: CGFloat = 100.0
+    static var minSwipeVelocity: CGFloat = 80.0  // 80 px/s (was 100 - 20% more forgiving)
     static var edgeBufferDistance: CGFloat = 24.0
     static var sequenceShowDuration: TimeInterval = 0.6
     static var sequenceGapDuration: TimeInterval = 0.2
     static var transitionDelay: TimeInterval = 0.5
     static var flashAnimationDuration: TimeInterval = 0.3
-    static var pinchMinimumChange: CGFloat = 0.08  // 8% inward change for hybrid pinch detection (threshold + velocity)
+    static var pinchMinimumChange: CGFloat = 0.06  // 6% inward change (was 0.08 / 8% - 25% more forgiving)
 }

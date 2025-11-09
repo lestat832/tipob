@@ -54,9 +54,6 @@ class GameViewModel: ObservableObject {
         gameState = .showSequence
         showingGestureIndex = 0
 
-        // Stop old gesture managers (cleanup from Tutorial/other modes)
-        MotionGestureManager.shared.stopAllOldGestureManagers()
-
         // Add initial delay so player can read "Watch the sequence!" message
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.showNextGestureInSequence()
@@ -202,9 +199,6 @@ class GameViewModel: ObservableObject {
     private func showNextClassicGesture() {
         // Generate gesture
         classicModeModel.generateRandomGesture(discreetMode: discreetModeEnabled)
-
-        // Stop old gesture managers (cleanup from Tutorial/other modes)
-        MotionGestureManager.shared.stopAllOldGestureManagers()
 
         // Activate motion detector if motion gesture expected
         if let currentGesture = classicModeModel.currentGesture,

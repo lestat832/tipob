@@ -15,27 +15,27 @@ class MotionGestureManager: ObservableObject {
     // Shake detection state
     private var lastShakeTime: Date = .distantPast
     private let shakeCooldown: TimeInterval = 0.5
-    private let shakeThreshold: Double = 2.5
-    private let shakeUpdateInterval: TimeInterval = 0.1
+    private let shakeThreshold: Double = 2.0  // 2.0G (was 2.5G - 20% more sensitive)
+    private let shakeUpdateInterval: TimeInterval = 0.02  // 50 Hz (was 0.1s / 10 Hz)
 
     // Tilt detection state
     private var lastTiltTime: Date = .distantPast
     private var tiltStartTime: Date?
     private var currentTiltDirection: TiltDirection = .neutral
-    private let tiltAngleThreshold: Double = 0.52  // ~30 degrees
+    private let tiltAngleThreshold: Double = 0.44  // ~25 degrees (was 0.52 / ~30° - 17% easier)
     private let tiltDuration: TimeInterval = 0.3
     private let tiltCooldown: TimeInterval = 0.5
-    private let tiltUpdateInterval: TimeInterval = 0.05
+    private let tiltUpdateInterval: TimeInterval = 0.016  // 60 Hz (was 0.05s / 20 Hz)
 
     // Raise/Lower detection state
     private var lastRaiseLowerTime: Date = .distantPast
     private var sustainedRaiseStartTime: Date?
     private var sustainedLowerStartTime: Date?
-    private let raiseLowerThreshold: Double = 0.4
+    private let raiseLowerThreshold: Double = 0.3  // 0.3G (was 0.4G - 25% more sensitive)
     private let raiseLowerSpikeThreshold: Double = 0.8
     private let raiseLowerSustainedDuration: TimeInterval = 0.1
     private let raiseLowerCooldown: TimeInterval = 0.5
-    private let raiseLowerUpdateInterval: TimeInterval = 1.0 / 30.0
+    private let raiseLowerUpdateInterval: TimeInterval = 1.0 / 60.0  // 60 Hz (was 1/30s / 30 Hz)
 
     private enum TiltDirection {
         case neutral
@@ -61,9 +61,6 @@ class MotionGestureManager: ObservableObject {
         onDetected: @escaping () -> Void,
         onWrongGesture: @escaping () -> Void
     ) {
-        // Stop all old independent gesture managers first
-        stopAllOldGestureManagers()
-
         // Deactivate current detector if any
         deactivateAllDetectors()
 
@@ -101,13 +98,6 @@ class MotionGestureManager: ObservableObject {
         currentTiltDirection = .neutral
         sustainedRaiseStartTime = nil
         sustainedLowerStartTime = nil
-    }
-
-    /// Stop all old independent gesture managers to prevent CMMotionManager conflicts
-    func stopAllOldGestureManagers() {
-        ShakeGestureManager.shared.stopMonitoring()
-        TiltGestureManager.shared.stopMonitoring()
-        RaiseGestureManager.shared.stopMonitoring()
     }
 
     // MARK: - Shake Detection

@@ -410,9 +410,6 @@ struct GameVsPlayerVsPlayerView: View {
     }
 
     private func startGame() {
-        // Stop old gesture managers (cleanup from Tutorial/other modes)
-        MotionGestureManager.shared.stopAllOldGestureManagers()
-
         // Reset everything
         sequence = []
         currentRound = 0

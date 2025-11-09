@@ -148,17 +148,36 @@ struct TutorialView: View {
             .detectPinch(
                 onPinch: { handleGesture(.pinch) }
             )
-            .detectShake(
-                onShake: { handleGesture(.shake) }
-            )
-            .detectTilts(
-                onTiltLeft: { handleGesture(.tiltLeft) },
-                onTiltRight: { handleGesture(.tiltRight) }
-            )
-            .detectRaise(
-                onRaise: { handleGesture(.raise) },
-                onLower: { handleGesture(.lower) }
-            )
+            .onChange(of: currentGestureIndex) { _, _ in
+                // Activate motion detector for motion gestures
+                if currentGesture.isMotionGesture {
+                    MotionGestureManager.shared.activateDetector(
+                        for: currentGesture,
+                        onDetected: {
+                            handleGesture(currentGesture)
+                        },
+                        onWrongGesture: {
+                            // In tutorial, we don't penalize wrong motion gestures
+                            // Player can only trigger correct gesture through MotionGestureManager
+                        }
+                    )
+                } else {
+                    // Deactivate motion detector for touch gestures
+                    MotionGestureManager.shared.deactivateAllDetectors()
+                }
+            }
+            .onAppear {
+                // Activate motion detector on initial load if needed
+                if currentGesture.isMotionGesture {
+                    MotionGestureManager.shared.activateDetector(
+                        for: currentGesture,
+                        onDetected: {
+                            handleGesture(currentGesture)
+                        },
+                        onWrongGesture: {}
+                    )
+                }
+            }
 
             // Completion view overlay
             if showCompletionSheet {
@@ -177,6 +196,8 @@ struct TutorialView: View {
         .onDisappear {
             // Clear expected gesture when leaving Tutorial Mode
             GestureCoordinator.shared.clearExpectedGesture()
+            // Deactivate motion detectors
+            MotionGestureManager.shared.deactivateAllDetectors()
         }
     }
 
