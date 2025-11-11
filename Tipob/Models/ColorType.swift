@@ -9,13 +9,13 @@ enum ColorType: String, Codable, Equatable, CaseIterable {
     case green
     case yellow
 
-    /// Returns the SwiftUI Color for this color type
+    /// Returns the SwiftUI Color for this color type (Toy Box Classic palette)
     var uiColor: Color {
         switch self {
-        case .red: return .red
-        case .blue: return .blue
-        case .green: return .green
-        case .yellow: return .yellow
+        case .red: return .toyBoxLeft      // Toy Red
+        case .blue: return .toyBoxUp       // Toy Blue
+        case .green: return .toyBoxDown    // Toy Green
+        case .yellow: return .toyBoxTap    // Toy Yellow
         }
     }
 

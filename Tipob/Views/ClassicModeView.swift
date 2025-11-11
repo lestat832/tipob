@@ -5,11 +5,7 @@ struct ClassicModeView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [.purple.opacity(0.8), .blue.opacity(0.8)]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            Color.toyBoxClassicGradient
             .ignoresSafeArea()
 
             if viewModel.flashColor != .clear {

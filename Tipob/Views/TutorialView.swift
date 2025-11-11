@@ -33,11 +33,7 @@ struct TutorialView: View {
     var body: some View {
         ZStack {
             // Gradient background matching main game
-            LinearGradient(
-                gradient: Gradient(colors: [.blue, .purple, .pink]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
+            Color.toyBoxMenuGradient
             .ignoresSafeArea()
 
             // Tutorial content
@@ -81,7 +77,7 @@ struct TutorialView: View {
                     } else {
                         Text(currentGesture.symbol)
                             .font(.system(size: 120))
-                            .foregroundColor(gestureColor(for: currentGesture))
+                            .foregroundColor(currentGesture.color)
                             .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
                             .onAppear {
                                 // Set expected gesture for coordinator (Tutorial Mode only)
@@ -357,37 +353,6 @@ struct TutorialView: View {
             return "Move the phone downward"
         case .stroop:
             return "Swipe in the direction of the COLOR you see, not the word"
-        }
-    }
-
-    private func gestureColor(for gesture: GestureType) -> Color {
-        switch gesture.color {
-        case "blue":
-            return .blue
-        case "green":
-            return .green
-        case "red":
-            return .red
-        case "orange":
-            return .orange
-        case "yellow":
-            return .yellow
-        case "cyan":
-            return .cyan
-        case "magenta":
-            return Color(red: 1.0, green: 0.0, blue: 1.0) // Magenta RGB
-        case "indigo":
-            return .indigo
-        case "purple":
-            return .purple
-        case "teal":
-            return .teal
-        case "brown":
-            return .brown
-        case "mint":
-            return .mint  // Light green for raise
-        default:
-            return .white
         }
     }
 }

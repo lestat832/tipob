@@ -17,11 +17,7 @@ struct CountdownRing: View {
             Circle()
                 .trim(from: 0, to: CGFloat(progress))
                 .stroke(
-                    LinearGradient(
-                        gradient: Gradient(colors: [.blue, .purple]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
+                    Color.toyBoxCountdownGradient,
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))

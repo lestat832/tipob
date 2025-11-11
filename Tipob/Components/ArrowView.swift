@@ -12,10 +12,10 @@ struct ArrowView: View {
     var body: some View {
         Text(gesture.symbol)
             .font(.system(size: 120, weight: .bold))
-            .foregroundColor(colorForGesture(gesture))
+            .foregroundColor(gesture.color)
             .scaleEffect(scale)
             .opacity(opacity)
-            .shadow(color: colorForGesture(gesture).opacity(0.6), radius: glowRadius)
+            .shadow(color: gesture.color.opacity(0.6), radius: glowRadius)
             .offset(offset)
             .rotationEffect(.degrees(rotationAngle))
             .onAppear {
@@ -384,25 +384,6 @@ struct ArrowView: View {
                 opacity = 0
                 glowRadius = 0
             }
-        }
-    }
-
-    private func colorForGesture(_ gesture: GestureType) -> Color {
-        switch gesture.color {
-        case "blue": return .blue
-        case "green": return .green
-        case "red": return .red
-        case "orange": return .orange
-        case "yellow": return .yellow
-        case "cyan": return .cyan
-        case "magenta": return Color(red: 1.0, green: 0.0, blue: 1.0) // Magenta RGB
-        case "indigo": return .indigo
-        case "purple": return .purple
-        case "teal": return .teal
-        case "brown": return .brown
-        case "mint": return .mint  // Light green for raise
-        case "rainbow": return .pink  // Fallback color for Stroop symbol
-        default: return .gray
         }
     }
 }

@@ -1,8 +1,8 @@
 # Tipob Feature Scoping Document
-**Date**: October 10, 2025 (Updated: October 27, 2025)
+**Date**: October 10, 2025 (Updated: November 10, 2025)
 **Project**: Tipob - iOS SwiftUI Bop-It Style Game
 **Purpose**: Comprehensive feature planning and decision framework
-**Status**: Phase 1 MVP Complete - Ready for Partner Review
+**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization
 
 ---
 
@@ -21,18 +21,140 @@
 ## 🎮 Gesture Expansion Options
 
 ### Currently Implemented ✅
-| Gesture | Detection Method | Difficulty | Status |
-|---------|-----------------|------------|--------|
-| Swipe Up ↑ | DragGesture + angle calculation | Easy | ✅ Live |
-| Swipe Down ↓ | DragGesture + angle calculation | Easy | ✅ Live |
-| Swipe Left ← | DragGesture + angle calculation | Easy | ✅ Live |
-| Swipe Right → | DragGesture + angle calculation | Easy | ✅ Live |
-| **Single Tap ⊙** | TapGesture with disambiguation | Easy | ✅ Implemented 2025-10-20 |
-| **Double Tap ◎** | TapGesture with timing window | Easy | ✅ Implemented 2025-10-20 |
-| **Long Press ⏺** | LongPressGesture (600ms) | Easy | ✅ Implemented 2025-10-20 |
-| **Pinch 🤏** | Native UIPinchGestureRecognizer | Easy | ✅ Implemented 2025-10-27 |
+| Gesture | Detection Method | Added | Status |
+|---------|-----------------|-------|--------|
+| Swipe Up ↑ | DragGesture + angle calculation | Original | ✅ Live |
+| Swipe Down ↓ | DragGesture + angle calculation | Original | ✅ Live |
+| Swipe Left ← | DragGesture + angle calculation | Original | ✅ Live |
+| Swipe Right → | DragGesture + angle calculation | Original | ✅ Live |
+| **Single Tap ⊙** | TapGesture (300ms window) | 2025-10-20 | ✅ Live |
+| **Double Tap ◎** | TapGesture + DispatchWorkItem | 2025-10-20 | ✅ Live |
+| **Long Press ⏺** | LongPressGesture (600ms) | 2025-10-20 | ✅ Live |
+| **Pinch 🤏** | Native UIPinchGestureRecognizer | 2025-10-27 | ✅ Live |
+| **Shake 📳** | CoreMotion accelerometer (2.0G) | 2025-10-28 | ✅ Live |
+| **Tilt Left ◀** | CoreMotion roll detection (~25°) | 2025-10-28 | ✅ Live |
+| **Tilt Right ▶** | CoreMotion roll detection (~25°) | 2025-10-28 | ✅ Live |
+| **Raise ⬆️** | CoreMotion gravity projection (0.3G) | 2025-10-29 | ✅ Live |
+| **Lower ⬇️** | CoreMotion gravity projection (0.3G) | 2025-10-29 | ✅ Live |
+| **Stroop 🎨** | Color-word mismatch + swipe | 2025-10-31 | ✅ Live |
 
-**Total Gestures**: 8 (4 swipes + 3 touch gestures + 1 multi-touch gesture)
+**Total Gestures**: 14 (4 swipes + 3 touch + 6 motion + 1 cognitive)
+**Disabled**: Spread (detection issues with finger positioning)
+
+---
+
+## 🎮 Motion Gesture System (Implemented)
+
+### MotionGestureManager - Centralized Detection
+**Status**: ✅ Complete (November 4, 2025)  
+**Architecture**: Singleton pattern, prevents CMMotionManager conflicts  
+**File**: `Tipob/Utilities/MotionGestureManager.swift` (~650 lines)
+
+**Motion Gestures Implemented:**
+
+#### Shake Detection 📳
+- Threshold: 2.0G (optimized from 2.5G)
+- Update rate: 50 Hz (optimized from 10 Hz - 5x faster)
+- Cooldown: 500ms
+- Method: Magnitude-based acceleration detection
+
+#### Tilt Detection ◀▶
+- Threshold: 0.44 rad (~25°) (optimized from 0.52 rad)
+- Directions: Left and Right
+- Update rate: 60 Hz (optimized from 20 Hz - 3x faster)
+- Sustained duration: 300ms
+- Cooldown: 500ms
+
+#### Raise/Lower Detection ⬆️⬇️
+- Threshold: 0.3G (optimized from 0.4G)
+- Update rate: 60 Hz (optimized from 30 Hz - 2x faster)
+- Spike threshold: 0.8G (immediate detection)
+- Sustained duration: 100ms
+- Method: Gravity axis projection
+
+#### Pinch Detection 🤏
+- Implementation: Native UIPinchGestureRecognizer (UIViewRepresentable)
+- Threshold: 0.85 (15% reduction) (optimized from 0.8)
+- File: `PinchGestureView.swift`
+
+---
+
+## 🧠 Stroop Cognitive Gesture (Implemented October 31, 2025)
+
+### How Stroop Mode Works
+**Status**: ✅ Complete and integrated into all 4 game modes  
+**Probability**: 1/14 chance per gesture prompt (equal to other gestures)
+
+**Mechanism:**
+1. Display color word (RED, BLUE, GREEN, YELLOW) in mismatched text color
+2. Show 4 directional color labels (↑ Blue, ↓ Green, ← Red, → Yellow)
+3. Player must swipe in direction matching the **TEXT color** (not word name)
+4. Tests cognitive flexibility and inhibition control
+
+**Example**: Word "RED" shown in BLUE text → Player must swipe UP (Blue direction)
+
+**Implementation:**
+- ColorType enum: 4 colors (red, blue, green, yellow)
+- StroopPromptView.swift (~350 lines)
+- Random color-to-direction mapping each instance
+- Integrated gesture detection via SwipeGestureModifier
+
+**File**: `Tipob/Models/ColorType.swift`, `Tipob/Components/StroopPromptView.swift`
+
+---
+
+## 🎭 Discreet Mode (Implemented November 3, 2025)
+
+### Purpose
+Toggle between **touch-only** vs. **full gesture set** for different social contexts
+
+**Status**: ✅ Complete with menu toggle and persistence
+
+### Two Gesture Sets
+
+#### Discreet Mode (9 gestures) - Public-friendly
+- 4 Swipes (Up, Down, Left, Right)
+- 3 Taps (Tap, Double Tap, Long Press)
+- 1 Pinch
+- 1 Stroop
+
+#### Unhinged Mode (14 gestures) - Full experience
+All gestures including:
+- Shake 📳 (requires vigorous motion)
+- Tilt ◀▶ (requires device tilting)
+- Raise ⬆️ / Lower ⬇️ (requires arm movement)
+
+### Implementation
+- **File**: `GesturePoolManager.swift` (~90 lines)
+- **UI**: Menu toggle with info icon (ℹ️) explanation
+- **Persistence**: UserDefaults (key: "isDiscreetModeEnabled")
+- **Integration**: Respected across all 4 game modes
+- **Tutorial**: Discreet toggle hidden in Tutorial mode
+
+**User Control**: Toggle anytime via menu, takes effect next game
+
+---
+
+## 🏆 Leaderboard System (Implemented November 4, 2025)
+
+### Features
+**Status**: ✅ Complete MVP with per-mode tracking
+
+- **Top 100 Entries**: Per game mode (Classic, Memory, PvP modes)
+- **Persistence**: JSON file storage in Documents directory
+- **Display**: Segmented control to switch between modes
+- **New Records**: "NEW HIGH SCORE!" banner on achievement
+- **Integration**: Accessible from menu via trophy button
+
+### Implementation
+- **File**: `LeaderboardManager.swift` (~260 lines)
+- **Model**: `LeaderboardEntry.swift` (codable struct)
+- **View**: `LeaderboardView.swift` with SwiftUI
+- **Keys**: Separate UserDefaults keys per mode
+
+**Menu Integration**: Trophy button in menu (top-right corner)
+
+---
 
 ### Tier 1: High Priority - Easy Implementation 🟢
 
@@ -205,6 +327,759 @@ class MotionManager: ObservableObject {
 **Timeline**: 2-3 weeks
 **Goal**: Increase engagement and replayability
 **Priority**: 🔴 Critical Path
+
+---
+
+## ⚡ Gesture Detection Optimization (Implemented November 9, 2025)
+
+### Option 1: Quick Wins ✅ COMPLETE
+**Goal**: Eliminate latency and improve detection accuracy for MVP  
+**Status**: Shipped (commit c4642d3)  
+**Expected Impact**: 20-30% faster gesture response
+
+#### Changes Implemented
+
+**Architecture Cleanup:**
+- Deleted 6 old conflicting gesture managers (~400 lines removed)
+- Centralized all motion detection to MotionGestureManager
+- Eliminated CMMotionManager conflicts
+
+**Sensor Update Rate Increases:**
+| Gesture | Old Rate | New Rate | Improvement |
+|---------|----------|----------|-------------|
+| Shake | 10 Hz (0.1s) | 50 Hz (0.02s) | 5x faster |
+| Tilt | 20 Hz (0.05s) | 60 Hz (0.016s) | 3x faster |
+| Raise/Lower | 30 Hz (1/30s) | 60 Hz (1/60s) | 2x faster |
+
+**Detection Threshold Relaxation:**
+| Gesture | Old Threshold | New Threshold | Change |
+|---------|---------------|---------------|--------|
+| Shake | 2.5G | 2.0G | 20% more sensitive |
+| Tilt | 0.52 rad (~30°) | 0.44 rad (~25°) | 17% easier angle |
+| Raise/Lower | 0.4G | 0.3G | 25% more sensitive |
+| Swipe velocity | 100 px/s | 80 px/s | 20% more forgiving |
+| Pinch | 0.08 (8% reduction) | 0.06 (6% reduction) | 25% easier |
+
+**Files Modified**: 7 files (MotionGestureManager, GameModel, PinchGestureView, TutorialView, GameViewModel, PlayerVsPlayerView, GameVsPlayerVsPlayerView)
+
+---
+
+### Option 2: Architecture Improvements 📋 PLANNED
+**Goal**: Further performance gains through async processing  
+**Estimated Effort**: 8-10 hours  
+**Expected Impact**: 70-80% improvement over baseline
+
+#### Proposed Changes
+1. **Background Queue Processing**
+   - Move sensor processing off main thread
+   - Dedicated DispatchQueue for motion calculations
+   - Reduce main thread blocking
+
+2. **CADisplayLink Integration**
+   - Replace Timer with CADisplayLink for countdown
+   - 60 Hz precision (vs. 10-20 Hz with Timer)
+   - Smoother visual updates
+
+3. **Animation Consolidation**
+   - Batch animation updates
+   - Reduce withAnimation() calls
+   - Minimize view re-renders
+
+**When to Implement**: Post-MVP if broader user testing reveals remaining latency issues
+
+---
+
+### Option 3: Diagnostic Framework & Dev Panel 🎛️ P0 - CRITICAL
+**Goal**: Comprehensive tuning and debugging infrastructure
+**Estimated Effort**: 30-40 hours (expanded from 20+ based on expert feedback)
+**Expected Impact**: Enables hundreds of small refinements through data-driven optimization
+**Priority**: **P0 (Must-Have before v2.0)** - Expert feedback validates this as essential
+
+> **Expert Validation**: "With WELDER we had a whole dev panel in the app to quickly tweak parameters between plays. Games like this live and die by tuning."
+
+#### Dev Panel Specification (WELDER-Inspired)
+
+**Core Concept**: In-app dev panel accessible via gesture (triple-tap with 3 fingers) or Settings toggle, allowing real-time parameter tweaking between plays without rebuilding.
+
+##### 1. Threshold Tuning Interface
+
+**Gesture-Specific Controls:**
+```
+[Shake Gesture]
+├── Threshold: [1.5G] ←——●——→ [3.0G]  (current: 2.0G)
+├── Cooldown: [100ms] ←——●——→ [1000ms]  (current: 500ms)
+├── Update Rate: [10Hz] ←——●——→ [100Hz]  (current: 50Hz)
+└── [Test Gesture] [Reset to Default] [Export Config]
+
+[Swipe Gesture]
+├── Min Distance: [30px] ←——●——→ [100px]  (current: 50px)
+├── Min Velocity: [50px/s] ←——●——→ [150px/s]  (current: 80px/s)
+├── Angle Tolerance: [±30°] ←——●——→ [±60°]  (current: ±45°)
+└── [Test Gesture] [Reset to Default] [Export Config]
+
+[Pinch Gesture]
+├── Scale Change: [5%] ←——●——→ [30%]  (current: 15%)
+├── Min Duration: [0ms] ←——●——→ [500ms]  (current: 100ms)
+├── Sensitivity: [Low] ●——→ [High]  (current: Medium)
+└── [Test Gesture] [Reset to Default] [Export Config]
+
+... (expandable for all 14 gestures)
+```
+
+**Between-Play Workflow:**
+1. Play game → encounter gesture issue (too sensitive/not sensitive enough)
+2. Tap dev panel shortcut (triple-tap 3 fingers)
+3. Adjust relevant parameter(s) with sliders
+4. Tap "Play Again" button (returns to game with new settings)
+5. Test immediately → iterate until tuned
+6. Export final configuration to code
+
+**Key Features:**
+- **Live Preview**: Visual feedback as sliders move (e.g., shake threshold shows G-force meter)
+- **Comparison Mode**: A/B test two configurations side-by-side
+- **Preset Profiles**: "Conservative", "Balanced", "Aggressive" presets
+- **Export to Code**: Generate Swift code snippet with optimal values
+- **Session History**: Track all parameter changes during tuning session
+
+##### 2. Real-Time Debugging Overlay
+
+**HUD Display (Overlay During Gameplay):**
+```
+┌─────────────────────────────────┐
+│ FPS: 60 | Latency: 45ms         │ ← Performance metrics
+├─────────────────────────────────┤
+│ Shake: 1.8G (threshold: 2.0G)   │ ← Live sensor readings
+│ Tilt: 18° (threshold: 25°)      │
+│ Accel: X:0.2 Y:-0.1 Z:0.9       │
+├─────────────────────────────────┤
+│ Last Gesture: Swipe Up (MATCH)  │ ← Detection events
+│ Response Time: 42ms              │
+│ False Positives: 0 (this round) │
+└─────────────────────────────────┘
+```
+
+**Visualization Modes:**
+- **Sensor Timeline**: Scrolling graph of motion data (last 5 seconds)
+- **Detection Events**: Color-coded dots for successful/failed detections
+- **Latency Waterfall**: Visual breakdown of detection pipeline stages
+
+##### 3. Automated Test Suite
+
+**Test Categories:**
+1. **Gesture Accuracy Tests**
+   - Record 100 swipes → measure recognition rate
+   - Target: >95% accuracy for all gestures
+   - Device-specific calibration profiles
+
+2. **Performance Regression Tests**
+   - Benchmark response time for each gesture
+   - Alert if changes degrade performance >10%
+   - Track across iOS versions and devices
+
+3. **Conflict Detection Tests**
+   - Test all gesture pairs for interference
+   - Example: Does pinch trigger false tap?
+   - Generate conflict matrix report
+
+4. **Edge Case Scenarios**
+   - Fast alternating gestures
+   - Rapid-fire same gesture
+   - Interrupted gestures (start but don't complete)
+   - Boundary conditions (exactly at threshold)
+
+**Test Execution:**
+- Manual trigger via dev panel
+- Automated pre-commit hook (CI/CD integration)
+- Export results as JSON/CSV for analysis
+
+##### 4. Analytics Dashboard
+
+**Real-Time Metrics:**
+```
+Gesture Performance (Last 100 Rounds)
+├── Miss Rate by Gesture
+│   ├── Shake: 12% (↑ HIGH - needs tuning)
+│   ├── Pinch: 5% (✓ acceptable)
+│   ├── Swipe Up: 2% (✓ excellent)
+│   └── ...
+├── False Positive Tracking
+│   ├── Double Tap as Single Tap: 8 occurrences
+│   ├── Shake as Tilt: 3 occurrences
+│   └── ...
+└── User Behavior Patterns
+    ├── Avg Response Time: 450ms
+    ├── Fastest Gesture: Tap (280ms)
+    ├── Slowest Gesture: Pinch (620ms)
+    └── Hesitation Points: Stroop (45% pause >1s)
+```
+
+**Session Recording:**
+- Record entire play session with sensor data
+- Replay with adjustable speed (0.25x, 0.5x, 1x, 2x)
+- Annotate specific moments ("Why did this fail?")
+- Export recordings for bug reports
+
+##### 5. Configuration Management
+
+**Profile System:**
+```
+Active Profile: [Production v1.0] ▼
+├── Production v1.0 (current live)
+├── Beta Test v2 (20% more sensitive)
+├── Accessibility Mode (30% more forgiving)
+├── Expert Mode (15% stricter)
+└── [Create New Profile...]
+```
+
+**Version Control Integration:**
+- Export configuration as `.tipob-config` file
+- Commit alongside code changes
+- Load from file for reproducible builds
+- Share configs with team via Git
+
+##### Implementation Approach
+
+**Phase 1: Dev Panel UI (10-12 hours)**
+- SwiftUI sheet with tabbed interface
+- Slider controls for all gesture parameters
+- "Apply" and "Reset" buttons
+- Profile selection picker
+
+**Phase 2: Live Parameter Injection (8-10 hours)**
+- Environment object for dev settings
+- Override mechanism in gesture detectors
+- Hot-reload without app restart
+- Export to UserDefaults for persistence
+
+**Phase 3: Debugging Overlay (6-8 hours)**
+- ZStack overlay with conditional rendering
+- Real-time sensor data binding
+- Performance metrics tracking
+- Toggle via dev panel or gesture
+
+**Phase 4: Analytics & Testing (6-8 hours)**
+- Event logging system
+- Test automation framework
+- Results visualization
+- Export functionality
+
+**Total Estimated Effort**: 30-40 hours
+
+**When to Implement**: **P0 - Before v2.0 launch**
+Rationale: Expert feedback confirms tuning infrastructure is non-negotiable for quality. "The best games get there through hundreds of small refinements" — impossible without proper tooling.
+
+---
+
+### Testing Status (Current)
+
+**Completed Testing:**
+- ✅ All 14 gestures functional across 5 modes
+- ✅ Gesture optimization deployed (Nov 9)
+- ✅ No compiler errors or warnings
+
+**Known Issues:**
+- **Stroop alignment**: Build cache issue, needs clean build (Cmd+Shift+K)
+- **Double tap false positives**: Collecting more data from user testing
+
+**TestFlight Readiness:**
+- ✅ Code stable and committed
+- ✅ All modes functional
+- 📋 Awaiting user decision to deploy beta
+
+### Expert Feedback & Design Philosophy
+
+**Source**: Video Game Industry Expert (November 2025)
+**Context**: Feedback received after Phase 1 completion, informing v2.0 strategy
+
+#### Core Insight: Tuning is Critical
+
+> "Games like this live and die by tuning. It's never quite right the first time — the best ones get there through hundreds of small refinements in timing, feedback, and rhythm."
+
+**Impact on Roadmap**: This feedback **elevates Option 3 from "nice-to-have" to "essential"**. Without proper tuning infrastructure, we risk shipping an unrefined experience.
+
+#### Key Recommendations
+
+**1. Real-Time Tuning System (Validates Option 3)**
+- Reference: "With WELDER we had a whole dev panel in the app to quickly tweak parameters between plays"
+- **Action**: Expand Option 3 to include comprehensive dev panel (see detailed spec below)
+- **Priority**: P0 (must-have before v2.0 launch)
+
+**2. Sound Design as Core Gameplay**
+- Philosophy: "The rhythm between gesture, haptic, and sound should feel tight — like the player is playing an instrument"
+- **Latency Target**: <50ms from gesture detection to sound playback
+- **Design Goal**: Make every gesture feel like playing a musical instrument
+- **References**: Geometry Dash, Beat Saber (satisfying loop of motion and feedback)
+
+**3. User Testing Approach**
+- Method: "Run short user tests, watch where they hesitate, where they laugh, and where they get frustrated"
+- **Goal**: Not to make the game easier, but to make every failure feel fair and every success satisfying
+- **Observation Points**:
+  - Hesitation (unclear cues or confusing mechanics)
+  - Laughter (moments of delight or surprise)
+  - Frustration (unfair failures or unclear feedback)
+
+**4. Game Design Balance**
+- Principle: "Balance friction and empowerment — for every new obstacle or challenge you add, give players a tool, cue, or sense of mastery"
+- **Application**: When adding difficult gestures (shake, tilt), provide clear visual/haptic cues for success
+
+**5. "Just One More Try" Loop**
+- Critical Metric: "Game over → replay time and taps will make or break"
+- **Target**: <1 second from game over to restart
+- **Current State**: ~2-3 seconds (needs optimization)
+- **Reference Games**: Endless runners (Temple Run, Subway Surfers) - fast restarts, escalating tension
+
+---
+
+### Sound Design & Music Strategy 🎵
+
+**Philosophy**: "The rhythm between gesture, haptic, and sound should feel tight — like the player is playing an instrument" (Expert Feedback)
+
+#### Core Design Principles
+
+**1. Gesture as Instrument**
+- Every gesture triggers a unique sound signature
+- Haptic + sound coordination creates satisfying feedback loop
+- **Target Latency**: <50ms from gesture detection → sound playback
+- **Reference**: Beat Saber, Geometry Dash (tight motion-feedback coupling)
+
+**2. Multi-Sensory Harmony**
+- **Haptic**: Physical confirmation (tap, buzz, vibration)
+- **Visual**: Color flash, animation, particle effects
+- **Audio**: Sound effect matching gesture character
+- All three modalities fire simultaneously for coherent experience
+
+#### Sound System Architecture
+
+**Gesture → Sound Mapping:**
+```
+Touch Gestures (Percussive Sounds)
+├── Tap ⊙: Short click (50ms, 1kHz tone)
+├── Double Tap ◎: Double click (2× 40ms, 1.2kHz tone, 100ms gap)
+├── Long Press ⏺: Rising tone (600ms, 400Hz → 800Hz sweep)
+
+Swipe Gestures (Whoosh Sounds)
+├── Up ↑: Ascending whoosh (200ms, pitch up)
+├── Down ↓: Descending whoosh (200ms, pitch down)
+├── Left ←: Left-panned whoosh (150ms)
+├── Right →: Right-panned whoosh (150ms)
+
+Motion Gestures (Impact/Mechanical Sounds)
+├── Shake 📳: Rattle sound (300ms, layered impacts)
+├── Pinch 🤏: Squish sound (200ms, compression effect)
+├── Tilt L/R ◀▶: Tilt mechanism (150ms, metallic clink)
+├── Raise/Lower ↟↡: Hydraulic lift (250ms, mechanical hum)
+
+Cognitive Gesture (Melodic)
+├── Stroop 🎨: Chime cascade (400ms, 3-note arpeggio)
+```
+
+**Success vs. Failure Sounds:**
+- **Correct Gesture**: Consonant, pleasant sound (major chord, bright tone)
+- **Wrong Gesture**: Dissonant, jarring sound (minor chord, dull thud)
+- **Timeout**: Descending trombone (sad failure sound)
+- **New Record**: Triumphant fanfare (celebratory jingle)
+
+#### Audio Implementation Plan
+
+**Phase 1: Core Sound Effects (6-8 hours)**
+- Source or create 14 gesture sound effects
+- Import as WAV/MP3 files (high quality, low latency)
+- Integrate with AVAudioPlayer or AVAudioEngine
+- Test latency (<50ms requirement)
+
+**Phase 2: Haptic-Audio Coordination (4-6 hours)**
+- Synchronize HapticManager with AudioManager
+- Ensure haptic fires immediately before/with sound
+- Test perceived simultaneity (human perception ~20ms window)
+- Fine-tune delays per gesture type
+
+**Phase 3: Music System (8-10 hours)**
+- Background music tracks per game mode
+  - **Classic Mode**: Upbeat, accelerating tempo (matches speed progression)
+  - **Memory Mode**: Contemplative, puzzle-like (gives thinking space)
+  - **PvP Mode**: Competitive, tension-building (head-to-head energy)
+  - **Tutorial**: Friendly, instructional (welcoming tone)
+  - **Stroop**: Cognitive challenge (quirky, brain-teaser vibe)
+- Adaptive music system: tempo increases with difficulty
+- Seamless looping (no jarring cuts)
+
+**Phase 4: Audio Polish (4-6 hours)**
+- Volume balancing (SFX vs. music ratio)
+- Spatial audio for swipes (left/right panning)
+- Audio ducking (lower music during critical moments)
+- User settings: SFX volume, music volume, toggle on/off
+
+**Phase 5: Advanced Features (Optional, 6-8 hours)**
+- Procedural audio generation (algorithmic sound design)
+- Dynamic mixing based on gameplay intensity
+- Accessibility: Visual sound indicators for deaf/hard-of-hearing
+- Export game session as audio file (shareable replay)
+
+#### Sound Asset Sourcing
+
+**Options:**
+1. **Royalty-Free Libraries** (Fast, affordable)
+   - Freesound.org (CC0 license)
+   - Zapsplat.com (free tier)
+   - Soundsnap.com (paid)
+
+2. **Custom Sound Design** (Higher quality, unique identity)
+   - Hire sound designer (Fiverr, Upwork)
+   - Use Logic Pro/Ableton for synthesis
+   - Record real-world sounds (Foley)
+
+3. **Procedural Generation** (Technical, scalable)
+   - AudioKit framework (Swift audio synthesis)
+   - Generate sounds algorithmically
+   - Infinite variations without asset files
+
+**Recommended Approach**: Start with royalty-free libraries (Phase 1), upgrade to custom sounds post-launch if budget allows.
+
+#### Critical Metrics
+
+**Performance Targets:**
+- **Gesture → Sound Latency**: <50ms (imperceptible delay)
+- **Audio Buffer Size**: 256 samples @ 44.1kHz = 5.8ms (hardware minimum)
+- **Processing Overhead**: <5% CPU usage for audio system
+- **Memory Footprint**: <10MB for all sound assets (compressed)
+
+**User Experience Targets:**
+- **Satisfaction**: 90%+ of players rate sound/music positively
+- **Toggle Usage**: <20% of players disable sound (indicates quality)
+- **Perceived Responsiveness**: Players describe game as "snappy" or "tight"
+
+#### Integration with Dev Panel (Option 3)
+
+**Audio Tuning Controls:**
+```
+[Sound Design Panel]
+├── Gesture Sound Volume: [0%] ←——●——→ [100%]  (current: 80%)
+├── Music Volume: [0%] ←——●——→ [100%]  (current: 60%)
+├── Audio Latency Compensation: [-50ms] ←●→ [+50ms]  (current: 0ms)
+├── Haptic-Audio Sync Offset: [-20ms] ←●→ [+20ms]  (current: -5ms)
+└── [Test Sound] [Reset Defaults] [Export Config]
+```
+
+**Live Audio Debugging:**
+- Show waveform visualization during gameplay
+- Display actual latency measurements (gesture → sound)
+- A/B test different sound effects in real-time
+- Record audio session with timestamped events
+
+#### Timeline & Priority
+
+**Priority**: **P1 (High Priority for v2.0)**
+- Expert feedback elevates sound to core gameplay mechanic
+- Geometry Dash/Beat Saber prove audio is make-or-break
+- Target: Ship Phase 1-3 with v2.0 launch
+
+**Estimated Total Effort**: 22-30 hours
+**Dependencies**: Option 3 dev panel (for audio tuning)
+
+---
+
+### Game Design Philosophy & Competitive Analysis 🎮
+
+**Core Principle**: "Balance friction and empowerment — for every new obstacle or challenge you add, give players a tool, cue, or sense of mastery that helps them overcome it. That's where the fun lives." (Expert Feedback)
+
+#### Design Pillars
+
+**1. Fair Failures**
+- **Definition**: Every failure should feel preventable, not random or unfair
+- **Application in Tipob**:
+  - Clear visual cues before gesture prompt (200ms preview)
+  - Consistent timing windows (no surprise speed-ups mid-gesture)
+  - Generous grace periods for motion gestures (shake, tilt)
+  - No hidden mechanics or undiscoverable interactions
+
+**Anti-Pattern to Avoid**: Random difficulty spikes, unclear failure reasons, punishing player for game's lack of clarity
+
+**2. Satisfying Successes**
+- **Definition**: Every correct gesture should feel rewarding and empowering
+- **Application in Tipob**:
+  - Triple feedback: haptic + visual + audio (multi-sensory celebration)
+  - Progression rewards: unlock new gestures, faster speeds, achievements
+  - Visible skill growth: players see themselves improving over sessions
+  - Celebration moments: new personal records, milestone rounds
+
+**Anti-Pattern to Avoid**: Flat feedback (just advancing to next gesture), no sense of accomplishment, success feels trivial
+
+**3. "Just One More Try" Loop**
+- **Definition**: Players should always believe they can do better next time
+- **Critical Metric**: Game over → replay time/taps (Expert: "will make or break")
+- **Application in Tipob**:
+  - **Current**: ~2-3 seconds (game over screen → tap to restart → countdown)
+  - **Target**: <1 second (instant restart option)
+  - **Implementation**: "Double tap to restart" immediately after failure
+  - Show what went wrong briefly, but don't force long post-mortem
+
+**Reference Games**: Endless runners (Temple Run, Subway Surfers) nail this with <1s restarts
+
+**4. Friction vs. Empowerment Balance**
+- **For Every Challenge, Provide a Tool**:
+
+| Challenge (Friction) | Tool/Cue (Empowerment) |
+|---------------------|------------------------|
+| 14 different gestures (overwhelming) | Tutorial mode (teaches each gesture) |
+| Increasing speed (Classic mode) | Visual countdown ring (time awareness) |
+| Long sequences (Memory mode) | Color-coded gestures (visual memory aids) |
+| Cognitive load (Stroop) | 4 directional labels (always visible) |
+| Motion gestures in public (embarrassing) | Discreet Mode (removes motion gestures) |
+| Difficult gestures (shake, tilt) | Visual feedback bar (shows detection progress) |
+| Unfamiliar controls | Onboarding flow + practice rounds |
+
+- **Rule of Thumb**: If adding a gesture that increases difficulty, also add a visual/audio cue that helps players master it
+
+#### Competitive Analysis: What Makes Games Addictive
+
+**Geometry Dash** (Rhythm + Reflexes)
+- **What Works**:
+  - Tight rhythm coupling (music drives gameplay)
+  - Instant restarts (<0.5s from death to retry)
+  - Clear feedback (you always know WHY you failed)
+  - Practice mode (isolate difficult sections)
+  - Satisfying progression (unlock new levels/icons)
+
+- **Lessons for Tipob**:
+  - Sound design is critical (music = gameplay mechanic)
+  - Instant restarts are non-negotiable
+  - Let players practice individual gestures (practice mode)
+  - Visual customization (unlock gesture colors/effects)
+
+**Beat Saber** (VR Rhythm)
+- **What Works**:
+  - Physical embodiment (gestures feel like playing instrument)
+  - Multi-sensory feedback (slash sound + haptic + particle effects)
+  - Escalating difficulty (faster songs unlock over time)
+  - Clear visual cues (blocks approach with plenty of warning)
+  - Leaderboards (social competition)
+
+- **Lessons for Tipob**:
+  - Make gestures feel physical and satisfying (we have haptics!)
+  - Multi-sensory feedback is essential (audio + haptic + visual)
+  - Progressive difficulty unlocking (don't overwhelm beginners)
+  - Social features matter (we have leaderboards ✓)
+
+**Temple Run / Subway Surfers** (Endless Runners)
+- **What Works**:
+  - Simple controls (swipe + tilt, easy to learn)
+  - "Just one more try" loop perfected (<1s restarts)
+  - Escalating tension (speed increases gradually)
+  - Power-ups (temporary advantages)
+  - Meta-progression (unlock characters, upgrades)
+
+- **Lessons for Tipob**:
+  - Fast restarts are scientifically proven to drive engagement
+  - Escalating tension works (Classic mode already does this)
+  - Consider power-ups (e.g., "slow time" for 3 gestures)
+  - Meta-progression (unlock gesture customization, sound packs)
+
+**Where They Fall Short** (Opportunities for Tipob):
+- **Repetition**: Endless runners get stale after many plays
+  - **Tipob Advantage**: 14 gestures + 5 modes = more variety
+- **Unclear Feedback**: Sometimes deaths feel random
+  - **Tipob Advantage**: Gesture-based = clear right/wrong
+- **Lack of Skill Expression**: Limited ways to show mastery
+  - **Tipob Advantage**: Speed modes + leaderboards showcase skill
+
+#### User Testing Framework
+
+**Observation Method** (Expert Advice):
+> "Run short user tests, watch where they hesitate, where they laugh, and where they get frustrated. The goal isn't to make the game easier — it's to make every failure feel fair and every success satisfying."
+
+**What to Watch For:**
+
+**Hesitation Points** (Indicates confusion or unclear mechanics):
+- Do they pause before attempting a gesture? (gesture not clear)
+- Do they re-read instructions multiple times? (wording unclear)
+- Do they try the wrong gesture first? (visual cue misleading)
+- **Action**: Improve clarity of gesture prompts, add visual hints
+
+**Laughter Moments** (Indicates delight or surprise):
+- Which gestures make them smile or laugh? (fun factor)
+- When do they react positively? (satisfying feedback)
+- What moments do they want to share? (viral potential)
+- **Action**: Amplify these moments, make them more frequent
+
+**Frustration Points** (Indicates unfair difficulty or bad UX):
+- Do they blame the game or themselves? (fairness perception)
+- Do they quit after a specific gesture? (difficulty spike)
+- Do they complain about timing windows? (calibration issue)
+- Do they retry immediately or stop playing? (engagement)
+- **Action**: Fix unfair mechanics, adjust difficulty curves
+
+**Testing Protocol:**
+1. **Recruit**: 5-10 users (mix of gamers and non-gamers)
+2. **Setup**: Silent observation (don't guide them)
+3. **Duration**: 10-15 minutes per user (first session only)
+4. **Recording**: Screen + face recording (capture reactions)
+5. **Debrief**: Ask open-ended questions after playing
+   - "What was the hardest part?"
+   - "What felt most satisfying?"
+   - "Would you play again? Why/why not?"
+
+**Metrics to Track:**
+- Time to first failure (learning curve)
+- Number of restarts (engagement indicator)
+- Gesture miss rate per gesture type (difficulty balance)
+- Session length (average play time)
+- Retention: Do they return next day/week? (long-term engagement)
+
+#### Implementation Priorities
+
+**P0 (Must-Have before v2.0):**
+- ✅ Fair failure feedback (already implemented)
+- ⏳ Fast restart loop (<1s target)
+- ⏳ Option 3 dev panel (for tuning fairness/difficulty)
+- ⏳ Sound design Phase 1-3 (satisfying successes)
+
+**P1 (High Priority for v2.0):**
+- Practice mode (master individual gestures)
+- Visual gesture progress bars (empowerment tool)
+- Achievement system (milestone celebrations)
+- Accessibility options (reduce difficulty for wider audience)
+
+**P2 (Post-Launch Enhancements):**
+- Power-ups (temporary advantages)
+- Customization unlocks (gesture colors, sound packs)
+- Social features (share scores, challenge friends)
+- Meta-progression system (long-term goals)
+
+---
+
+### Expert-Validated Feature Priorities (v2.0 Roadmap) 🎯
+
+**Context**: Following expert feedback, the roadmap has been re-prioritized to focus on quality, tuning, and retention mechanics. This section supersedes the granular Phase 1/Phase 2 breakdown below with expert-validated priorities.
+
+#### P0 - Critical for v2.0 Launch (Must-Have)
+
+**1. Option 3: Dev Panel & Tuning Infrastructure** (30-40 hours)
+- **Why P0**: "Games like this live and die by tuning" — impossible to ship quality experience without it
+- **Scope**: Threshold tuning interface, debugging overlay, analytics dashboard, config management
+- **Success Metric**: Ability to tweak all gesture parameters between plays, export optimized configs
+- **Blocking**: All other features depend on this for calibration
+
+**2. Sound Design & Music Phase 1-3** (18-24 hours)
+- **Why P0**: "The rhythm between gesture, haptic, and sound should feel tight — like playing an instrument"
+- **Scope**: 14 gesture sound effects, haptic-audio sync, mode-specific music tracks, volume controls
+- **Success Metric**: <50ms gesture-to-sound latency, 90%+ positive user feedback on audio
+- **References**: Beat Saber, Geometry Dash (audio = core mechanic, not accessory)
+
+**3. Fast Restart Loop Optimization** (4-6 hours)
+- **Why P0**: "Game over → replay time and taps will make or break"
+- **Current**: ~2-3 seconds from failure to restart
+- **Target**: <1 second (double tap to instant restart)
+- **Success Metric**: 80%+ of players restart within 1 second of failure
+- **References**: Geometry Dash (<0.5s), Temple Run/Subway Surfers (<1s)
+
+**4. User Testing & Iteration** (12-16 hours)
+- **Why P0**: "Watch where they hesitate, laugh, and get frustrated" — critical before launch
+- **Scope**: 5-10 user sessions, observation + debrief, identify pain points
+- **Deliverable**: List of 10+ UX improvements based on real user behavior
+- **Testing Protocol**: Documented in Game Design Philosophy section above
+
+**P0 Total**: 64-86 hours (~2-3 weeks full-time)
+
+---
+
+#### P1 - High Priority for v2.0 (Strongly Recommended)
+
+**5. Practice Mode** (8-12 hours)
+- **Why P1**: Enables players to master individual gestures (empowerment tool)
+- **Scope**: Select specific gestures to practice, no timer pressure, accuracy feedback
+- **Success Metric**: Players who use practice mode have 30%+ higher retention
+- **Reference**: Geometry Dash practice mode (isolate difficult sections)
+
+**6. Visual Gesture Progress Bars** (6-8 hours)
+- **Why P1**: "For every challenge, provide a tool" — show real-time detection progress
+- **Scope**: Shake detection bar (shows 0G → 2.0G), tilt angle indicator, pinch % indicator
+- **Success Metric**: Reduce motion gesture miss rate by 20%+
+- **Empowerment**: Players see WHY they're failing (too soft, wrong angle, etc.)
+
+**7. Achievement System - Foundation** (10-12 hours)
+- **Why P1**: Milestone celebrations drive retention ("satisfying successes")
+- **Scope**: 15-20 achievements (first game, reach round X, perfect round, mastery)
+- **Success Metric**: Players with 3+ unlocked achievements have 50%+ higher retention
+- **Monetization**: Foundation for future IAP (unlock achievements faster)
+
+**8. Settings Menu Expansion** (8-10 hours)
+- **Why P1**: Accessibility and player comfort (reduce friction)
+- **Scope**: Volume sliders (SFX/music separate), haptic toggle, gesture pool toggle (Discreet Mode)
+- **Success Metric**: <20% of players disable sound/haptics (indicates quality)
+- **Accessibility**: Critical for public play and different user preferences
+
+**9. Onboarding Flow Polish** (6-8 hours)
+- **Why P1**: First-time user experience determines retention
+- **Scope**: Interactive tutorial improvements, gesture practice rounds, skip option
+- **Success Metric**: 80%+ of new users complete tutorial, 50%+ play 2nd session
+- **Current State**: Tutorial exists but needs polish based on user testing findings
+
+**P1 Total**: 38-50 hours (~1-1.5 weeks full-time)
+
+---
+
+#### P2 - Post-Launch Enhancements (Nice-to-Have)
+
+**10. Daily Challenges** (14-16 hours)
+- Habit-forming mechanic, global leaderboard, streak bonuses
+- **Timing**: Launch with v2.1 (1-2 months post-launch)
+
+**11. Power-Ups System** (12-16 hours)
+- Slow time, extra life, gesture hint, double points
+- **Timing**: v2.2 after balancing core gameplay
+
+**12. Cosmetic System** (20-30 hours)
+- Gesture color themes, particle effects, UI skins
+- **Monetization**: IAP packs ($1.99-$3.99)
+- **Timing**: v2.2-v2.3 after retention metrics validated
+
+**13. Social Features** (16-20 hours)
+- Share scores, challenge friends, friend leaderboards, push notifications
+- **Timing**: v2.3 once core gameplay proven sticky
+
+**14. Meta-Progression** (30-40 hours)
+- Gesture unlock system, mastery ranks, progression rewards
+- **Timing**: v3.0 major update (6+ months post-launch)
+
+**15. Advanced Gestures** (15-20 hours per gesture)
+- Spread, rotate, voice commands, blow/whistle
+- **Timing**: v3.0+ based on demand and technical feasibility
+
+**P2 Total**: 107-142 hours (spread over 6-12 months post-launch)
+
+---
+
+#### Updated Launch Timeline
+
+**v2.0 Alpha** (Internal Testing):
+- P0 features complete (dev panel, sound design, fast restarts, user testing)
+- 1st round of user testing findings implemented
+- **Timeline**: 3-4 weeks from now
+
+**v2.0 Beta** (TestFlight):
+- P0 + P1 features complete
+- 2nd round of user testing complete
+- Tuned and polished based on data from dev panel
+- **Timeline**: 5-7 weeks from now
+
+**v2.0 Production Launch**:
+- All P0/P1 features shipped
+- High confidence in quality from testing and tuning
+- Marketing materials ready (trailer, screenshots, ASO)
+- **Timeline**: 8-10 weeks from now
+
+**v2.1-v3.0** (Post-Launch):
+- Roll out P2 features based on user feedback and metrics
+- Monetization experiments (IAP, ads, premium features)
+- Platform expansion (iPad optimization, Apple Watch, macOS)
+- **Timeline**: 3-12 months post-launch
+
+---
+
+**Key Insight from Expert Feedback**:
+Shipping v2.0 without P0 features (especially dev panel and sound design) would be premature. The extra 2-3 weeks for tuning infrastructure will pay massive dividends in quality and player satisfaction. "The best games get there through hundreds of small refinements" — this requires proper tooling.
+
+---
 
 #### 1.1 Gesture Expansion ✅
 - [x] **Tap gesture ⊙** (1 hour) - ✅ Completed 2025-10-20 (Actual: 0.5 hours)
@@ -1291,12 +2166,13 @@ Priority Score = (User Value × 2) + (Business Impact × 1.5) + (Ease × 1) + (A
 | 1.0 | 2025-10-10 | Initial scoping document | Claude Code |
 | 2.0 | 2025-10-21 | Updated implementation status: 7 gestures complete (4 swipes + 3 touch), Memory Mode 🧠 and Game vs Player vs Player 👥 complete | Claude Code |
 | 3.0 | 2025-10-27 | Updated to 8 gestures (added Pinch 🤏 via native UIKit), Phase 1 MVP complete, added gesture roadmap with priorities | Claude Code |
+| 4.0 | 2025-11-10 | Added 7 new gestures (shake, tilt L/R, raise, lower, Stroop), implemented Discreet Mode, Leaderboard System, MotionGestureManager, completed gesture optimization (Option 1), documented Options 2 & 3 | Claude Code |
 
 ---
 
-**Document Status**: ✅ Ready for Partner Review
-**Document Version**: 3.0
-**Last Updated**: 2025-10-27
+**Document Status**: ✅ Phase 1 Complete with Performance Optimization
+**Document Version**: 4.0
+**Last Updated**: 2025-11-10
 **Next Review Date**: After partner feedback session
 **Owner**: Marc Geraldez
 

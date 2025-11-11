@@ -121,7 +121,7 @@ class GameViewModel: ObservableObject {
     private func successfulRound() {
         timer?.invalidate()
         gameState = .judge
-        flashColor = .green
+        flashColor = .toyBoxSuccess
         HapticManager.shared.success()
 
         withAnimation(.easeInOut(duration: GameConfiguration.flashAnimationDuration)) {
@@ -148,7 +148,7 @@ class GameViewModel: ObservableObject {
 
         gameModel.updateBestStreak()
         PersistenceManager.shared.saveBestStreak(gameModel.bestStreak)
-        flashColor = .red
+        flashColor = .toyBoxError
         FailureFeedbackManager.shared.playFailureFeedback()
 
         withAnimation(.easeInOut(duration: GameConfiguration.flashAnimationDuration)) {
@@ -241,7 +241,7 @@ class GameViewModel: ObservableObject {
         if isGestureCorrect(gesture, expected: currentGesture) {
             // Correct gesture
             classicModeModel.recordSuccess()
-            flashColor = .green
+            flashColor = .toyBoxSuccess
             HapticManager.shared.success()
 
             // Generate next gesture IMMEDIATELY so it's visible right away
@@ -289,7 +289,7 @@ class GameViewModel: ObservableObject {
 
         classicModeModel.updateBestScore()
         PersistenceManager.shared.saveClassicBestScore(classicModeModel.bestScore)
-        flashColor = .red
+        flashColor = .toyBoxError
         FailureFeedbackManager.shared.playFailureFeedback()
 
         withAnimation(.easeInOut(duration: GameConfiguration.flashAnimationDuration)) {

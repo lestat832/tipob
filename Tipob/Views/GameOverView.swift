@@ -8,11 +8,7 @@ struct GameOverView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [.red.opacity(0.8), .orange.opacity(0.8)]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            Color.toyBoxGameOverGradient
             .ignoresSafeArea()
 
             VStack(spacing: 30) {
@@ -24,7 +20,7 @@ struct GameOverView: View {
 
                         Text("NEW HIGH SCORE!")
                             .font(.system(size: 28, weight: .black, design: .rounded))
-                            .foregroundColor(.yellow)
+                            .foregroundColor(.toyBoxTap)
                             .shadow(color: .orange, radius: 10)
                     }
                     .scaleEffect(textScale)
@@ -66,7 +62,7 @@ struct GameOverView: View {
                                 .foregroundColor(.white.opacity(0.8))
                             Text("\(viewModel.gameModel.bestStreak)")
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
-                                .foregroundColor(.yellow)
+                                .foregroundColor(.toyBoxTap)
                         }
                     }
                 }
@@ -91,12 +87,12 @@ struct GameOverView: View {
                             Text("Play Again")
                                 .font(.system(size: 22, weight: .bold, design: .rounded))
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(Color.toyBoxButtonText)
                         .padding(.horizontal, 40)
                         .padding(.vertical, 15)
                         .background(
                             Capsule()
-                                .fill(Color.green)
+                                .fill(Color.toyBoxButtonBg)
                                 .shadow(radius: 5)
                         )
                     }
@@ -136,7 +132,7 @@ struct GameOverView: View {
                             .padding(.vertical, 12)
                             .background(
                                 Capsule()
-                                    .fill(Color.yellow.opacity(0.4))
+                                    .fill(Color.toyBoxTap.opacity(0.4))
                             )
                         }
                     }

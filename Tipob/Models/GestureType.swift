@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum GestureType: Equatable {
     case up
@@ -83,23 +84,23 @@ enum GestureType: Equatable {
         }
     }
 
-    var color: String {
+    var color: Color {
         switch self {
-        case .up: return "blue"
-        case .down: return "green"
-        case .left: return "red"
-        case .right: return "orange"
-        case .tap: return "yellow"
-        case .doubleTap: return "cyan"
-        case .longPress: return "magenta"
-        case .pinch: return "indigo"
-        // case .spread: return "purple"  // SPREAD: Temporarily disabled
-        case .shake: return "teal"
-        case .tiltLeft: return "purple"
-        case .tiltRight: return "brown"
-        case .raise: return "mint"  // Light green
-        case .lower: return "orange"
-        case .stroop: return "rainbow"
+        case .up: return .toyBoxUp
+        case .down: return .toyBoxDown
+        case .left: return .toyBoxLeft
+        case .right: return .toyBoxRight
+        case .tap: return .toyBoxTap
+        case .doubleTap: return .toyBoxDoubleTap
+        case .longPress: return .toyBoxLongPress
+        case .pinch: return .toyBoxPinch
+        // case .spread: return .purple  // SPREAD: Temporarily disabled
+        case .shake: return .toyBoxShake
+        case .tiltLeft: return .toyBoxTiltLeft
+        case .tiltRight: return .toyBoxTiltRight
+        case .raise: return .toyBoxRaise
+        case .lower: return .toyBoxLower
+        case .stroop: return .toyBoxUp  // Stroop uses directional color based on context
         }
     }
 

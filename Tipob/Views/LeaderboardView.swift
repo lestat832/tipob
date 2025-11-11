@@ -12,11 +12,7 @@ struct LeaderboardView: View {
         NavigationView {
             ZStack {
                 // Background gradient
-                LinearGradient(
-                    gradient: Gradient(colors: [.blue.opacity(0.3), .purple.opacity(0.3)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                Color.toyBoxMenuGradient.opacity(0.3)
                 .ignoresSafeArea()
 
                 VStack(spacing: 0) {

@@ -66,11 +66,7 @@ struct PlayerVsPlayerView: View {
     var body: some View {
         ZStack {
             // Background gradient
-            LinearGradient(
-                gradient: Gradient(colors: [.blue, .purple, .pink]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
+            Color.toyBoxMenuGradient
             .ignoresSafeArea()
 
             // Flash overlay

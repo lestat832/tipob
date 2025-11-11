@@ -9,11 +9,7 @@ struct LaunchView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [.purple, .blue, .cyan]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            Color.toyBoxLaunchGradient
             .ignoresSafeArea()
 
             VStack(spacing: 20) {

@@ -53,18 +53,12 @@ struct TutorialCompletionView: View {
                             Text("🔄")
                                 .font(.system(size: 20))
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(Color.toyBoxButtonText)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: [.green, .green.opacity(0.8)]),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
+                        .background(Color.toyBoxButtonBg)
                         .cornerRadius(15)
-                        .shadow(color: .green.opacity(0.4), radius: 10, x: 0, y: 5)
+                        .shadow(color: Color.toyBoxButtonBg.opacity(0.4), radius: 10, x: 0, y: 5)
                     }
 
                     // I'm Done button (secondary)
@@ -78,7 +72,7 @@ struct TutorialCompletionView: View {
                             Text("✓")
                                 .font(.system(size: 20))
                         }
-                        .foregroundColor(.blue)
+                        .foregroundColor(Color.toyBoxButtonBg)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
                         .background(
@@ -100,13 +94,7 @@ struct TutorialCompletionView: View {
             .padding(.horizontal, 30)
             .background(
                 RoundedRectangle(cornerRadius: 25)
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [.blue.opacity(0.95), .purple.opacity(0.95)]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .fill(Color.toyBoxMenuGradient)
                     .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
             )
             .padding(.horizontal, 40)

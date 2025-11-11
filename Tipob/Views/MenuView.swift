@@ -16,11 +16,7 @@ struct MenuView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [.blue, .purple, .pink]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
+            Color.toyBoxMenuGradient
             .ignoresSafeArea()
 
             VStack(spacing: 40) {
@@ -91,13 +87,7 @@ struct MenuView: View {
                     }) {
                         ZStack {
                             Circle()
-                                .fill(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [.yellow.opacity(0.8), .orange.opacity(0.8)]),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
+                                .fill(Color.toyBoxButtonBg)
                                 .frame(width: 44, height: 44)
                                 .shadow(color: .black.opacity(0.2), radius: 3, x: 0, y: 2)
 
@@ -126,19 +116,13 @@ struct MenuView: View {
                 }) {
                     ZStack {
                         Circle()
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [.white, .white.opacity(0.8)]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
+                            .fill(Color.toyBoxButtonBg)
                             .frame(width: 200, height: 200)
                             .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
 
                         Text("Start\nPlaying")
                             .font(.system(size: 32, weight: .bold, design: .rounded))
-                            .foregroundColor(.purple)
+                            .foregroundColor(Color.toyBoxButtonText)
                             .multilineTextAlignment(.center)
                     }
                 }
