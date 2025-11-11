@@ -32,10 +32,10 @@ struct StroopPromptView: View {
                     .padding(.vertical, 4)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(.white.opacity(0.2))
+                            .fill(.white.opacity(0.9))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8)
-                                    .stroke(upColor.uiColor, lineWidth: 2)
+                                    .stroke(upColor.uiColor, lineWidth: 3)
                             )
                     )
                     .fixedSize()
@@ -60,10 +60,10 @@ struct StroopPromptView: View {
                         .padding(.vertical, 4)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(.white.opacity(0.2))
+                                .fill(.white.opacity(0.9))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
-                                        .stroke(leftColor.uiColor, lineWidth: 2)
+                                        .stroke(leftColor.uiColor, lineWidth: 3)
                                 )
                         )
                         .fixedSize()
@@ -73,24 +73,45 @@ struct StroopPromptView: View {
 
                 Spacer()
 
-                // Center word
-                Text(wordColor.displayName)
-                    .font(.system(size: 70, weight: .bold, design: .rounded))
-                    .foregroundColor(textColor.uiColor)
-                    .scaleEffect(scale)
-                    .opacity(opacity)
-                    .shadow(color: textColor.uiColor.opacity(0.6), radius: glowRadius)
-                    .offset(offset)
-                    .rotationEffect(.degrees(rotationAngle))
-                    .fixedSize()
-                    .onAppear {
-                        if isAnimating {
-                            animateStroopFlash()
-                        } else {
-                            scale = 1.0
-                            opacity = 1.0
-                        }
+                // Center word (with white stroke for visibility)
+                ZStack {
+                    // White stroke (background layer)
+                    Text(wordColor.displayName)
+                        .font(.system(size: 70, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .offset(x: -2, y: -2)
+                    Text(wordColor.displayName)
+                        .font(.system(size: 70, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .offset(x: 2, y: -2)
+                    Text(wordColor.displayName)
+                        .font(.system(size: 70, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .offset(x: -2, y: 2)
+                    Text(wordColor.displayName)
+                        .font(.system(size: 70, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .offset(x: 2, y: 2)
+
+                    // Main colored word (foreground layer)
+                    Text(wordColor.displayName)
+                        .font(.system(size: 70, weight: .bold, design: .rounded))
+                        .foregroundColor(textColor.uiColor)
+                        .shadow(color: textColor.uiColor.opacity(0.6), radius: glowRadius)
+                }
+                .scaleEffect(scale)
+                .opacity(opacity)
+                .offset(offset)
+                .rotationEffect(.degrees(rotationAngle))
+                .fixedSize()
+                .onAppear {
+                    if isAnimating {
+                        animateStroopFlash()
+                    } else {
+                        scale = 1.0
+                        opacity = 1.0
                     }
+                }
 
                 Spacer()
 
@@ -107,10 +128,10 @@ struct StroopPromptView: View {
                         .padding(.vertical, 4)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(.white.opacity(0.2))
+                                .fill(.white.opacity(0.9))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
-                                        .stroke(rightColor.uiColor, lineWidth: 2)
+                                        .stroke(rightColor.uiColor, lineWidth: 3)
                                 )
                         )
                         .fixedSize()
@@ -134,10 +155,10 @@ struct StroopPromptView: View {
                     .padding(.vertical, 4)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(.white.opacity(0.2))
+                            .fill(.white.opacity(0.9))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8)
-                                    .stroke(downColor.uiColor, lineWidth: 2)
+                                    .stroke(downColor.uiColor, lineWidth: 3)
                             )
                     )
                     .fixedSize()

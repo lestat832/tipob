@@ -1,8 +1,15 @@
 import SwiftUI
+import GoogleMobileAds
 
 @main
 struct TipobApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+    init() {
+        // Initialize Google Mobile Ads SDK (TEST MODE)
+        MobileAds.shared.start()
+        print("🎯 AdMob initialized with TEST IDs - ready for interstitial ads")
+    }
 
     var body: some Scene {
         WindowGroup {

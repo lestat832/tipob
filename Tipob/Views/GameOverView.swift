@@ -75,10 +75,34 @@ struct GameOverView: View {
                     // Play Again Button
                     Button(action: {
                         HapticManager.shared.impact()
-                        if viewModel.isClassicMode {
-                            viewModel.startClassicMode()
+
+                        // Check if we should show an ad
+                        if AdManager.shared.shouldShowEndOfGameAd() {
+                            // Get top view controller and show ad
+                            if let viewController = UIApplication.topViewController() {
+                                AdManager.shared.showInterstitialAd(from: viewController) {
+                                    // After ad dismisses, start new game
+                                    if viewModel.isClassicMode {
+                                        viewModel.startClassicMode()
+                                    } else {
+                                        viewModel.startGame()
+                                    }
+                                }
+                            } else {
+                                // No view controller - start game immediately
+                                if viewModel.isClassicMode {
+                                    viewModel.startClassicMode()
+                                } else {
+                                    viewModel.startGame()
+                                }
+                            }
                         } else {
-                            viewModel.startGame()
+                            // No ad - start game immediately
+                            if viewModel.isClassicMode {
+                                viewModel.startClassicMode()
+                            } else {
+                                viewModel.startGame()
+                            }
                         }
                     }) {
                         HStack {
@@ -101,6 +125,8 @@ struct GameOverView: View {
                         // Home Button
                         Button(action: {
                             HapticManager.shared.impact()
+                            // Don't show ad when going home, just track game completion
+                            AdManager.shared.incrementGameCount()
                             viewModel.resetToMenu()
                         }) {
                             HStack {
@@ -146,6 +172,9 @@ struct GameOverView: View {
             LeaderboardView()
         }
         .onAppear {
+            // Increment game count when game over screen appears
+            AdManager.shared.incrementGameCount()
+
             withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
                 textScale = 1.0
                 opacity = 1.0

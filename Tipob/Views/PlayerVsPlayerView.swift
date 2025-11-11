@@ -409,7 +409,24 @@ struct PlayerVsPlayerView: View {
 
             VStack(spacing: 20) {
                 // Play Again button
-                Button(action: playAgain) {
+                Button(action: {
+                    // Check if we should show an ad
+                    if AdManager.shared.shouldShowEndOfGameAd() {
+                        // Get top view controller and show ad
+                        if let viewController = UIApplication.topViewController() {
+                            AdManager.shared.showInterstitialAd(from: viewController) {
+                                // After ad dismisses, start new game
+                                playAgain()
+                            }
+                        } else {
+                            // No view controller - start game immediately
+                            playAgain()
+                        }
+                    } else {
+                        // No ad - start game immediately
+                        playAgain()
+                    }
+                }) {
                     HStack {
                         Image(systemName: "arrow.clockwise.circle.fill")
                             .font(.title2)
@@ -429,6 +446,8 @@ struct PlayerVsPlayerView: View {
                 HStack(spacing: 15) {
                     // Back to Menu button
                     Button(action: {
+                        // Don't show ad when going home, just track game completion
+                        AdManager.shared.incrementGameCount()
                         viewModel.resetToMenu()
                     }) {
                         HStack {
@@ -470,6 +489,10 @@ struct PlayerVsPlayerView: View {
         }
         .sheet(isPresented: $showingLeaderboard) {
             LeaderboardView()
+        }
+        .onAppear {
+            // Increment game count when results appear
+            AdManager.shared.incrementGameCount()
         }
     }
 

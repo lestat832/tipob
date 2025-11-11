@@ -75,10 +75,7 @@ struct TutorialView: View {
                                 GestureCoordinator.shared.expectedGesture = currentGesture
                             }
                     } else {
-                        Text(currentGesture.symbol)
-                            .font(.system(size: 120))
-                            .foregroundColor(currentGesture.color)
-                            .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+                        ArrowView(gesture: currentGesture, isAnimating: false)
                             .onAppear {
                                 // Set expected gesture for coordinator (Tutorial Mode only)
                                 GestureCoordinator.shared.expectedGesture = currentGesture

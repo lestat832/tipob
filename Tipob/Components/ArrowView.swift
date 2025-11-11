@@ -10,22 +10,43 @@ struct ArrowView: View {
     @State private var rotationAngle: Double = 0.0
 
     var body: some View {
-        Text(gesture.symbol)
-            .font(.system(size: 120, weight: .bold))
-            .foregroundColor(gesture.color)
-            .scaleEffect(scale)
-            .opacity(opacity)
-            .shadow(color: gesture.color.opacity(0.6), radius: glowRadius)
-            .offset(offset)
-            .rotationEffect(.degrees(rotationAngle))
-            .onAppear {
-                if isAnimating {
-                    animateIn()
-                } else {
-                    scale = 1.0
-                    opacity = 1.0
-                }
+        ZStack {
+            // White stroke (background layer)
+            Text(gesture.symbol)
+                .font(.system(size: 120, weight: .bold))
+                .foregroundColor(.white)
+                .offset(x: -2, y: -2)
+            Text(gesture.symbol)
+                .font(.system(size: 120, weight: .bold))
+                .foregroundColor(.white)
+                .offset(x: 2, y: -2)
+            Text(gesture.symbol)
+                .font(.system(size: 120, weight: .bold))
+                .foregroundColor(.white)
+                .offset(x: -2, y: 2)
+            Text(gesture.symbol)
+                .font(.system(size: 120, weight: .bold))
+                .foregroundColor(.white)
+                .offset(x: 2, y: 2)
+
+            // Main colored symbol (foreground layer)
+            Text(gesture.symbol)
+                .font(.system(size: 120, weight: .bold))
+                .foregroundColor(gesture.color)
+                .shadow(color: gesture.color.opacity(0.6), radius: glowRadius)
+        }
+        .scaleEffect(scale)
+        .opacity(opacity)
+        .offset(offset)
+        .rotationEffect(.degrees(rotationAngle))
+        .onAppear {
+            if isAnimating {
+                animateIn()
+            } else {
+                scale = 1.0
+                opacity = 1.0
             }
+        }
     }
 
     private func animateIn() {
