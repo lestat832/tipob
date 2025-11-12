@@ -1,76 +1,75 @@
-# Session Summary - 2025-11-11
+# Session Summary - 2025-11-12
 
 ## Completed Tasks
 
-### ✅ Google AdMob Integration (TEST MODE)
-- **Created AdManager.swift** - Singleton managing interstitial ad loading and presentation
-  - Cooldown logic: 30 seconds minimum between ads
-  - Frequency: Shows ad every 2 completed games
-  - Launch delay: No ads in first 30 seconds after app launch
-  - TEST Ad Unit ID: `ca-app-pub-3940256099942544/4411468910`
+### ✅ Info.plist Configuration Fixes
+- **Removed SceneDelegate reference** - Fixed "Could not load class Tipob.SceneDelegate" error
+  - Removed UISceneDelegateClassName key (not needed for SwiftUI apps)
   
-- **Created UIViewControllerHelper.swift** - SwiftUI/UIKit bridge for ad presentation
-  - `UIApplication.topViewController()` helper
-  - Recursive view controller hierarchy traversal
+- **Added UIRequiresFullScreen** - Fixed interface orientation warning
+  - Added to both Info.plist and Xcode project settings
+  - Configured portrait-only mode for iPhone
   
-- **Modified TipobApp.swift** - AdMob SDK initialization
-  - `MobileAds.shared.start()` on app launch
-  - TEST Application ID in Info.plist: `ca-app-pub-3940256099942544~1458002511`
-  
-- **Modified GameOverView.swift** - Ad integration hooks
-  - "Play Again" button: Checks cooldown and shows ad
-  - "Home" button: Increments game count without ad
-  - `onAppear`: Increments game count
-  
-- **Created/Updated Info.plist** - Complete bundle configuration
-  - All required CFBundle keys
-  - GADApplicationIdentifier for AdMob
-  - UIApplicationSceneManifest configuration
+- **Added 49 SKAdNetwork identifiers** - Fixed AdMob SKAdNetwork warning
+  - Google's primary ID: cstr6suwn9.skadnetwork
+  - 48 third-party buyer IDs for ad attribution tracking
+  - Enables iOS 14+ conversion tracking
 
-### 🔧 API Compatibility Fixes (GoogleMobileAds v12.13.0)
-- Fixed class naming: `GADInterstitialAd`, `GADRequest`, `GADFullScreenContentDelegate`
-- Fixed method parameters: `present(from:)` instead of `fromRootViewController:`
-- Fixed SDK initialization: `MobileAds.shared.start()` API
-- Added `@MainActor` to delegate extension for Swift 6 concurrency
-- Wrapped delegate assignment in `DispatchQueue.main.async`
-- Removed deprecated `adDidPresentFullScreenContent` method
+### ✅ Xcode Project Settings Update
+- **Added INFOPLIST_KEY_UIRequiresFullScreen = YES** (Debug + Release)
+- **Changed iPhone orientations to portrait-only**
+  - From: "Portrait + Landscape Left + Landscape Right"
+  - To: "Portrait only"
+- Applied to both Debug and Release build configurations
 
-### 📱 Testing Results
-- ✅ Test ads successfully displaying after 2 games + 30 seconds
-- ✅ Ads dismiss properly and resume game flow
-- ✅ All cooldown conditions enforced correctly
-- ⚠️  User observed some delays (expected behavior - SDK initialization + ad fetch/render)
+### ✅ Ad Logic Simplification (Testing Mode)
+- **Removed ALL cooldown restrictions** from AdManager.swift
+  - ❌ Removed 30s launch protection
+  - ❌ Removed 30s cooldown between ads
+  - ❌ Removed "every 2 games" frequency check
+  - ✅ Now only checks: "Is ad loaded?"
+
+- **Updated all game over views** to show ads on Home button
+  - GameOverView.swift (Classic/Memory modes)
+  - PlayerVsPlayerView.swift (PvP mode)
+  - GameVsPlayerVsPlayerView.swift (Game vs PvP mode)
+
+**Result:** Ads now show on EVERY "Home" and "Play Again" button tap across all game modes (if ad is loaded)
 
 ## In Progress
-- None - AdMob integration fully complete
+- None - All requested changes completed
 
 ## Next Session
-- Monitor ad performance in user testing
-- Consider future enhancements if needed:
-  - Analytics integration for ad metrics
-  - A/B testing different cooldown parameters
-  - Banner ads for menu screen (if desired)
+- Test ad display frequency on device
+- Consider restoring conservative cooldown logic if needed
+- Monitor user experience with current ad frequency
+- Potentially adjust ad timing based on testing feedback
 
 ## Key Decisions
-1. **TEST IDs Only** - Using Google's official test identifiers for development
-2. **Interstitial Ads Only** - End-of-game placement for minimal disruption
-3. **Conservative Cooldown** - 30s + every 2 games prevents ad fatigue
-4. **Graceful Degradation** - Always continues game flow if ad unavailable
-5. **Swift Package Manager** - Modern dependency management over CocoaPods
+1. **Removed all ad cooldowns for testing** - Makes it easy to verify ad integration works
+2. **Both Home and Play Again show ads** - Maximum ad exposure for testing
+3. **Graceful degradation maintained** - Game continues if ad not loaded
+4. **Can easily restore cooldowns** - All logic preserved in git history
 
 ## Blockers/Issues
-- None - All implementation issues resolved successfully
+- None - All build warnings resolved, ads showing as expected
 
-## Files Modified
-- `/Users/marcgeraldez/Projects/tipob/Tipob/Utilities/AdManager.swift` (Created)
-- `/Users/marcgeraldez/Projects/tipob/Tipob/Utilities/UIViewControllerHelper.swift` (Created)
-- `/Users/marcgeraldez/Projects/tipob/Tipob/TipobApp.swift` (Modified)
-- `/Users/marcgeraldez/Projects/tipob/Tipob/Views/GameOverView.swift` (Modified)
-- `/Users/marcgeraldez/Projects/tipob/Tipob/Info.plist` (Created/Updated)
-- Additional UI refinements to TutorialView, StroopPromptView, ArrowView, ColorType, Color+ToyBox
+## Files Modified This Session
+- `/Users/marcgeraldez/Projects/tipob/Tipob/Info.plist` - Fixed config, added SKAdNetwork IDs
+- `/Users/marcgeraldez/Projects/tipob/Tipob.xcodeproj/project.pbxproj` - Portrait-only settings
+- `/Users/marcgeraldez/Projects/tipob/Tipob/Utilities/AdManager.swift` - Simplified ad logic
+- `/Users/marcgeraldez/Projects/tipob/Tipob/Views/GameOverView.swift` - Added Home button ads
+- `/Users/marcgeraldez/Projects/tipob/Tipob/Views/PlayerVsPlayerView.swift` - Added Home button ads
+- `/Users/marcgeraldez/Projects/tipob/Tipob/Views/GameVsPlayerVsPlayerView.swift` - Added Home button ads
+
+## Console Issues Status
+✅ SceneDelegate error - RESOLVED
+✅ SKAdNetwork warning - RESOLVED  
+✅ Interface orientation warning - RESOLVED
+ℹ️ Sandbox extension message - Normal iOS logging (not an error)
 
 ## Technical Notes
-- GoogleMobileAds SDK v12+ has breaking API changes from earlier versions
-- Swift 6 concurrency requires `@MainActor` for UI delegate conformance
-- Info.plist must include GADApplicationIdentifier + all standard CFBundle keys
-- Ad SDK adds ~1-2s initialization delay on first launch (expected)
+- SKAdNetwork identifiers fetched from official Google AdMob documentation (Nov 2025)
+- Info.plist requires both GADApplicationIdentifier AND SKAdNetworkItems for AdMob
+- Xcode project settings must match Info.plist orientation configuration
+- Ad cooldown logic can be easily restored from git commit bf24401 if needed
