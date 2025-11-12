@@ -446,9 +446,18 @@ struct PlayerVsPlayerView: View {
                 HStack(spacing: 15) {
                     // Back to Menu button
                     Button(action: {
-                        // Don't show ad when going home, just track game completion
-                        AdManager.shared.incrementGameCount()
-                        viewModel.resetToMenu()
+                        // Show ad if available, then go home
+                        if AdManager.shared.shouldShowEndOfGameAd() {
+                            if let viewController = UIApplication.topViewController() {
+                                AdManager.shared.showInterstitialAd(from: viewController) {
+                                    viewModel.resetToMenu()
+                                }
+                            } else {
+                                viewModel.resetToMenu()
+                            }
+                        } else {
+                            viewModel.resetToMenu()
+                        }
                     }) {
                         HStack {
                             Image(systemName: "house.fill")

@@ -41,14 +41,9 @@ class AdManager: NSObject {
 
     // MARK: - Configuration
 
-    /// Minimum seconds between ads (cooldown)
-    private let minimumTimeBetweenAds: TimeInterval = 30.0
-
-    /// Show ad every N completed games
-    private let gamesPerAd: Int = 2
-
-    /// Minimum seconds after app launch before showing first ad
-    private let minimumTimeSinceLaunch: TimeInterval = 30.0
+    // REMOVED COOLDOWN RESTRICTIONS FOR TESTING
+    // All timing and frequency restrictions disabled
+    // Ad shows every time if loaded
 
     // MARK: - Initialization
 
@@ -65,38 +60,15 @@ class AdManager: NSObject {
     // MARK: - Public Methods
 
     /// Check if an ad should be shown at end of game
-    /// Returns true if cooldown conditions are satisfied
+    /// Returns true if ad is loaded (all cooldowns removed for testing)
     func shouldShowEndOfGameAd() -> Bool {
-        // Check 1: Minimum time since app launch
-        let timeSinceLaunch = Date().timeIntervalSince(appLaunchTime)
-        guard timeSinceLaunch >= minimumTimeSinceLaunch else {
-            print("⏭️ Skipping ad - app launched \(Int(timeSinceLaunch))s ago (need \(Int(minimumTimeSinceLaunch))s)")
-            return false
-        }
-
-        // Check 2: Minimum time since last ad
-        if let lastAdTime = lastAdShownTime {
-            let timeSinceLastAd = Date().timeIntervalSince(lastAdTime)
-            if timeSinceLastAd < minimumTimeBetweenAds {
-                let remainingTime = Int(minimumTimeBetweenAds - timeSinceLastAd)
-                print("⏭️ Skipping ad - cooldown active (\(remainingTime)s remaining)")
-                return false
-            }
-        }
-
-        // Check 3: Games completed frequency
-        guard gamesCompletedSinceLastAd >= gamesPerAd else {
-            print("⏭️ Skipping ad - games completed: \(gamesCompletedSinceLastAd)/\(gamesPerAd)")
-            return false
-        }
-
-        // Check 4: Ad is loaded and ready
+        // Only check: Ad is loaded and ready
         guard interstitialAd != nil else {
             print("⏭️ Skipping ad - not loaded yet")
             return false
         }
 
-        print("✅ Ad conditions satisfied - ready to show")
+        print("✅ Ad loaded - ready to show")
         return true
     }
 
@@ -117,19 +89,13 @@ class AdManager: NSObject {
         print("📺 Presenting interstitial ad...")
         ad.present(from: viewController)
 
-        // Reset counters
-        lastAdShownTime = Date()
-        gamesCompletedSinceLastAd = 0
-
         // Preload next ad
         loadInterstitialAd()
     }
 
-    /// Increment the completed games counter
-    /// Call this at the end of each game session
+    /// Increment the completed games counter (no-op - cooldowns removed)
     func incrementGameCount() {
-        gamesCompletedSinceLastAd += 1
-        print("🎮 Games completed: \(gamesCompletedSinceLastAd)/\(gamesPerAd)")
+        // No-op: Game counting disabled for testing
     }
 
     // MARK: - Private Methods
