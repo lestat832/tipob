@@ -6,10 +6,16 @@ struct SwipeGestureModifier: ViewModifier {
     @State private var dragStartTime: Date = Date()
 
     func body(content: Content) -> some View {
-        GeometryReader { geometry in
+        #if DEBUG
+        let dragMinDistance = DevConfigManager.shared.dragMinimumDistance
+        #else
+        let dragMinDistance: CGFloat = 20
+        #endif
+
+        return GeometryReader { geometry in
             content
                 .simultaneousGesture(
-                    DragGesture(minimumDistance: 20)
+                    DragGesture(minimumDistance: dragMinDistance)
                         .onChanged { value in
                             if dragStartLocation == .zero {
                                 dragStartLocation = value.startLocation

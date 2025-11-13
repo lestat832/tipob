@@ -14,28 +14,49 @@ class MotionGestureManager: ObservableObject {
 
     // Shake detection state
     private var lastShakeTime: Date = .distantPast
+    #if DEBUG
+    private var shakeCooldown: TimeInterval { DevConfigManager.shared.shakeCooldown }
+    private var shakeThreshold: Double { DevConfigManager.shared.shakeThreshold }
+    private var shakeUpdateInterval: TimeInterval { DevConfigManager.shared.shakeUpdateInterval }
+    #else
     private let shakeCooldown: TimeInterval = 0.5
     private let shakeThreshold: Double = 2.0  // 2.0G (was 2.5G - 20% more sensitive)
     private let shakeUpdateInterval: TimeInterval = 0.02  // 50 Hz (was 0.1s / 10 Hz)
+    #endif
 
     // Tilt detection state
     private var lastTiltTime: Date = .distantPast
     private var tiltStartTime: Date?
     private var currentTiltDirection: TiltDirection = .neutral
+    #if DEBUG
+    private var tiltAngleThreshold: Double { DevConfigManager.shared.tiltAngleThreshold }
+    private var tiltDuration: TimeInterval { DevConfigManager.shared.tiltDuration }
+    private var tiltCooldown: TimeInterval { DevConfigManager.shared.tiltCooldown }
+    private var tiltUpdateInterval: TimeInterval { DevConfigManager.shared.tiltUpdateInterval }
+    #else
     private let tiltAngleThreshold: Double = 0.44  // ~25 degrees (was 0.52 / ~30° - 17% easier)
     private let tiltDuration: TimeInterval = 0.3
     private let tiltCooldown: TimeInterval = 0.5
     private let tiltUpdateInterval: TimeInterval = 0.016  // 60 Hz (was 0.05s / 20 Hz)
+    #endif
 
     // Raise/Lower detection state
     private var lastRaiseLowerTime: Date = .distantPast
     private var sustainedRaiseStartTime: Date?
     private var sustainedLowerStartTime: Date?
+    #if DEBUG
+    private var raiseLowerThreshold: Double { DevConfigManager.shared.raiseLowerThreshold }
+    private var raiseLowerSpikeThreshold: Double { DevConfigManager.shared.raiseLowerSpikeThreshold }
+    private var raiseLowerSustainedDuration: TimeInterval { DevConfigManager.shared.raiseLowerSustainedDuration }
+    private var raiseLowerCooldown: TimeInterval { DevConfigManager.shared.raiseLowerCooldown }
+    private var raiseLowerUpdateInterval: TimeInterval { DevConfigManager.shared.raiseLowerUpdateInterval }
+    #else
     private let raiseLowerThreshold: Double = 0.3  // 0.3G (was 0.4G - 25% more sensitive)
     private let raiseLowerSpikeThreshold: Double = 0.8
     private let raiseLowerSustainedDuration: TimeInterval = 0.1
     private let raiseLowerCooldown: TimeInterval = 0.5
     private let raiseLowerUpdateInterval: TimeInterval = 1.0 / 60.0  // 60 Hz (was 1/30s / 30 Hz)
+    #endif
 
     private enum TiltDirection {
         case neutral

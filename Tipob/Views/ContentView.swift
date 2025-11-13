@@ -3,6 +3,10 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var viewModel = GameViewModel()
 
+    #if DEBUG
+    @State private var showDevPanel = false
+    #endif
+
     var body: some View {
         ZStack {
             switch viewModel.gameState {
@@ -49,5 +53,11 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: viewModel.gameState)
+        #if DEBUG
+        .overlay(DevPanelGestureOverlay(isPresented: $showDevPanel))
+        .sheet(isPresented: $showDevPanel) {
+            DevPanelView()
+        }
+        #endif
     }
 }

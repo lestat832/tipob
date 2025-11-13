@@ -73,9 +73,16 @@ struct GameModel {
 
 struct GameConfiguration {
     static var perGestureTime: TimeInterval = 3.0
+
+    #if DEBUG
+    static var minSwipeDistance: CGFloat { DevConfigManager.shared.minSwipeDistance }
+    static var minSwipeVelocity: CGFloat { DevConfigManager.shared.minSwipeVelocity }
+    static var edgeBufferDistance: CGFloat { DevConfigManager.shared.edgeBufferDistance }
+    #else
     static var minSwipeDistance: CGFloat = 50.0
     static var minSwipeVelocity: CGFloat = 80.0  // 80 px/s (was 100 - 20% more forgiving)
     static var edgeBufferDistance: CGFloat = 24.0
+    #endif
     static var sequenceShowDuration: TimeInterval = 0.6
     static var sequenceGapDuration: TimeInterval = 0.2
     static var transitionDelay: TimeInterval = 0.5

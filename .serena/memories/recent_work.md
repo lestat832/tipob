@@ -1,58 +1,55 @@
-# Recent Work Highlights
+# Recent Work Highlights - Tipob Project
 
-## Latest Session: Info.plist Fixes + Ad Logic Simplification (Nov 12, 2025)
+## Latest Accomplishment (2025-11-13)
+**MVP Admin Dev Panel Implementation** - Complete DEBUG-only gesture threshold tuning system
 
-### Info.plist Configuration Mastery
-Successfully resolved all console warnings and errors:
-- **SceneDelegate error** - Removed UISceneDelegateClassName (SwiftUI apps don't need it)
-- **Orientation warning** - Added UIRequiresFullScreen + portrait-only config
-- **SKAdNetwork warning** - Added 49 Google AdMob identifiers for iOS 14+ attribution
+### Architecture Pattern Learned
+**Conditional Compilation with Live Configuration Injection:**
 
-### Pattern: Xcode Project Settings Must Match Info.plist
-Learned that orientation warnings require **both** changes:
-1. Info.plist: UISupportedInterfaceOrientations + UIRequiresFullScreen
-2. Project settings: INFOPLIST_KEY_UIRequiresFullScreen + portrait-only iPhone config
+```swift
+// DevConfigManager.swift (DEBUG only)
+#if DEBUG
+import Combine  // CRITICAL: @Published requires Combine
+class DevConfigManager: ObservableObject {
+    static let shared = DevConfigManager()
+    @Published var shakeThreshold: Double = 2.0
+    // ... 18 more @Published properties
+}
+#endif
 
-### Ad Logic Evolution
-- **Conservative approach (Nov 11)**: 30s launch + 30s cooldown + every 2 games
-- **Testing approach (Nov 12)**: Show on every tap if ad loaded
-- **Easy to toggle**: All cooldown logic preserved in git history for future restoration
+// Gesture detection files
+#if DEBUG
+private var shakeThreshold: Double { DevConfigManager.shared.shakeThreshold }
+#else
+private let shakeThreshold: Double = 2.0
+#endif
+```
 
-### Testing Strategy Pattern
-When testing integrations like AdMob:
-1. Start with aggressive display (show every time)
-2. Verify integration works correctly
-3. Restore conservative logic after validation
-4. Allows rapid iteration and debugging
+**Benefits:**
+- Zero overhead in release builds (code stripped by compiler)
+- Live threshold updates in DEBUG without rebuilding
+- Easy to tune gestures during testing
+- Production-ready pattern for configuration management
 
-## Previous Accomplishment: Google AdMob Integration (Nov 11, 2025)
+### Key Technical Insight
+**@Published Property Wrapper Dependencies:**
+- Requires `import Combine` (not just SwiftUI)
+- Missing import causes cryptic "init(wrappedValue:) not available" errors
+- Error message doesn't clearly indicate missing Combine framework
+- Solution: Always import Foundation, SwiftUI, AND Combine for ObservableObject
 
-Successfully integrated Google AdMob with TEST credentials:
-- Singleton AdManager with cooldown logic
-- SwiftUI/UIKit bridge for ad presentation
-- Info.plist configuration with TEST IDs
-- Graceful degradation if ads unavailable
+### Implementation Pattern for Future Reference
+**3-Step Live Configuration Pattern:**
+1. Create DEBUG-only configuration manager with @Published properties
+2. Use computed properties in detection code to read from manager
+3. Provide UI (dev panel) to adjust values in real-time
 
-### API Compatibility (GoogleMobileAds v12+)
-- Class naming: GAD prefix required (GADInterstitialAd, GADRequest)
-- Method signatures: `present(from:)` not `fromRootViewController:`
-- SDK initialization: `MobileAds.shared.start()` new API
-- Swift 6 concurrency: @MainActor required for UI delegates
-- Threading: Delegate assignment must be on main thread
+**Scales to:** Feature flags, A/B testing, performance tuning, debugging tools
 
-## Architecture Stability
-- MVVM pattern well-established
-- 7 gestures (4 swipes + 3 touch) working reliably
-- 3 game modes (Classic ⚡, Memory 🧠, PvP 👥) fully functional
-- AdMob monetization ready (TEST mode)
-- Portrait-only mode properly configured
-- Solid foundation for App Store submission
+### Files Modified This Session
+- **New:** DevConfigManager.swift, DevPanelView.swift, DevPanelGestureRecognizer.swift
+- **Modified:** MotionGestureManager.swift, SwipeGestureModifier.swift, TapGestureModifier.swift, PinchGestureView.swift, GameModel.swift, ContentView.swift
+- **Documentation:** DEV_PANEL_IMPLEMENTATION.md (400 lines)
 
-## Ready for Production Transition
-When ready to launch:
-1. Replace TEST Ad Unit ID with production ID in AdManager.swift
-2. Replace TEST Application ID in Info.plist
-3. Restore conservative ad cooldown logic (if desired)
-4. Verify App Store app ID matches AdMob account
-5. Test with real ads in TestFlight
-6. Submit to App Store review
+### Next Phase
+Testing and production threshold calibration based on real device feedback.

@@ -73,8 +73,14 @@ struct PinchGestureView: UIViewRepresentable {
                     print("[\(Date().logTimestamp)] 🔍 Pinch: Scale=\(String(format: "%.2f", gesture.scale)) - triggered=\(hasPinchTriggered)")
                 }
 
-                // Detect pinch when scale drops below 0.85 (15% reduction)
-                if gesture.scale < 0.85 && !hasPinchTriggered {
+                // Detect pinch when scale drops below threshold (default 0.85 = 15% reduction)
+                #if DEBUG
+                let pinchThreshold = DevConfigManager.shared.pinchScaleThreshold
+                #else
+                let pinchThreshold: CGFloat = 0.85
+                #endif
+
+                if gesture.scale < pinchThreshold && !hasPinchTriggered {
                     // Check with GestureCoordinator for intelligent filtering
                     guard GestureCoordinator.shared.shouldAllowGesture(.pinch) else {
                         print("[\(Date().logTimestamp)] ⏸️ Pinch suppressed by coordinator")

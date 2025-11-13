@@ -17,8 +17,13 @@ struct TapDetectionModifier: ViewModifier {
     @State private var singleTapTimer: DispatchWorkItem?
     @State private var longPressDetected: Bool = false
 
+    #if DEBUG
+    private var doubleTapWindow: TimeInterval { DevConfigManager.shared.doubleTapWindow }
+    private var longPressDuration: TimeInterval { DevConfigManager.shared.longPressDuration }
+    #else
     private let doubleTapWindow: TimeInterval = 0.3 // 300ms
     private let longPressDuration: TimeInterval = 0.7 // 700ms
+    #endif
 
     func body(content: Content) -> some View {
         content
