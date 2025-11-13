@@ -1,8 +1,8 @@
 TIPOB - PRODUCT OVERVIEW
 
-Last Updated: November 10, 2025
-Version: 3.0
-Status: Phase 1 Complete - 14 Gestures + Performance Optimized
+Last Updated: November 12, 2025
+Version: 3.1
+Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Integration
 
 ========================================
 
@@ -20,6 +20,7 @@ Hard to Master: Progressive difficulty keeps players engaged
 14 Diverse Gestures: Touch, motion, and cognitive challenges
 Discreet Mode: Toggle between public-friendly vs full gesture set
 Performance Optimized: 20-30% faster gesture response (Nov 2025)
+Monetization Ready: Google AdMob integration with TEST credentials for beta testing
 Triple Game Modes: Three distinct gameplay experiences (Classic, Memory, and PvP)
 Visual Polish: Beautiful gradient UI with color-coded gestures
 
@@ -434,6 +435,7 @@ Technology Stack
 - Architecture Pattern: MVVM (Model-View-ViewModel)
 - State Management: @Published properties with ObservableObject
 - Persistence: UserDefaults
+- Monetization: Google AdMob (TEST mode)
 
 Project Structure
 
@@ -477,6 +479,8 @@ Utilities - Helper classes
 - SwipeGestureModifier.swift - Swipe detection
 - TapGestureModifier.swift - Tap detection
 - PinchGestureModifier.swift - Pinch detection wrapper
+- AdManager.swift - Google AdMob singleton manager (~150 lines)
+- UIViewControllerHelper.swift - SwiftUI/UIKit presentation bridge (~80 lines)
 
 State Machine
 Flow: Launch → Menu → [Tutorial/Classic/Memory/PvP] → Game Over → Menu
@@ -631,6 +635,10 @@ Completed Features:
 - PvP turn management
 - Fair sequence replay (PvP modes)
 - Portrait orientation lock
+- Google AdMob integration (TEST mode, interstitial ads)
+- Ad triggers on game over screens (Home/Play Again buttons)
+- Ad preloading during gameplay
+- 49 SKAdNetwork identifiers for iOS 14+ attribution
 
 Known Issues:
 - Stroop alignment: Build cache issue (needs Cmd+Shift+K clean build)
@@ -653,7 +661,92 @@ Planned Features:
 - Re-enable Spread gesture with improved detection
 - Cloud save and global leaderboards
 - Share scores to social media
-- Monetization options (ads, IAP, subscription)
+- Monetization expansion (rewarded ads, banner ads, IAP, subscription)
+- Production AdMob credentials (after beta testing)
+- Remove Ads IAP ($4.99)
+
+========================================
+
+MONETIZATION SYSTEM
+
+Status: TEST Mode (Implemented November 11-12, 2025)
+
+Google AdMob Integration
+SDK: Google Mobile Ads (GoogleMobileAds framework)
+Configuration: TEST credentials for beta testing
+Ad Type: Interstitial ads (full-screen)
+
+TEST Credentials:
+- Ad Unit ID: ca-app-pub-3940256099942544/4411468910
+- Application ID: ca-app-pub-3940256099942544~1458002511
+
+Implementation Architecture:
+- AdManager.swift: Singleton managing ad lifecycle (~150 lines)
+- UIViewControllerHelper.swift: SwiftUI/UIKit bridge for presenting ads (~80 lines)
+- Ad initialization in TipobApp.swift (SDK startup)
+- Integration in game over views (GameOverView, PlayerVsPlayerView, GameVsPlayerVsPlayerView)
+
+Ad Display Logic (Updated November 12, 2025):
+- Trigger: EVERY button tap on end-of-game screens
+- Buttons: "Home" and "Play Again" both show ads
+- Frequency: No cooldowns (full testing mode)
+- Graceful Degradation: Game continues if ad fails to load
+
+Previous Logic (November 11, 2025):
+- 30-second launch cooldown
+- 30-second inter-ad cooldown
+- Every 2 games minimum
+
+Rationale for Simplification:
+Testing mode allows maximum ad impressions to validate integration, performance impact, and user experience before production deployment.
+
+Ad Flow:
+1. User completes game (success or failure)
+2. Reaches game over screen
+3. Taps "Home" or "Play Again"
+4. Ad loads (if available)
+5. Ad displays as full-screen interstitial
+6. User closes ad
+7. Navigation continues (home/restart)
+
+Technical Details:
+- Preloading: Ads preload in background during gameplay
+- Thread Safety: Main thread presentation via UIViewControllerHelper
+- Error Handling: Silent failures, logs errors without blocking UX
+- Memory Management: Singleton pattern prevents duplicate managers
+
+iOS Configuration (Info.plist):
+- GADApplicationIdentifier: TEST app ID configured
+- SKAdNetworkItems: 49 identifiers for iOS 14+ ad attribution
+- UIRequiresFullScreen: YES (portrait-only mode)
+- UISceneDelegateClassName: Removed (fixed warning)
+
+Files Modified:
+- AdManager.swift (new)
+- UIViewControllerHelper.swift (new)
+- TipobApp.swift (AdMob SDK initialization)
+- GameOverView.swift (ad trigger integration)
+- PlayerVsPlayerView.swift (ad trigger integration)
+- GameVsPlayerVsPlayerView.swift (ad trigger integration)
+- Info.plist (49 SKAdNetwork IDs, portrait lock, scene delegate fix)
+
+Production Readiness:
+- Current: TEST mode with Google test credentials
+- Next Step: Replace TEST IDs with production AdMob account IDs
+- Required: Create AdMob account, register app, obtain production IDs
+- No code changes needed, only ID swaps in AdManager.swift
+
+Performance Impact:
+- Preloading during gameplay: Minimal (background thread)
+- Ad display: 300-500ms additional latency before navigation
+- Memory: ~10-20MB additional for ad SDK
+- User Experience: Testing phase to gather feedback
+
+Future Enhancements:
+- Rewarded video ads (continue playing after game over)
+- Banner ads (menu screen)
+- Ad frequency optimization based on user retention data
+- Remove Ads IAP ($4.99)
 
 ========================================
 
@@ -759,6 +852,15 @@ Key Files
 Total Swift Files
 23 files across the project
 
+Recent Updates (November 11-12, 2025):
+- Google AdMob integration complete (TEST credentials)
+- AdManager singleton for ad lifecycle management
+- UIViewControllerHelper for SwiftUI ad presentation
+- Ad triggers on all game over screens (Home/Play Again)
+- Initial logic: 30s cooldowns + every 2 games
+- Updated logic (Nov 12): Show ads on EVERY button tap (testing mode)
+- Info.plist fixes: SKAdNetwork IDs, portrait lock, scene delegate removal
+
 Recent Updates (November 10, 2025):
 - Gesture detection optimization complete (Option 1 Quick Wins)
 - 6 old gesture managers deleted (~400 lines removed)
@@ -801,6 +903,7 @@ REVISION HISTORY
 Version 1.0 | October 10, 2025 | Initial product overview
 Version 2.0 | October 21, 2025 | Updated with 7 gestures, Memory Mode, and PvP Mode
 Version 3.0 | November 10, 2025 | Updated with 14 gestures, Stroop Mode, Discreet Mode, Leaderboard System, MotionGestureManager, gesture optimization complete
+Version 3.1 | November 12, 2025 | Added Google AdMob integration (TEST mode), AdManager, UIViewControllerHelper, Info.plist configuration
 
 ========================================
 

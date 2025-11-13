@@ -1,8 +1,8 @@
 # Tipob Feature Scoping Document
-**Date**: October 10, 2025 (Updated: November 10, 2025)
+**Date**: October 10, 2025 (Updated: November 12, 2025)
 **Project**: Tipob - iOS SwiftUI Bop-It Style Game
 **Purpose**: Comprehensive feature planning and decision framework
-**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization
+**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (TEST)
 
 ---
 
@@ -1600,6 +1600,148 @@ enum GameMode {
 
 ---
 
+### IMPLEMENTED: AdMob Integration (November 11-12, 2025) ✅
+
+**Status**: Complete - TEST Mode Active
+
+**Implementation Details:**
+
+#### SDK & Configuration
+- **Framework**: Google Mobile Ads (GoogleMobileAds)
+- **Ad Type**: Interstitial ads (full-screen)
+- **TEST Credentials**:
+  - Ad Unit ID: `ca-app-pub-3940256099942544/4411468910`
+  - Application ID: `ca-app-pub-3940256099942544~1458002511`
+- **Production Note**: TEST IDs only - never uses production credentials
+
+#### Core Components
+
+**AdManager.swift** (~165 lines)
+- Singleton pattern for centralized ad lifecycle management
+- Automatic ad preloading during gameplay
+- Retry logic with 30-second backoff on failure
+- Graceful degradation (game continues if ad unavailable)
+- FullScreenContentDelegate conformance for ad events
+
+**UIViewControllerHelper.swift** (~80 lines)
+- SwiftUI/UIKit bridge for presenting UIKit ad controllers
+- Extension on UIApplication to find top view controller
+- Required because AdMob SDK is UIKit-based
+
+#### Integration Points
+
+**Ad Trigger Logic:**
+- **Home Button**: All game over screens (GameOverView, PlayerVsPlayerView, GameVsPlayerVsPlayerView)
+- **Play Again Button**: All game over screens
+- **Frequency**: Shows on EVERY button tap if ad is loaded (testing mode)
+
+**Original Logic (Nov 11):**
+- 30-second cooldown between ads
+- Every 2 games minimum
+- 30-second launch protection (no ads in first 30s)
+
+**Simplified Logic (Nov 12):**
+- **All cooldowns removed** for testing purposes
+- Ad shows immediately if loaded
+- `incrementGameCount()` became no-op
+- `shouldShowEndOfGameAd()` only checks if ad is loaded
+
+#### Info.plist Configuration
+
+**Added Entries:**
+```xml
+<key>GADApplicationIdentifier</key>
+<string>ca-app-pub-3940256099942544~1458002511</string>
+
+<key>SKAdNetworkItems</key>
+<array>
+  <!-- 49 SKAdNetwork identifiers for iOS 14+ attribution -->
+</array>
+
+<key>UIRequiresFullScreen</key>
+<true/>
+```
+
+**Configuration Fixes (Nov 12):**
+- Removed UISceneDelegateClassName reference (SwiftUI apps don't need SceneDelegate)
+- Added UIRequiresFullScreen key for portrait-only mode
+- Added 49 SKAdNetwork identifiers for iOS 14+ ad attribution
+- Updated Xcode project settings to match Info.plist
+
+#### Ad Flow Sequence
+
+1. **Initialization**: AdManager preloads first ad on app launch
+2. **Gameplay**: Ad loads in background during game
+3. **Game Over**: User taps Home or Play Again
+4. **Check**: `shouldShowEndOfGameAd()` verifies ad is loaded
+5. **Present**: Ad displays via UIViewController helper
+6. **Completion**: Callback executes (navigates home or restarts game)
+7. **Preload**: Next ad loads immediately after dismissal
+
+#### Testing Observations
+
+**Successful Tests:**
+- ✅ Ads load reliably with TEST credentials
+- ✅ Ad display does not interrupt gameplay
+- ✅ Graceful fallback when ad unavailable
+- ✅ Preloading works during gameplay
+- ✅ All 5 game modes respect ad logic
+
+**Known Behaviors:**
+- TEST ads show immediately (no fill rate issues)
+- Production ads may have lower fill rates
+- Ad loading retry mechanism working (30s backoff)
+
+#### Technical Decisions
+
+**Why Singleton Pattern:**
+- Prevents multiple CMMotionManager instances (iOS limitation)
+- Centralized ad state management
+- Consistent behavior across all views
+
+**Why UIViewControllerHelper:**
+- AdMob SDK requires UIViewController for presentation
+- SwiftUI views don't have direct UIViewController access
+- Helper finds topmost view controller in window hierarchy
+
+**Why Aggressive Testing Mode:**
+- User requested "show ads on EVERY tap" for validation
+- Easier to test ad integration and UX flow
+- Can dial back frequency before production launch
+
+#### Future Production Transition
+
+**Before App Store Submission:**
+- [ ] Replace TEST Ad Unit IDs with production IDs
+- [ ] Replace TEST Application ID with production ID
+- [ ] Re-enable cooldown restrictions (recommended: 30s + every 2 games)
+- [ ] Update AdManager comments to reflect production status
+- [ ] Test fill rates with real production ads
+
+**Recommended Production Logic:**
+```swift
+// Restore these constants:
+private let minimumTimeBetweenAds: TimeInterval = 30.0
+private let gamesPerAd: Int = 2
+private let minimumTimeSinceLaunch: TimeInterval = 30.0
+
+// Restore full shouldShowEndOfGameAd() checks:
+- Time since app launch
+- Time since last ad
+- Games completed frequency
+- Ad loaded and ready
+```
+
+#### File References
+- `/Users/marcgeraldez/Projects/tipob/Tipob/Utilities/AdManager.swift`
+- `/Users/marcgeraldez/Projects/tipob/Tipob/Utilities/UIViewControllerHelper.swift`
+- `/Users/marcgeraldez/Projects/tipob/Tipob/Views/GameOverView.swift`
+- `/Users/marcgeraldez/Projects/tipob/Tipob/Views/PlayerVsPlayerView.swift`
+- `/Users/marcgeraldez/Projects/tipob/Tipob/Views/GameVsPlayerVsPlayerView.swift`
+- `/Users/marcgeraldez/Projects/tipob/Tipob/Info.plist`
+
+---
+
 #### Stream 2: In-App Purchases (Growth - Month 3+) 💎
 
 ##### Remove Ads IAP
@@ -1668,9 +1810,11 @@ enum GameMode {
 ### Monetization Roadmap
 
 #### Phase 1 (Month 1-3): Ad Foundation
-- ✅ Implement interstitial + rewarded ads
-- ✅ A/B test ad frequency
-- ✅ Launch "Remove Ads" IAP
+- ✅ Implement interstitial ads (COMPLETE - Nov 11, 2025)
+- ✅ AdMob SDK integration with TEST credentials
+- ⏳ Rewarded ads (next priority)
+- ⏳ A/B test ad frequency (after production transition)
+- ⏳ Launch "Remove Ads" IAP (requires production Ad IDs)
 - Target: $5-10K/month revenue
 
 #### Phase 2 (Month 4-6): IAP Expansion
@@ -1777,14 +1921,14 @@ Subscription:   $4.99/mo ← Matches Remove Ads, but recurring value
 | Async Multiplayer | XL | Backend + authentication | P3 |
 
 #### Monetization
-| Feature | Effort | Dependencies | Priority |
-|---------|--------|--------------|----------|
-| AdMob Integration | S | SDK + privacy | P0 |
-| Interstitial Ads | XS | AdMob | P0 |
-| Rewarded Ads | S | AdMob | P0 |
-| IAP - Remove Ads | M | StoreKit 2 | P0 |
-| IAP - Cosmetics | L | Theme engine + IAP | P1 |
-| Subscription | L | StoreKit 2 + backend | P2 |
+| Feature | Effort | Dependencies | Priority | Status |
+|---------|--------|--------------|----------|--------|
+| AdMob Integration | S | SDK + privacy | P0 | ✅ Complete (Nov 11) |
+| Interstitial Ads | XS | AdMob | P0 | ✅ Complete (Nov 12) |
+| Rewarded Ads | S | AdMob | P0 | ⏳ Next |
+| IAP - Remove Ads | M | StoreKit 2 | P0 | ⏳ Pending |
+| IAP - Cosmetics | L | Theme engine + IAP | P1 | ⏳ Pending |
+| Subscription | L | StoreKit 2 + backend | P2 | ⏳ Pending |
 
 ---
 
@@ -1917,15 +2061,25 @@ import Firebase  // Or Mixpanel
 
 #### Monetization SDKs
 ```swift
-// Ads
-import GoogleMobileAds  // AdMob
+// Ads - ✅ IMPLEMENTED (November 11, 2025)
+import GoogleMobileAds  // AdMob - TEST mode active
+// Files: AdManager.swift, UIViewControllerHelper.swift
 
-// IAP
+// IAP - ⏳ PENDING
 import StoreKit  // Native iOS
 
 // Alternative: RevenueCat for subscription management
 import RevenueCat
 ```
+
+#### AdMob Implementation Notes (Current)
+- **Status**: TEST credentials active
+- **Ad Unit ID**: `ca-app-pub-3940256099942544/4411468910` (TEST)
+- **App ID**: `ca-app-pub-3940256099942544~1458002511` (TEST)
+- **Integration**: AdManager singleton, UIViewControllerHelper bridge
+- **Triggers**: Home + Play Again buttons on all game over screens
+- **Current Mode**: Aggressive testing (shows every tap if loaded)
+- **Production Readiness**: Requires TEST → production ID swap
 
 #### Backend Requirements
 - **Option 1: Firebase** (recommended for indie)
@@ -2117,11 +2271,15 @@ Priority Score = (User Value × 2) + (Business Impact × 1.5) + (Ease × 1) + (A
 ## 📝 Next Steps Checklist
 
 ### Immediate (This Week)
-- [ ] Review this document, highlight questions
-- [ ] Choose Phase 1 gesture additions (recommend: tap, double tap, shake)
-- [ ] Decide on 2 game modes to prioritize (recommend: Endless, Memory)
+- [x] Review this document, highlight questions ✅
+- [x] Choose Phase 1 gesture additions (recommend: tap, double tap, shake) ✅ 14 gestures complete
+- [x] Decide on 2 game modes to prioritize (recommend: Endless, Memory) ✅ All modes complete
 - [ ] Set up Game Center in App Store Connect
 - [ ] Create mockups for settings menu
+- [x] Implement AdMob integration ✅ Complete (Nov 11-12, 2025)
+- [ ] **CRITICAL**: Transition from TEST to production Ad IDs before launch
+- [ ] Implement rewarded video ads (continue after game over)
+- [ ] Build "Remove Ads" IAP ($4.99)
 
 ### Short-Term (This Month)
 - [ ] Implement Priority 1 fixes from code analysis
@@ -2167,13 +2325,14 @@ Priority Score = (User Value × 2) + (Business Impact × 1.5) + (Ease × 1) + (A
 | 2.0 | 2025-10-21 | Updated implementation status: 7 gestures complete (4 swipes + 3 touch), Memory Mode 🧠 and Game vs Player vs Player 👥 complete | Claude Code |
 | 3.0 | 2025-10-27 | Updated to 8 gestures (added Pinch 🤏 via native UIKit), Phase 1 MVP complete, added gesture roadmap with priorities | Claude Code |
 | 4.0 | 2025-11-10 | Added 7 new gestures (shake, tilt L/R, raise, lower, Stroop), implemented Discreet Mode, Leaderboard System, MotionGestureManager, completed gesture optimization (Option 1), documented Options 2 & 3 | Claude Code |
+| 4.1 | 2025-11-12 | Added Google AdMob integration (TEST mode), AdManager singleton, UIViewControllerHelper, Info.plist configuration, 49 SKAdNetwork identifiers, aggressive testing mode (ads on every tap), updated monetization roadmap | Claude Code |
 
 ---
 
-**Document Status**: ✅ Phase 1 Complete with Performance Optimization
-**Document Version**: 4.0
-**Last Updated**: 2025-11-10
-**Next Review Date**: After partner feedback session
+**Document Status**: ✅ Phase 1 Complete with Performance Optimization + Monetization (TEST)
+**Document Version**: 4.1
+**Last Updated**: 2025-11-12
+**Next Review Date**: Before production Ad ID transition
 **Owner**: Marc Geraldez
 
 ---
