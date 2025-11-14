@@ -2,6 +2,11 @@ import SwiftUI
 
 struct GameOverView: View {
     @ObservedObject var viewModel: GameViewModel
+
+    #if DEBUG
+    @Binding var showDevPanel: Bool
+    #endif
+
     @State private var textScale: CGFloat = 0.5
     @State private var opacity: Double = 0
     @State private var showingLeaderboard = false
@@ -177,6 +182,24 @@ struct GameOverView: View {
                 .padding(.bottom, 50)
             }
             .padding(.top, 100)
+        }
+        .overlay(alignment: .topTrailing) {
+            #if DEBUG
+            Button(action: {
+                HapticManager.shared.impact()
+                showDevPanel = true
+            }) {
+                Image(systemName: "gearshape.fill")
+                    .font(.title)
+                    .foregroundColor(.white)
+                    .padding(12)
+                    .background(
+                        Circle()
+                            .fill(Color.black.opacity(0.3))
+                    )
+                    .padding(8)
+            }
+            #endif
         }
         .sheet(isPresented: $showingLeaderboard) {
             LeaderboardView()

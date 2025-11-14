@@ -12,6 +12,9 @@ class MotionGestureManager: ObservableObject {
     private var onDetectedCallback: (() -> Void)?
     private var onWrongGestureCallback: (() -> Void)?
 
+    // Track if last detected gesture was a motion gesture (for grace period logic)
+    @Published var lastDetectedWasMotion: Bool = false
+
     // Shake detection state
     private var lastShakeTime: Date = .distantPast
     #if DEBUG
@@ -119,6 +122,10 @@ class MotionGestureManager: ObservableObject {
         currentTiltDirection = .neutral
         sustainedRaiseStartTime = nil
         sustainedLowerStartTime = nil
+
+        // Reset motion tracking flag
+        lastDetectedWasMotion = false
+        print("[\(Date().logTimestamp)] 🔄 Motion tracking reset (touch gesture expected)")
     }
 
     // MARK: - Shake Detection
@@ -164,6 +171,8 @@ class MotionGestureManager: ObservableObject {
 
         print("[\(Date().logTimestamp)] 🎯 Shake detected")
         lastShakeTime = now
+        lastDetectedWasMotion = true
+        print("[\(Date().logTimestamp)] 🔄 Motion gesture detected (Shake) - tracking set to true")
         onDetectedCallback?()
     }
 
@@ -234,6 +243,8 @@ class MotionGestureManager: ObservableObject {
                 lastTiltTime = now
                 tiltStartTime = nil
                 currentTiltDirection = .neutral
+                lastDetectedWasMotion = true
+                print("[\(Date().logTimestamp)] 🔄 Motion gesture detected (Tilt Left) - tracking set to true")
                 onDetectedCallback?()
             } else if activeGesture == .tiltRight {
                 print("[\(Date().logTimestamp)] ❌ Wrong tilt direction (expected right, got left)")
@@ -251,6 +262,8 @@ class MotionGestureManager: ObservableObject {
                 lastTiltTime = now
                 tiltStartTime = nil
                 currentTiltDirection = .neutral
+                lastDetectedWasMotion = true
+                print("[\(Date().logTimestamp)] 🔄 Motion gesture detected (Tilt Right) - tracking set to true")
                 onDetectedCallback?()
             } else if activeGesture == .tiltLeft {
                 print("[\(Date().logTimestamp)] ❌ Wrong tilt direction (expected left, got right)")
@@ -340,6 +353,8 @@ class MotionGestureManager: ObservableObject {
         }
         lastRaiseLowerTime = Date()
         sustainedRaiseStartTime = nil
+        lastDetectedWasMotion = true
+        print("[\(Date().logTimestamp)] 🔄 Motion gesture detected (Raise) - tracking set to true")
         onDetectedCallback?()
     }
 
@@ -421,6 +436,8 @@ class MotionGestureManager: ObservableObject {
         }
         lastRaiseLowerTime = Date()
         sustainedLowerStartTime = nil
+        lastDetectedWasMotion = true
+        print("[\(Date().logTimestamp)] 🔄 Motion gesture detected (Lower) - tracking set to true")
         onDetectedCallback?()
     }
 

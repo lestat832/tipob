@@ -580,6 +580,18 @@ struct PlayerVsPlayerView: View {
         isAddingGesture = false  // Reset adding mode
         gamePhase = .repeatPhase
 
+        #if DEBUG
+        // Apply grace period if transitioning from motion to touch gesture
+        if currentGestureIndex < sequence.count {
+            let currentGesture = sequence[currentGestureIndex]
+            if !currentGesture.isMotionGesture && MotionGestureManager.shared.lastDetectedWasMotion {
+                let gracePeriod = DevConfigManager.shared.motionToTouchGracePeriod
+                timeRemaining += gracePeriod
+                print("[\(Date().logTimestamp)] ⏱️ Grace period applied: +\(String(format: "%.1f", gracePeriod))s for motion→touch transition (PvP - start repeat)")
+            }
+        }
+        #endif
+
         // Activate motion detector for first expected gesture
         activatePvPDetector()
 
@@ -620,6 +632,18 @@ struct PlayerVsPlayerView: View {
                     // Move to next gesture - update detector for next expected gesture
                     activatePvPDetector()
                     timeRemaining = perGestureTime
+
+                    #if DEBUG
+                    // Apply grace period if transitioning from motion to touch gesture
+                    if currentGestureIndex < sequence.count {
+                        let currentGesture = sequence[currentGestureIndex]
+                        if !currentGesture.isMotionGesture && MotionGestureManager.shared.lastDetectedWasMotion {
+                            let gracePeriod = DevConfigManager.shared.motionToTouchGracePeriod
+                            timeRemaining += gracePeriod
+                            print("[\(Date().logTimestamp)] ⏱️ Grace period applied: +\(String(format: "%.1f", gracePeriod))s for motion→touch transition (PvP - next gesture)")
+                        }
+                    }
+                    #endif
                 }
             } else {
                 // Wrong gesture - immediate loss

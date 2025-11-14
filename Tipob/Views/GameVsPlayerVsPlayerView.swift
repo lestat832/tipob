@@ -513,6 +513,18 @@ struct GameVsPlayerVsPlayerView: View {
         timeRemaining = perGestureTime
         gamePhase = .playerTurn
 
+        #if DEBUG
+        // Apply grace period if transitioning from motion to touch gesture
+        if currentGestureIndex < sequence.count {
+            let currentGesture = sequence[currentGestureIndex]
+            if !currentGesture.isMotionGesture && MotionGestureManager.shared.lastDetectedWasMotion {
+                let gracePeriod = DevConfigManager.shared.motionToTouchGracePeriod
+                timeRemaining += gracePeriod
+                print("[\(Date().logTimestamp)] ⏱️ Grace period applied: +\(String(format: "%.1f", gracePeriod))s for motion→touch transition (Game vs PvP - start turn)")
+            }
+        }
+        #endif
+
         // Activate motion detector for first expected gesture
         activateGameVsPvPDetector()
 
@@ -550,6 +562,18 @@ struct GameVsPlayerVsPlayerView: View {
                 // Move to next gesture - update detector for next expected gesture
                 activateGameVsPvPDetector()
                 timeRemaining = perGestureTime
+
+                #if DEBUG
+                // Apply grace period if transitioning from motion to touch gesture
+                if currentGestureIndex < sequence.count {
+                    let currentGesture = sequence[currentGestureIndex]
+                    if !currentGesture.isMotionGesture && MotionGestureManager.shared.lastDetectedWasMotion {
+                        let gracePeriod = DevConfigManager.shared.motionToTouchGracePeriod
+                        timeRemaining += gracePeriod
+                        print("[\(Date().logTimestamp)] ⏱️ Grace period applied: +\(String(format: "%.1f", gracePeriod))s for motion→touch transition (Game vs PvP - next gesture)")
+                    }
+                }
+                #endif
             }
         } else {
             // Wrong gesture

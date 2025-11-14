@@ -61,6 +61,19 @@ class DevConfigManager: ObservableObject {
 
     @Published var pinchScaleThreshold: CGFloat = 0.85  // scale (15% reduction triggers)
 
+    // MARK: - Timing Settings
+
+    @Published var motionToTouchGracePeriod: TimeInterval = 0.5  // seconds (grace period for motion→touch transitions)
+
+    // MARK: - Gameplay Logging
+
+    @Published var gameplayLogs: [GameplayLogEntry] = []
+
+    // MARK: - Sequence Replay Storage
+
+    @Published var lastMemorySequence: [GestureType]? = nil
+    @Published var lastClassicSequence: [GestureType]? = nil
+
     // MARK: - Default Values Storage
 
     private let defaults = GestureThresholds(
@@ -80,7 +93,8 @@ class DevConfigManager: ObservableObject {
             dragMinimum: 20.0
         ),
         tap: TapThresholds(doubleTapWindow: 0.3, longPressDuration: 0.7),
-        pinch: PinchThresholds(scaleThreshold: 0.85)
+        pinch: PinchThresholds(scaleThreshold: 0.85),
+        timing: TimingThresholds(motionToTouchGracePeriod: 0.5)
     )
 
     // MARK: - Public Methods
@@ -117,6 +131,9 @@ class DevConfigManager: ObservableObject {
 
         // Pinch
         pinchScaleThreshold = defaults.pinch.scaleThreshold
+
+        // Timing
+        motionToTouchGracePeriod = defaults.timing.motionToTouchGracePeriod
 
         print("✅ DevConfigManager reset to defaults")
     }
@@ -155,6 +172,9 @@ class DevConfigManager: ObservableObject {
             ),
             pinch: PinchThresholds(
                 scaleThreshold: pinchScaleThreshold
+            ),
+            timing: TimingThresholds(
+                motionToTouchGracePeriod: motionToTouchGracePeriod
             )
         )
 
@@ -177,6 +197,44 @@ class DevConfigManager: ObservableObject {
             return nil
         }
     }
+
+    /// Log a gesture attempt (expected vs detected)
+    func logGesture(expected: GestureType, detected: GestureType?, success: Bool) {
+        let timestamp = Date().logTimestamp
+        let entry = GameplayLogEntry(
+            timestamp: timestamp,
+            expectedGesture: expected,
+            detectedGesture: detected,
+            success: success
+        )
+        gameplayLogs.append(entry)
+        print("📋 Log: [\(timestamp)] Expected: \(expected.displayName) → Detected: \(detected?.displayName ?? "none") \(success ? "✓" : "✗")")
+    }
+
+    /// Clear all gameplay logs (call at start of new game)
+    func clearLogs() {
+        gameplayLogs.removeAll()
+        print("📋 Gameplay logs cleared")
+    }
+
+    /// Store the last played sequence for replay debugging
+    func captureMemorySequence(_ sequence: [GestureType]) {
+        lastMemorySequence = sequence
+        print("🔄 Captured Memory sequence (\(sequence.count) gestures): \(sequence.map { $0.displayName }.joined(separator: ", "))")
+    }
+
+    /// Store the last played Classic Mode gesture series for replay debugging
+    func captureClassicSequence(_ sequence: [GestureType]) {
+        lastClassicSequence = sequence
+        print("🔄 Captured Classic sequence (\(sequence.count) gestures): \(sequence.map { $0.displayName }.joined(separator: ", "))")
+    }
+
+    /// Clear stored sequences
+    func clearStoredSequences() {
+        lastMemorySequence = nil
+        lastClassicSequence = nil
+        print("🔄 Cleared stored sequences")
+    }
 }
 
 // MARK: - Codable Structures for JSON Export
@@ -189,6 +247,7 @@ struct GestureThresholds: Codable {
     let swipe: SwipeThresholds
     let tap: TapThresholds
     let pinch: PinchThresholds
+    let timing: TimingThresholds
 }
 
 struct ShakeThresholds: Codable {
@@ -226,6 +285,28 @@ struct TapThresholds: Codable {
 
 struct PinchThresholds: Codable {
     let scaleThreshold: CGFloat
+}
+
+struct TimingThresholds: Codable {
+    let motionToTouchGracePeriod: TimeInterval
+}
+
+// MARK: - Gameplay Logging
+
+/// Log entry for gesture attempts (expected vs detected)
+struct GameplayLogEntry: Identifiable {
+    let id = UUID()
+    let timestamp: String
+    let expectedGesture: GestureType
+    let detectedGesture: GestureType?
+    let success: Bool
+
+    var displayText: String {
+        let expectedName = expectedGesture.displayName
+        let detectedName = detectedGesture?.displayName ?? "(none)"
+        let icon = success ? "✓" : "✗"
+        return "[\(timestamp)] \(icon) \(expectedName) → \(detectedName)"
+    }
 }
 
 #endif

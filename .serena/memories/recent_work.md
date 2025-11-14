@@ -1,55 +1,21 @@
-# Recent Work Highlights - Tipob Project
+# Recent Work Highlights
 
-## Latest Accomplishment (2025-11-13)
-**MVP Admin Dev Panel Implementation** - Complete DEBUG-only gesture threshold tuning system
+## November 14, 2025 - Landing Page Deployment
 
-### Architecture Pattern Learned
-**Conditional Compilation with Live Configuration Injection:**
+**Accomplishment:** Successfully deployed Out of Pocket landing page to GitHub Pages using local build workflow.
 
-```swift
-// DevConfigManager.swift (DEBUG only)
-#if DEBUG
-import Combine  // CRITICAL: @Published requires Combine
-class DevConfigManager: ObservableObject {
-    static let shared = DevConfigManager()
-    @Published var shakeThreshold: Double = 2.0
-    // ... 18 more @Published properties
-}
-#endif
+**Key Learning:** Vite/React apps require compilation before GitHub Pages deployment - can't serve source files directly. The `base` path configuration in vite.config.ts is critical for subpath deployments.
 
-// Gesture detection files
-#if DEBUG
-private var shakeThreshold: Double { DevConfigManager.shared.shakeThreshold }
-#else
-private let shakeThreshold: Double = 2.0
-#endif
-```
+**Pattern Established:** 
+- Local build workflow: Clone → Update config → Install → Build → Commit → Push → Configure Pages
+- Alternative to GitHub Actions when simpler manual approach preferred
 
-**Benefits:**
-- Zero overhead in release builds (code stripped by compiler)
-- Live threshold updates in DEBUG without rebuilding
-- Easy to tune gestures during testing
-- Production-ready pattern for configuration management
+## Recent Pattern: Motion-to-Touch Grace Period (Previous Session)
 
-### Key Technical Insight
-**@Published Property Wrapper Dependencies:**
-- Requires `import Combine` (not just SwiftUI)
-- Missing import causes cryptic "init(wrappedValue:) not available" errors
-- Error message doesn't clearly indicate missing Combine framework
-- Solution: Always import Foundation, SwiftUI, AND Combine for ObservableObject
+Implemented DEBUG-only grace period feature in Tipob iOS game for motion gesture → touch gesture transitions:
+- Added `motionToTouchGracePeriod` (0.5s) to DevConfigManager
+- Applied in all game modes (Memory, Classic, PvP) 
+- Tracked via `MotionGestureManager.shared.lastDetectedWasMotion` flag
+- Live-tunable via Admin Dev Panel
 
-### Implementation Pattern for Future Reference
-**3-Step Live Configuration Pattern:**
-1. Create DEBUG-only configuration manager with @Published properties
-2. Use computed properties in detection code to read from manager
-3. Provide UI (dev panel) to adjust values in real-time
-
-**Scales to:** Feature flags, A/B testing, performance tuning, debugging tools
-
-### Files Modified This Session
-- **New:** DevConfigManager.swift, DevPanelView.swift, DevPanelGestureRecognizer.swift
-- **Modified:** MotionGestureManager.swift, SwipeGestureModifier.swift, TapGestureModifier.swift, PinchGestureView.swift, GameModel.swift, ContentView.swift
-- **Documentation:** DEV_PANEL_IMPLEMENTATION.md (400 lines)
-
-### Next Phase
-Testing and production threshold calibration based on real device feedback.
+**Key Insight:** Grace periods help with inherent latency when switching input modalities (accelerometer → touchscreen).

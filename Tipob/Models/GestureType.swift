@@ -106,10 +106,10 @@ enum GestureType: Equatable {
 
     var displayName: String {
         switch self {
-        case .up: return "Up"
-        case .down: return "Down"
-        case .left: return "Left"
-        case .right: return "Right"
+        case .up: return "Swipe Up"
+        case .down: return "Swipe Down"
+        case .left: return "Swipe Left"
+        case .right: return "Swipe Right"
         case .tap: return "Tap"
         case .doubleTap: return "Double Tap"
         case .longPress: return "Long Press"
@@ -120,7 +120,7 @@ enum GestureType: Equatable {
         case .tiltRight: return "Tilt Right"
         case .raise: return "Raise"
         case .lower: return "Lower"
-        case .stroop: return "Color-Swipe"
+        case .stroop: return "Stroop"
         }
     }
 

@@ -11,6 +11,7 @@ import SwiftUI
 
 struct DevPanelView: View {
 
+    @ObservedObject var viewModel: GameViewModel
     @ObservedObject private var config = DevConfigManager.shared
     @Environment(\.dismiss) private var dismiss
 
@@ -25,6 +26,12 @@ struct DevPanelView: View {
                     // Header Info
                     infoHeader
 
+                    // Gameplay Logs
+                    logsSection
+
+                    // Sequence Replay
+                    replaySection
+
                     // Gesture Sections
                     shakeSection
                     tiltSection
@@ -32,6 +39,9 @@ struct DevPanelView: View {
                     swipeSection
                     tapSection
                     pinchSection
+
+                    // Timing Settings
+                    timingSection
 
                     // Action Buttons
                     actionButtons
@@ -81,6 +91,108 @@ struct DevPanelView: View {
         .cornerRadius(12)
     }
 
+    // MARK: - Gameplay Logs Section
+
+    private var logsSection: some View {
+        DisclosureGroup("📋 Gameplay Logs (\(config.gameplayLogs.count) entries)") {
+            if config.gameplayLogs.isEmpty {
+                Text("No logs yet - play a game to see gesture detection logs")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding()
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(config.gameplayLogs.reversed()) { log in
+                            Text(log.displayText)
+                                .font(.system(size: 12, design: .monospaced))
+                                .foregroundColor(log.success ? .green : .red)
+                        }
+                    }
+                    .padding()
+                }
+                .frame(maxHeight: 300)
+            }
+        }
+        .padding()
+        .background(Color.secondary.opacity(0.05))
+        .cornerRadius(12)
+    }
+
+    // MARK: - Sequence Replay Section
+
+    private var replaySection: some View {
+        VStack(spacing: 12) {
+            Text("🔄 Sequence Replay")
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text("Replay the last game sequence with updated threshold settings")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            if let memorySeq = config.lastMemorySequence {
+                Button(action: {
+                    HapticManager.shared.impact()
+                    dismiss()
+                    viewModel.replayLastMemorySequence()
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Replay Memory Sequence")
+                                .fontWeight(.semibold)
+                            Text("\(memorySeq.count) gestures: \(memorySeq.prefix(3).map { $0.displayName }.joined(separator: ", "))\(memorySeq.count > 3 ? "..." : "")")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(Color.purple.opacity(0.2))
+                    .foregroundColor(.primary)
+                    .cornerRadius(12)
+                }
+            }
+
+            if let classicSeq = config.lastClassicSequence {
+                Button(action: {
+                    HapticManager.shared.impact()
+                    dismiss()
+                    viewModel.replayLastClassicSequence()
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Replay Classic Sequence")
+                                .fontWeight(.semibold)
+                            Text("\(classicSeq.count) gestures: \(classicSeq.prefix(3).map { $0.displayName }.joined(separator: ", "))\(classicSeq.count > 3 ? "..." : "")")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(Color.orange.opacity(0.2))
+                    .foregroundColor(.primary)
+                    .cornerRadius(12)
+                }
+            }
+
+            if config.lastMemorySequence == nil && config.lastClassicSequence == nil {
+                Text("Play a game to enable sequence replay")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .padding()
+        .background(Color.secondary.opacity(0.05))
+        .cornerRadius(12)
+    }
+
     // MARK: - Shake Detection Section
 
     private var shakeSection: some View {
@@ -91,7 +203,8 @@ struct DevPanelView: View {
                     value: $config.shakeThreshold,
                     range: 0.5...4.0,
                     unit: "G",
-                    step: 0.1
+                    step: 0.1,
+                    subtitle: "↑ Harder shake required | ↓ Easier to trigger"
                 )
 
                 SliderRow(
@@ -99,7 +212,8 @@ struct DevPanelView: View {
                     value: $config.shakeCooldown,
                     range: 0.1...2.0,
                     unit: "s",
-                    step: 0.1
+                    step: 0.1,
+                    subtitle: "↑ Longer wait between shakes | ↓ Can shake faster"
                 )
 
                 SliderRow(
@@ -108,7 +222,7 @@ struct DevPanelView: View {
                     range: 0.01...0.1,
                     unit: "s",
                     step: 0.01,
-                    subtitle: "\(Int(1.0 / config.shakeUpdateInterval)) Hz"
+                    subtitle: "\(Int(1.0 / config.shakeUpdateInterval)) Hz | ↑ Less responsive | ↓ More responsive"
                 )
             }
             .padding(.top, 8)
@@ -129,7 +243,7 @@ struct DevPanelView: View {
                     range: 0.1...1.57,
                     unit: "rad",
                     step: 0.05,
-                    subtitle: "\(Int(config.tiltAngleThreshold * 180 / .pi))°"
+                    subtitle: "\(Int(config.tiltAngleThreshold * 180 / .pi))° | ↑ More tilt required | ↓ Less tilt required"
                 )
 
                 SliderRow(
@@ -137,7 +251,8 @@ struct DevPanelView: View {
                     value: $config.tiltDuration,
                     range: 0.1...1.0,
                     unit: "s",
-                    step: 0.1
+                    step: 0.1,
+                    subtitle: "↑ Must hold tilt longer | ↓ Quick tilt works"
                 )
 
                 SliderRow(
@@ -145,7 +260,8 @@ struct DevPanelView: View {
                     value: $config.tiltCooldown,
                     range: 0.1...2.0,
                     unit: "s",
-                    step: 0.1
+                    step: 0.1,
+                    subtitle: "↑ Longer wait between tilts | ↓ Can tilt faster"
                 )
 
                 SliderRow(
@@ -154,7 +270,7 @@ struct DevPanelView: View {
                     range: 0.01...0.1,
                     unit: "s",
                     step: 0.01,
-                    subtitle: "\(Int(1.0 / config.tiltUpdateInterval)) Hz"
+                    subtitle: "\(Int(1.0 / config.tiltUpdateInterval)) Hz | ↑ Less responsive | ↓ More responsive"
                 )
             }
             .padding(.top, 8)
@@ -174,7 +290,8 @@ struct DevPanelView: View {
                     value: $config.raiseLowerThreshold,
                     range: 0.1...1.0,
                     unit: "G",
-                    step: 0.05
+                    step: 0.05,
+                    subtitle: "↑ Harder motion required | ↓ Easier to trigger"
                 )
 
                 SliderRow(
@@ -183,7 +300,7 @@ struct DevPanelView: View {
                     range: 0.5...2.0,
                     unit: "G",
                     step: 0.1,
-                    subtitle: "Immediate trigger"
+                    subtitle: "Immediate trigger | ↑ Harder instant | ↓ Easier instant"
                 )
 
                 SliderRow(
@@ -191,7 +308,8 @@ struct DevPanelView: View {
                     value: $config.raiseLowerSustainedDuration,
                     range: 0.05...0.5,
                     unit: "s",
-                    step: 0.05
+                    step: 0.05,
+                    subtitle: "↑ Must sustain longer | ↓ Quick motion works"
                 )
 
                 SliderRow(
@@ -199,7 +317,8 @@ struct DevPanelView: View {
                     value: $config.raiseLowerCooldown,
                     range: 0.1...2.0,
                     unit: "s",
-                    step: 0.1
+                    step: 0.1,
+                    subtitle: "↑ Longer wait between moves | ↓ Can move faster"
                 )
 
                 SliderRow(
@@ -208,7 +327,7 @@ struct DevPanelView: View {
                     range: 0.01...0.1,
                     unit: "s",
                     step: 0.01,
-                    subtitle: "\(Int(1.0 / config.raiseLowerUpdateInterval)) Hz"
+                    subtitle: "\(Int(1.0 / config.raiseLowerUpdateInterval)) Hz | ↑ Less responsive | ↓ More responsive"
                 )
             }
             .padding(.top, 8)
@@ -228,7 +347,8 @@ struct DevPanelView: View {
                     value: $config.minSwipeDistance,
                     range: 20...150,
                     unit: "px",
-                    step: 5
+                    step: 5,
+                    subtitle: "↑ Longer swipe required | ↓ Shorter swipe works"
                 )
 
                 SliderRow(
@@ -236,7 +356,8 @@ struct DevPanelView: View {
                     value: $config.minSwipeVelocity,
                     range: 30...200,
                     unit: "px/s",
-                    step: 10
+                    step: 10,
+                    subtitle: "↑ Faster swipe required | ↓ Slower swipe works"
                 )
 
                 SliderRow(
@@ -245,7 +366,7 @@ struct DevPanelView: View {
                     range: 0...100,
                     unit: "px",
                     step: 4,
-                    subtitle: "Prevents accidental edge swipes"
+                    subtitle: "↑ Larger screen margin | ↓ Smaller margin | Prevents edge swipes"
                 )
 
                 SliderRow(
@@ -254,7 +375,7 @@ struct DevPanelView: View {
                     range: 10...50,
                     unit: "px",
                     step: 2,
-                    subtitle: "DragGesture parameter"
+                    subtitle: "DragGesture | ↑ More initial movement | ↓ Less initial movement"
                 )
             }
             .padding(.top, 8)
@@ -275,7 +396,7 @@ struct DevPanelView: View {
                     range: 0.1...0.6,
                     unit: "s",
                     step: 0.05,
-                    subtitle: "\(Int(config.doubleTapWindow * 1000)) ms"
+                    subtitle: "\(Int(config.doubleTapWindow * 1000)) ms | ↑ More time for 2nd tap | ↓ Taps must be quicker"
                 )
 
                 SliderRow(
@@ -283,7 +404,8 @@ struct DevPanelView: View {
                     value: $config.longPressDuration,
                     range: 0.3...1.5,
                     unit: "s",
-                    step: 0.1
+                    step: 0.1,
+                    subtitle: "↑ Must hold longer | ↓ Shorter hold triggers"
                 )
             }
             .padding(.top, 8)
@@ -304,8 +426,41 @@ struct DevPanelView: View {
                     range: 0.5...0.95,
                     unit: "",
                     step: 0.05,
-                    subtitle: "\(Int((1.0 - config.pinchScaleThreshold) * 100))% reduction triggers"
+                    subtitle: "\(Int((1.0 - config.pinchScaleThreshold) * 100))% | ↑ Less pinch needed | ↓ More pinch needed"
                 )
+            }
+            .padding(.top, 8)
+        }
+        .padding()
+        .background(Color.secondary.opacity(0.05))
+        .cornerRadius(12)
+    }
+
+    // MARK: - Timing Settings Section
+
+    private var timingSection: some View {
+        DisclosureGroup("⏱️ Timing Settings") {
+            VStack(spacing: 16) {
+                SliderRow(
+                    label: "Motion→Touch Grace Period",
+                    value: $config.motionToTouchGracePeriod,
+                    range: 0.0...1.0,
+                    unit: "s",
+                    step: 0.05,
+                    subtitle: "Extra time when switching from motion to touch gesture | ↑ More time | ↓ Less time"
+                )
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("What is this?")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+
+                    Text("When a motion gesture (Raise, Shake, etc.) is followed by a touch gesture (Tap, Swipe, etc.), this adds extra time to account for the physical transition of moving your hand back to the screen.")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .padding(.top, 8)
         }

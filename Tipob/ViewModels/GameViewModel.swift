@@ -15,6 +15,12 @@ class GameViewModel: ObservableObject {
     private var timer: Timer?
     var randomNumberGenerator: RandomNumberGenerator = SystemRandomNumberGenerator()
 
+    #if DEBUG
+    private var classicGestureHistory: [GestureType] = []
+    private var classicModeReplaySequence: [GestureType]? = nil
+    private var classicModeReplayIndex: Int = 0
+    #endif
+
     init() {
         gameModel.bestStreak = PersistenceManager.shared.loadBestStreak()
         classicModeModel.bestScore = PersistenceManager.shared.loadClassicBestScore()
@@ -35,6 +41,12 @@ class GameViewModel: ObservableObject {
     func startClassicMode() {
         isClassicMode = true
         classicModeModel.reset()
+
+        #if DEBUG
+        DevConfigManager.shared.clearLogs()
+        classicGestureHistory.removeAll()
+        #endif
+
         gameState = .classicMode
         showNextClassicGesture()
     }
@@ -50,6 +62,11 @@ class GameViewModel: ObservableObject {
     func startGame() {
         isClassicMode = false
         gameModel.reset()
+
+        #if DEBUG
+        DevConfigManager.shared.clearLogs()
+        #endif
+
         gameModel.startNewRound(with: &randomNumberGenerator, discreetMode: discreetModeEnabled)
         gameState = .showSequence
         showingGestureIndex = 0
@@ -82,6 +99,18 @@ class GameViewModel: ObservableObject {
         gameModel.currentGestureIndex = 0
         timeRemaining = GameConfiguration.perGestureTime
 
+        #if DEBUG
+        // Apply grace period if transitioning from motion to touch gesture
+        if gameModel.currentGestureIndex < gameModel.sequence.count {
+            let currentGesture = gameModel.sequence[gameModel.currentGestureIndex]
+            if !currentGesture.isMotionGesture && MotionGestureManager.shared.lastDetectedWasMotion {
+                let gracePeriod = DevConfigManager.shared.motionToTouchGracePeriod
+                timeRemaining += gracePeriod
+                print("[\(Date().logTimestamp)] ⏱️ Grace period applied: +\(String(format: "%.1f", gracePeriod))s for motion→touch transition (Memory Mode - first gesture)")
+            }
+        }
+        #endif
+
         // Activate motion detector for first expected gesture
         activateMemoryModeDetector()
 
@@ -101,6 +130,15 @@ class GameViewModel: ObservableObject {
     func handleGesture(_ gesture: GestureType) {
         guard gameState == .awaitInput else { return }
 
+        #if DEBUG
+        // Log expected vs detected gesture
+        if gameModel.currentGestureIndex < gameModel.sequence.count {
+            let expectedGesture = gameModel.sequence[gameModel.currentGestureIndex]
+            let isCorrect = gameModel.isCurrentGestureCorrect(gesture)
+            DevConfigManager.shared.logGesture(expected: expectedGesture, detected: gesture, success: isCorrect)
+        }
+        #endif
+
         if gameModel.isCurrentGestureCorrect(gesture) {
             gameModel.addUserGesture(gesture)
             gameModel.moveToNextGesture()
@@ -112,6 +150,18 @@ class GameViewModel: ObservableObject {
                 // Move to next gesture - update detector for next expected gesture
                 activateMemoryModeDetector()
                 timeRemaining = GameConfiguration.perGestureTime
+
+                #if DEBUG
+                // Apply grace period if transitioning from motion to touch gesture
+                if gameModel.currentGestureIndex < gameModel.sequence.count {
+                    let currentGesture = gameModel.sequence[gameModel.currentGestureIndex]
+                    if !currentGesture.isMotionGesture && MotionGestureManager.shared.lastDetectedWasMotion {
+                        let gracePeriod = DevConfigManager.shared.motionToTouchGracePeriod
+                        timeRemaining += gracePeriod
+                        print("[\(Date().logTimestamp)] ⏱️ Grace period applied: +\(String(format: "%.1f", gracePeriod))s for motion→touch transition (Memory Mode - next gesture)")
+                    }
+                }
+                #endif
             }
         } else {
             gameOver()
@@ -138,6 +188,17 @@ class GameViewModel: ObservableObject {
 
     private func gameOver() {
         timer?.invalidate()
+
+        #if DEBUG
+        // Log timeout if applicable (no gesture detected before time ran out)
+        if gameModel.currentGestureIndex < gameModel.sequence.count {
+            let expectedGesture = gameModel.sequence[gameModel.currentGestureIndex]
+            DevConfigManager.shared.logGesture(expected: expectedGesture, detected: nil, success: false)
+        }
+
+        // Capture sequence for replay debugging
+        DevConfigManager.shared.captureMemorySequence(gameModel.sequence)
+        #endif
 
         // Calculate final score (Memory Mode uses round number)
         let finalScore = gameModel.round
@@ -219,6 +280,18 @@ class GameViewModel: ObservableObject {
 
         // Start countdown
         timeRemaining = classicModeModel.reactionTime
+
+        #if DEBUG
+        // Apply grace period if transitioning from motion to touch gesture
+        if let currentGesture = classicModeModel.currentGesture,
+           !currentGesture.isMotionGesture,
+           MotionGestureManager.shared.lastDetectedWasMotion {
+            let gracePeriod = DevConfigManager.shared.motionToTouchGracePeriod
+            timeRemaining += gracePeriod
+            print("[\(Date().logTimestamp)] ⏱️ Grace period applied: +\(String(format: "%.1f", gracePeriod))s for motion→touch transition (Classic Mode)")
+        }
+        #endif
+
         startClassicModeCountdown()
     }
 
@@ -237,6 +310,15 @@ class GameViewModel: ObservableObject {
         guard let currentGesture = classicModeModel.currentGesture else { return }
 
         timer?.invalidate()
+
+        #if DEBUG
+        // Log expected vs detected gesture
+        let isCorrect = isGestureCorrect(gesture, expected: currentGesture)
+        DevConfigManager.shared.logGesture(expected: currentGesture, detected: gesture, success: isCorrect)
+
+        // Track gesture in history for replay
+        classicGestureHistory.append(currentGesture)
+        #endif
 
         if isGestureCorrect(gesture, expected: currentGesture) {
             // Correct gesture
@@ -280,6 +362,18 @@ class GameViewModel: ObservableObject {
     private func classicModeGameOver() {
         timer?.invalidate()
 
+        #if DEBUG
+        // Log timeout if applicable (no gesture detected before time ran out)
+        if let currentGesture = classicModeModel.currentGesture {
+            DevConfigManager.shared.logGesture(expected: currentGesture, detected: nil, success: false)
+        }
+
+        // Capture sequence for replay debugging
+        if !classicGestureHistory.isEmpty {
+            DevConfigManager.shared.captureClassicSequence(classicGestureHistory)
+        }
+        #endif
+
         // Calculate final score (Classic Mode uses score)
         let finalScore = classicModeModel.score
 
@@ -298,4 +392,103 @@ class GameViewModel: ObservableObject {
 
         gameState = .gameOver
     }
+
+    // MARK: - Replay Methods (DEBUG ONLY)
+
+    #if DEBUG
+    /// Replay the last played Memory Mode sequence for debugging
+    func replayLastMemorySequence() {
+        guard let storedSequence = DevConfigManager.shared.lastMemorySequence else {
+            print("❌ No Memory sequence to replay")
+            return
+        }
+
+        isClassicMode = false
+        gameModel.reset()
+
+        // Inject stored sequence instead of generating new one
+        gameModel.sequence = storedSequence
+        gameModel.round = storedSequence.count
+
+        DevConfigManager.shared.clearLogs()
+
+        gameState = .showSequence
+        showingGestureIndex = 0
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.showNextGestureInSequence()
+        }
+
+        print("🔄 Replaying Memory sequence (\(storedSequence.count) gestures): \(storedSequence.map { $0.displayName }.joined(separator: ", "))")
+    }
+
+    /// Replay the last played Classic Mode sequence for debugging
+    func replayLastClassicSequence() {
+        guard let storedSequence = DevConfigManager.shared.lastClassicSequence,
+              !storedSequence.isEmpty else {
+            print("❌ No Classic sequence to replay")
+            return
+        }
+
+        isClassicMode = true
+        classicModeModel.reset()
+
+        DevConfigManager.shared.clearLogs()
+        classicGestureHistory.removeAll()
+
+        // Set up replay state
+        classicModeReplaySequence = storedSequence
+        classicModeReplayIndex = 0
+
+        gameState = .classicMode
+        showNextClassicReplayGesture()
+
+        print("🔄 Replaying Classic sequence (\(storedSequence.count) gestures): \(storedSequence.map { $0.displayName }.joined(separator: ", "))")
+    }
+
+    /// Show next gesture in Classic Mode replay sequence
+    private func showNextClassicReplayGesture() {
+        guard let replaySequence = classicModeReplaySequence,
+              classicModeReplayIndex < replaySequence.count else {
+            // Replay finished - switch to normal generation
+            classicModeReplaySequence = nil
+            showNextClassicGesture()
+            return
+        }
+
+        // Use stored gesture instead of generating random
+        classicModeModel.currentGesture = replaySequence[classicModeReplayIndex]
+        classicModeReplayIndex += 1
+
+        // Activate motion detector if needed
+        if let currentGesture = classicModeModel.currentGesture,
+           currentGesture.isMotionGesture {
+            MotionGestureManager.shared.activateDetector(
+                for: currentGesture,
+                onDetected: { [weak self] in
+                    self?.handleClassicModeGesture(currentGesture)
+                },
+                onWrongGesture: { [weak self] in
+                    self?.classicModeGameOver()
+                }
+            )
+        } else {
+            MotionGestureManager.shared.deactivateAllDetectors()
+        }
+
+        // Start countdown
+        timeRemaining = classicModeModel.reactionTime
+
+        // Apply grace period if transitioning from motion to touch gesture
+        if let currentGesture = classicModeModel.currentGesture,
+           !currentGesture.isMotionGesture,
+           MotionGestureManager.shared.lastDetectedWasMotion {
+            let gracePeriod = DevConfigManager.shared.motionToTouchGracePeriod
+            timeRemaining += gracePeriod
+            print("[\(Date().logTimestamp)] ⏱️ Grace period applied: +\(String(format: "%.1f", gracePeriod))s for motion→touch transition (Classic Replay)")
+        }
+
+        startClassicModeCountdown()
+    }
+    #endif
 }

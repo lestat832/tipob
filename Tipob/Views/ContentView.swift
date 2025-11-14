@@ -44,8 +44,13 @@ struct ContentView: View {
                     .transition(.opacity)
 
             case .gameOver:
+                #if DEBUG
+                GameOverView(viewModel: viewModel, showDevPanel: $showDevPanel)
+                    .transition(.slide)
+                #else
                 GameOverView(viewModel: viewModel)
                     .transition(.slide)
+                #endif
 
             case .leaderboard:
                 LeaderboardView()
@@ -54,9 +59,8 @@ struct ContentView: View {
         }
         .animation(.easeInOut(duration: 0.3), value: viewModel.gameState)
         #if DEBUG
-        .overlay(DevPanelGestureOverlay(isPresented: $showDevPanel))
         .sheet(isPresented: $showDevPanel) {
-            DevPanelView()
+            DevPanelView(viewModel: viewModel)
         }
         #endif
     }
