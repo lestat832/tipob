@@ -2,43 +2,65 @@
 
 ## Completed Tasks
 
-### Out of Pocket Landing Page Deployment
-- ✅ Cloned `oop-door-b59dd403` repository to `/tmp/oop-door-b59dd403`
-- ✅ Updated `vite.config.ts` with correct GitHub Pages base path (`/oop-door-b59dd403/`)
-- ✅ Installed npm dependencies (380 packages)
-- ✅ Built production bundle with Vite (`dist/` folder generated)
-- ✅ Committed and pushed changes to GitHub (commit: 7e3b3ec)
+### Out of Pocket Landing Page - GitHub Pages Deployment
+
+✅ **Root Deployment Strategy Implemented**
+- Discovered GitHub Pages only supports `/` (root) or `/docs` folders (not `/dist`)
+- User chose root deployment for simplicity
+- Copied production build from `dist/` to repository root
+- Committed and pushed all production files to GitHub
+
+**Files Deployed:**
+- `index.html` (production entry point)
+- `assets/` directory (compiled JS ~309 KB, CSS ~58 KB)
+- `favicon.ico`, `placeholder.svg`, `robots.txt`
+
+**Repository:** https://github.com/lestat832/oop-door-b59dd403
 
 ## In Progress
 
-### GitHub Pages Configuration (Manual Step Required)
-User needs to configure GitHub Pages settings in repository:
+### GitHub Pages Configuration (User Action Required)
+User needs to complete final manual step in GitHub settings:
 1. Go to https://github.com/lestat832/oop-door-b59dd403/settings/pages
-2. Source: Deploy from a branch
-3. Branch: main, Folder: /dist
-4. Save settings
+2. Select **/ (root)** from folder dropdown
+3. Click Save
 
 ## Next Session
 
-1. **Test deployment** - Verify site loads at https://lestat832.github.io/oop-door-b59dd403/
-2. **Share with stakeholders** - Once live, landing page ready for shareholder review
+1. **Verify deployment** - Once user configures GitHub Pages, test at https://lestat832.github.io/oop-door-b59dd403/
+2. **Share with stakeholders** - Landing page ready for shareholder review
 
 ## Key Decisions
 
-- **Local build approach**: User opted for local build + manual push instead of GitHub Actions automation
-- **Base path configuration**: Added `/oop-door-b59dd403/` to vite.config.ts for correct asset loading on GitHub Pages subpath
-- **Force-add dist/**: Overrode .gitignore to commit built files for GitHub Pages deployment
+**Deployment Approach:**
+- **Initial Plan**: Build to `/dist`, configure GitHub Pages to serve from `/dist`
+- **Problem Discovered**: GitHub Pages only supports `/` or `/docs` folders
+- **Solution Chosen**: Deploy from root (/) - simpler, fewer steps
+- **Alternative Rejected**: Rebuild to `/docs` - unnecessary complexity
 
-## Technical Details
-
-**Repository Journey:**
-- Initial: `out-of-pocket-launch` → renamed to `oop-door` → final: `oop-door-b59dd403`
-- Made public for GitHub Pages hosting
-
-**Tech Stack:**
-- Vite 5.4.19 + React + TypeScript + Tailwind CSS
-- Build output: ~309 KB JS, ~58 KB CSS (gzipped: ~99 KB + ~10 KB)
+**Technical Details:**
+- Had to handle git rebase conflict (remote had changes)
+- Successfully rebased and pushed (commit: cf221af)
+- Vite config base path was removed in remote (Lovable likely auto-updated)
+- Root deployment doesn't require base path configuration
 
 ## Blockers/Issues
 
-None - awaiting user to complete manual GitHub Pages configuration step.
+None - awaiting user to complete final GitHub Pages configuration step (manual UI interaction required).
+
+## Session Timeline
+
+1. Initial attempt: tried to use `/dist` folder for GitHub Pages
+2. Discovered limitation: only `/` or `/docs` supported
+3. Presented options: root vs docs deployment
+4. User chose root deployment (Option 1)
+5. Copied dist contents to root
+6. Handled git rebase conflict
+7. Successfully pushed to GitHub
+8. Ready for user to configure GitHub Pages settings
+
+## Repository State
+
+**Branch:** main
+**Last Commit:** cf221af - "feat: Deploy production build to root for GitHub Pages"
+**Production Files:** All built assets in repository root, ready for deployment
