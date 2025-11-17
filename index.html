@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Out of Pocket - Coming Soon</title>
+    <style>
+        :root {
+            /* 9 Gesture Colors */
+            --toy-blue: #0066FF;
+            --toy-green: #00CC00;
+            --toy-red: #FF0000;
+            --safety-orange: #FF6600;
+            --toy-yellow: #FFCC00;
+            --purple-pop: #9900FF;
+            --bubble-pink: #FF0099;
+            --sky-blue: #0099FF;
+            --mint-fresh: #00FFCC;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--purple-pop) 0%, var(--toy-blue) 50%, var(--mint-fresh) 100%);
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating dots animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes float-alternate {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* Top decoration dots - 9 floating dots */
+        .top-dots {
+            display: flex;
+            gap: 10px;
+            margin-top: 60px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 0 20px;
+        }
+
+        .dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .dot:nth-child(1) { background: var(--toy-blue); animation-delay: 0s; }
+        .dot:nth-child(2) { background: var(--toy-green); animation-delay: 0.2s; animation-name: float-alternate; }
+        .dot:nth-child(3) { background: var(--toy-red); animation-delay: 0.4s; }
+        .dot:nth-child(4) { background: var(--safety-orange); animation-delay: 0.6s; animation-name: float-alternate; }
+        .dot:nth-child(5) { background: var(--toy-yellow); animation-delay: 0.8s; }
+        .dot:nth-child(6) { background: var(--purple-pop); animation-delay: 1s; animation-name: float-alternate; }
+        .dot:nth-child(7) { background: var(--bubble-pink); animation-delay: 1.2s; }
+        .dot:nth-child(8) { background: var(--sky-blue); animation-delay: 1.4s; animation-name: float-alternate; }
+        .dot:nth-child(9) { background: var(--mint-fresh); animation-delay: 1.6s; }
+
+        /* Main content */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: clamp(48px, 12vw, 120px);
+            font-weight: 900;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: clamp(18px, 3vw, 32px);
+            font-weight: 400;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            max-width: 800px;
+            line-height: 1.4;
+        }
+
+        .coming-soon-badge {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 12px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Email form */
+        .email-form {
+            display: flex;
+            gap: 16px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .email-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1F2937;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-input::placeholder {
+            color: #9CA3AF;
+        }
+
+        .email-input:focus {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 6px 20px rgba(0, 102, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* White gradient button with blue text (Lovable spec) */
+        .submit-button {
+            padding: 16px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%);
+            color: var(--toy-blue);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 102, 255, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .submit-button:hover {
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 102, 255, 0.3);
+        }
+
+        .submit-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .submit-button:active {
+            transform: scale(0.98) translateY(0);
+        }
+
+        /* Success message with animation */
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes confetti {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .success-message {
+            display: none;
+            margin-top: 20px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.3) 100%);
+            border: 2px solid rgba(16, 185, 129, 0.5);
+            border-radius: 50px;
+            color: #D1FAE5;
+            font-weight: 600;
+            font-size: 18px;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .success-message.show {
+            display: block;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        /* Confetti particles */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: confetti 1.5s ease-out forwards;
+            pointer-events: none;
+        }
+
+        /* Bottom decoration bars - 5 bars with gesture colors */
+        .bottom-bars {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .bar {
+            width: 60px;
+            height: 5px;
+            border-radius: 3px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .bar:nth-child(1) { background: var(--toy-green); }
+        .bar:nth-child(2) { background: var(--safety-orange); }
+        .bar:nth-child(3) { background: var(--bubble-pink); }
+        .bar:nth-child(4) { background: var(--toy-yellow); }
+        .bar:nth-child(5) { background: var(--sky-blue); }
+
+        /* Footer */
+        footer {
+            padding: 30px 20px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Decorative accent lines */
+        .accent-lines {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 200px;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+
+        .accent-line {
+            position: absolute;
+            height: 2px;
+            border-radius: 1px;
+        }
+
+        .accent-line:nth-child(1) {
+            width: 300px;
+            background: var(--toy-red);
+            top: 20%;
+            left: 10%;
+            transform: rotate(-15deg);
+        }
+
+        .accent-line:nth-child(2) {
+            width: 400px;
+            background: var(--toy-yellow);
+            top: 60%;
+            right: 10%;
+            transform: rotate(15deg);
+        }
+
+        .accent-line:nth-child(3) {
+            width: 250px;
+            background: var(--mint-fresh);
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%) rotate(-5deg);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .top-dots {
+                margin-top: 40px;
+                gap: 8px;
+            }
+
+            .dot {
+                width: 14px;
+                height: 14px;
+            }
+
+            .email-form {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .email-input {
+                min-width: 100%;
+            }
+
+            .submit-button {
+                width: 100%;
+            }
+
+            .bottom-bars {
+                gap: 12px;
+            }
+
+            .bar {
+                width: 40px;
+                height: 4px;
+            }
+
+            .accent-lines {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative accent lines -->
+    <div class="accent-lines">
+        <div class="accent-line"></div>
+        <div class="accent-line"></div>
+        <div class="accent-line"></div>
+    </div>
+
+    <!-- 9 floating dots (all gesture colors) -->
+    <div class="top-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+    <div class="content">
+        <h1>Out of Pocket</h1>
+        <p class="subtitle">The fast-paced reflex + memory game for your phone.</p>
+
+        <div class="coming-soon-badge">Coming Soon</div>
+
+        <form class="email-form" id="waitlistForm">
+            <input
+                type="email"
+                class="email-input"
+                placeholder="Enter your email"
+                required
+                id="emailInput"
+            >
+            <button type="submit" class="submit-button">Join the Waitlist</button>
+        </form>
+
+        <div class="success-message" id="successMessage">
+            You're on the list! 🎉
+        </div>
+    </div>
+
+    <!-- 5 colored bars (gesture colors) -->
+    <div class="bottom-bars">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+
+    <footer>
+        © 2025 Out of Pocket
+    </footer>
+
+    <script>
+        // Gesture colors for confetti
+        const gestureColors = [
+            '#0066FF', // Toy Blue
+            '#00CC00', // Toy Green
+            '#FF0000', // Toy Red
+            '#FF6600', // Safety Orange
+            '#FFCC00', // Toy Yellow
+            '#9900FF', // Purple Pop
+            '#FF0099', // Bubble Pink
+            '#0099FF', // Sky Blue
+            '#00FFCC'  // Mint Fresh
+        ];
+
+        // Create confetti burst
+        function createConfetti(x, y) {
+            for (let i = 0; i < 15; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = x + 'px';
+                confetti.style.top = y + 'px';
+                confetti.style.background = gestureColors[Math.floor(Math.random() * gestureColors.length)];
+
+                const angle = (Math.random() * 360) * Math.PI / 180;
+                const velocity = 100 + Math.random() * 100;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+
+                confetti.style.setProperty('--tx', tx + 'px');
+                confetti.style.setProperty('--ty', ty + 'px');
+
+                document.body.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 1500);
+            }
+        }
+
+        // Form submission handler
+        document.getElementById('waitlistForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const emailInput = document.getElementById('emailInput');
+            const successMessage = document.getElementById('successMessage');
+            const submitButton = e.target.querySelector('.submit-button');
+
+            // Get button position for confetti
+            const rect = submitButton.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+
+            // Create confetti burst
+            createConfetti(x, y);
+
+            // Show success message
+            successMessage.classList.add('show');
+
+            // Clear input
+            emailInput.value = '';
+
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 5000);
+
+            // TODO: Add actual email collection backend
+            console.log('Email submitted (no backend configured yet)');
+        });
+    </script>
+</body>
+</html>
