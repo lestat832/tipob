@@ -11,7 +11,7 @@ class FailureFeedbackManager {
     /// Called whenever player makes a wrong gesture or times out
     func playFailureFeedback() {
         // Fire both simultaneously for maximum impact
-        SoundManager.shared.playFailureSound()
+        AudioManager.shared.playFailure()
         HapticManager.shared.playFailureFeedback()
     }
 }

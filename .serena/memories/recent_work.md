@@ -1,161 +1,58 @@
-# Recent Work Highlights
+# Recent Work - Audio System Implementation
 
-## November 18, 2025 - Audio System Implementation
+## Session: November 18, 2025
 
-**Major Accomplishment:** Implemented complete production-ready audio system for Out of Pocket game.
+### Major Achievement: Complete Audio System
 
-### What Was Built
+Successfully implemented comprehensive audio system for Out of Pocket game:
 
-**AudioManager.swift - Complete Audio Engine:**
-- Singleton pattern with 4 public methods
-- AVAudioEngine + AVAudioUnitTimePitch for pitch-shifted countdown
-- AVAudioPlayers for success/round complete sounds
-- System sound for failure (interrupts everything)
-- Preloaded sound files for zero-latency playback
-- AVAudioSession configured for ambient playback
+**Sound Types Implemented (4 total):**
+1. Success tick (45-70ms) - After each correct gesture
+2. Round complete chime (180-300ms) - Sequence completion/milestones
+3. Countdown beeps (3-2-1-GO) - Pitch-shifted (600-850Hz)
+4. Failure sound (SystemSoundID 1073) - Wrong gesture/timeout
 
-**UserSettings.swift - Preferences Wrapper:**
-- Clean API for sound/haptics settings
-- UserDefaults wrapper with default values
-- Simple properties: `soundEnabled`, `hapticsEnabled`
+**Key Learning: Audio Integration Performance**
 
-**Sound Files (CAF format):**
-- gesture_success_tick.caf (86ms)
-- round_complete_chime.caf (54ms)
-- countdown_beep.caf (297ms)
-- All mono, 44.1kHz, 16-bit
+**Problem encountered:** Initial implementation caused app launch hang (0.28-0.43s)
+- AudioManager singleton initialized during app launch
+- AVAudioSession + AVAudioEngine + file preloading blocked main thread
 
-### Technical Highlights
+**Solution:** Lazy initialization pattern
+- Empty init() - no blocking on launch
+- ensureInitialized() called on first use
+- Thread-safe with DispatchQueue
 
-**Pitch Shifting Implementation:**
-```swift
-// Single audio file shifted to 4 different frequencies
-// 3 → 600 Hz
-// 2 → 650 Hz
-// 1 → 700 Hz
-// GO → 850 Hz
-```
+**Lesson:** Always consider lazy initialization for singletons that perform expensive setup (audio, networking, ML models).
 
-Uses AVAudioUnitTimePitch with cents calculation:
-```swift
-let centsShift = 1200 * log2(targetFrequency / baseFrequency)
-timePitch.pitch = centsShift
-```
+**Key Learning: Audio Session Conflicts**
 
-**Interruption Logic:**
-- Success interrupts previous success (rapid fire handling)
-- Round complete can overlap with success
-- Failure immediately stops ALL sounds (countdown, success, round)
-- Countdown cannot be interrupted (except by failure)
+**Problem encountered:** Failure sound quality changed after integration
+- Two classes (SoundManager + AudioManager) configuring same shared AVAudioSession
+- Conflicting options: .mixWithOthers vs .mixWithOthers + .duckOthers
+- SystemSoundID playback affected by session state
 
-**Audio Session Configuration:**
-```swift
-category: .ambient        // Doesn't interrupt other apps
-options: .mixWithOthers   // Allow Spotify to play
-         .duckOthers      // Lower volume during calls/Siri
-```
+**Solution:** Consolidate to single audio system
+- Delete redundant SoundManager
+- AudioManager as single source of truth for audio session config
 
-### Problem Solved: OGG to CAF Conversion
+**Lesson:** Only one class should configure AVAudioSession in an app. Multiple configs create unpredictable behavior.
 
-**Challenge:** User uploaded sound files in OGG format, which AVAudioPlayer doesn't support.
+## Patterns Learned
 
-**Solution:** Used macOS `afconvert` tool to convert OGG → CAF:
-```bash
-afconvert input.ogg output.caf -d LEI16@44100 -f caff -c 1
-```
+**SwiftUI Layout Debugging:**
+- Large center elements can push side elements off screen
+- Always consider element size relative to screen width
+- Test on smallest target device (iPhone SE) first
 
-**Key Parameters:**
-- `-d LEI16@44100` = 16-bit Linear PCM at 44.1 kHz
-- `-f caff` = CAF file format
-- `-c 1` = Mono (1 channel)
+**Audio File Management:**
+- CAF format preferred for iOS (native Core Audio Format)
+- Preload small files (<1MB) for zero-latency playback
+- Use AVAudioEngine for effects (pitch shifting, reverb, etc.)
+- Use AVAudioPlayer for simple playback
+- Use SystemSoundID for system sounds (respects silent mode)
 
-**Result:** All 3 files successfully converted and committed.
-
-### Pattern Learned: Audio Format Compatibility
-
-**iOS AVAudioPlayer Support:**
-- ✅ CAF, M4A, WAV, AIFF, MP3, ALAC
-- ❌ OGG Vorbis
-
-**Best Practice for iOS Audio:**
-1. Use CAF format (native iOS support)
-2. Mono for sound effects (stereo wastes space)
-3. 44.1 kHz sample rate (iOS standard)
-4. 16-bit encoding (good quality/size balance)
-
-### Integration Guide Created
-
-Comprehensive documentation in `audio-integration-guide.md`:
-- Complete API reference
-- GameViewModel integration examples
-- Testing scenarios
-- Troubleshooting guide
-- Performance notes
-
-### Next Steps Required
-
-1. **Xcode Setup:**
-   - Verify CAF files in target membership
-   - Build and test preview
-
-2. **Integration:**
-   - Add AudioManager calls to GameViewModel
-   - Test all 4 sound types
-   - Fine-tune volumes/timing
-
-3. **Testing:**
-   - Test on physical device
-   - Verify silent mode behavior
-   - Test background audio mixing
-   - Test rapid sounds and interruptions
-
-## November 17, 2025 - Landing Page Complete Rebuild
-
-**Accomplishment:** Replaced complex React/Vite landing page with clean single-file HTML.
-
-**Key Learning:** Simplicity over complexity - single HTML file better than build system for static painted-door MVPs.
-
-**Status:** Deployed to oop-door-b59dd403, awaiting GitHub Pages configuration.
-
-## November 14, 2025 - Audio Documentation Session
-
-**Brief session:** Documented current audio state for brainstorming.
-
-**Opportunity identified:** 14 gestures need unique sounds, 4-phase implementation plan (22-28 hours).
-
-## Pattern Recognition: Production-Ready Code
-
-**Trend observed across sessions:**
-- Complete implementations with error handling
-- Graceful degradation (missing files don't crash)
-- DEBUG-only logging (no production noise)
-- Memory management (preload, keep in memory)
-- Comprehensive documentation
-- SwiftUI previews for testing
-
-**Application:** Professional-grade code suitable for App Store submission, not just proof-of-concept.
-
-## Audio System Architecture Summary
-
-```swift
-AudioManager (Singleton)
-├── AVAudioEngine (countdown pitch shifting)
-│   ├── AVAudioPlayerNode
-│   └── AVAudioUnitTimePitch (600-850 Hz)
-├── AVAudioPlayer (success) - interruptible
-├── AVAudioPlayer (round complete) - can overlap
-└── SystemSoundID 1073 (failure) - interrupts all
-
-UserSettings (Static properties)
-├── soundEnabled: Bool (default true)
-└── hapticsEnabled: Bool (default true)
-```
-
-**Deliverables:**
-- ✅ AudioManager.swift (250 lines, production-ready)
-- ✅ UserSettings.swift (50 lines, clean API)
-- ✅ 3 CAF sound files (converted, optimized)
-- ✅ Integration guide (comprehensive documentation)
-- ✅ SwiftUI preview (testing tool)
-
-**Total Implementation Time:** ~3-4 hours (complete audio system from spec to deployment)
+**Swift Concurrency:**
+- Task {} for async operations without blocking
+- await Task.sleep() for delays in async context
+- MainActor.run {} for UI updates from async context

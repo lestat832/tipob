@@ -10,13 +10,41 @@
 		92F8CB4D2EC3E87C00E7A169 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 92F8CB4C2EC3E87C00E7A169 /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		92F8CC252ECD2C4100E7A169 /* Copy Files (3 items) */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+			);
+			name = "Copy Files (3 items)";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		9205ABDB2E89F6A8006A347A /* Tipob.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tipob.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		92F8CC292ECD2C6E00E7A169 /* Exceptions for "Tipob" folder in "Copy Files (3 items)" phase from "Tipob" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 92F8CC252ECD2C4100E7A169 /* Copy Files (3 items) */;
+			membershipExceptions = (
+				Resources/Sounds/countdown_beep.caf,
+				Resources/Sounds/gesture_success_tick.caf,
+				Resources/Sounds/round_complete_chime.caf,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9205ABDD2E89F6A8006A347A /* Tipob */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				92F8CC292ECD2C6E00E7A169 /* Exceptions for "Tipob" folder in "Copy Files (3 items)" phase from "Tipob" target */,
+			);
 			path = Tipob;
 			sourceTree = "<group>";
 		};
@@ -59,6 +87,7 @@
 			buildPhases = (
 				9205ABD72E89F6A8006A347A /* Sources */,
 				9205ABD82E89F6A8006A347A /* Frameworks */,
+				92F8CC252ECD2C4100E7A169 /* Copy Files (3 items) */,
 			);
 			buildRules = (
 			);

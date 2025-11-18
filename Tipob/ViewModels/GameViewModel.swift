@@ -71,9 +71,19 @@ class GameViewModel: ObservableObject {
         gameState = .showSequence
         showingGestureIndex = 0
 
-        // Add initial delay so player can read "Watch the sequence!" message
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.showNextGestureInSequence()
+        // Play countdown sequence (3-2-1-GO) before showing sequence
+        Task {
+            for step in [3, 2, 1, 0] {
+                AudioManager.shared.playCountdownStep(step: step)
+                try? await Task.sleep(nanoseconds: 350_000_000) // 350ms between beeps
+            }
+
+            // Add delay so player can read "Watch the sequence!" message after countdown
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
+
+            await MainActor.run {
+                self.showNextGestureInSequence()
+            }
         }
     }
 
@@ -143,6 +153,7 @@ class GameViewModel: ObservableObject {
             gameModel.addUserGesture(gesture)
             gameModel.moveToNextGesture()
             HapticManager.shared.impact()
+            AudioManager.shared.playSuccess()
 
             if gameModel.hasCompletedSequence() {
                 successfulRound()
@@ -173,6 +184,7 @@ class GameViewModel: ObservableObject {
         gameState = .judge
         flashColor = .toyBoxSuccess
         HapticManager.shared.success()
+        AudioManager.shared.playRoundComplete()
 
         withAnimation(.easeInOut(duration: GameConfiguration.flashAnimationDuration)) {
             flashColor = .clear
@@ -325,6 +337,12 @@ class GameViewModel: ObservableObject {
             classicModeModel.recordSuccess()
             flashColor = .toyBoxSuccess
             HapticManager.shared.success()
+            AudioManager.shared.playSuccess()
+
+            // Play round complete milestone every 3 gestures
+            if classicModeModel.score % 3 == 0 {
+                AudioManager.shared.playRoundComplete()
+            }
 
             // Generate next gesture IMMEDIATELY so it's visible right away
             showNextClassicGesture()

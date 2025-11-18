@@ -33,13 +33,28 @@ class AudioManager {
     // MARK: - State Tracking
 
     private var isCountdownPlaying = false
+    private var isInitialized = false
+    private let initQueue = DispatchQueue(label: "com.outofpocket.audio.init")
 
     // MARK: - Initialization
 
     private init() {
-        configureAudioSession()
-        setupAudioEngine()
-        preloadSoundFiles()
+        // Lazy initialization - setup happens on first use to avoid blocking app launch
+    }
+
+    /// Ensure AudioManager is initialized before use (lazy initialization pattern)
+    private func ensureInitialized() {
+        guard !isInitialized else { return }
+
+        initQueue.sync {
+            guard !isInitialized else { return }
+
+            configureAudioSession()
+            setupAudioEngine()
+            preloadSoundFiles()
+
+            isInitialized = true
+        }
     }
 
     // MARK: - AVAudioSession Configuration
@@ -146,6 +161,7 @@ class AudioManager {
     /// Interruptible: Yes (by next success sound)
     /// Use: After every correct gesture
     func playSuccess() {
+        ensureInitialized()
         guard UserSettings.soundEnabled else { return }
         guard let player = successPlayer else { return }
 
@@ -166,6 +182,7 @@ class AudioManager {
     /// Must be overridden by: Failure sound
     /// Use: Classic every 3 gestures, Memory full sequence, PvP player finishes turn
     func playRoundComplete() {
+        ensureInitialized()
         guard UserSettings.soundEnabled else { return }
         guard let player = roundCompletePlayer else { return }
 
@@ -185,6 +202,7 @@ class AudioManager {
     /// - step 0 (GO) → 850 Hz
     /// - Parameter step: Countdown step (3, 2, 1, 0 for GO)
     func playCountdownStep(step: Int) {
+        ensureInitialized()
         guard UserSettings.soundEnabled else { return }
         guard let audioFile = countdownAudioFile else { return }
 
@@ -232,6 +250,7 @@ class AudioManager {
     /// Interrupts: Everything (success, round complete, countdown)
     /// Use: Wrong gesture, timeout, game over
     func playFailure() {
+        ensureInitialized()
         guard UserSettings.soundEnabled else { return }
 
         // FAILURE PREEMPTION: Stop all other sounds immediately
