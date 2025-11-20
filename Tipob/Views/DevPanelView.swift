@@ -9,6 +9,12 @@
 #if DEBUG
 import SwiftUI
 
+/// Wrapper to make URL identifiable for sheet presentation
+private struct IdentifiableURL: Identifiable {
+    let id = UUID()
+    let url: URL
+}
+
 struct DevPanelView: View {
 
     @ObservedObject var viewModel: GameViewModel
@@ -19,23 +25,13 @@ struct DevPanelView: View {
     @State private var exportURL: URL?
     @State private var showingResetAlert = false
 
-    // Log filtering
-    @State private var selectedFilter: LogFilter = .all
-    @State private var selectedGestureFilter: GestureType? = nil
-    @State private var showingExportIssuesSheet = false
-    @State private var exportIssuesURL: URL?
+    // Export issues (using Identifiable wrapper for reliable sheet presentation)
+    @State private var exportIssuesItem: IdentifiableURL?
 
     // Per-gesture testing
     @State private var showingGestureTest = false
     @State private var activeTestMode: GestureTestMode = .none
     @State private var showingTestResult = false
-
-    enum LogFilter: String, CaseIterable {
-        case all = "All"
-        case failures = "Failures"
-        case selected = "Selected"
-        case byGesture = "By Gesture"
-    }
 
     var body: some View {
         NavigationView {
@@ -114,25 +110,6 @@ struct DevPanelView: View {
 
     // MARK: - Gameplay Logs Section
 
-    private var filteredLogs: [GestureLogEntry] {
-        var logs = config.gameplayLogs
-
-        switch selectedFilter {
-        case .all:
-            break
-        case .failures:
-            logs = logs.filter { $0.issueType != .success }
-        case .selected:
-            logs = logs.filter { $0.isSelected }
-        case .byGesture:
-            if let gesture = selectedGestureFilter {
-                logs = logs.filter { $0.expectedGesture == gesture }
-            }
-        }
-
-        return logs.reversed()
-    }
-
     private var logsSection: some View {
         VStack(spacing: 12) {
             // Header with selection badge
@@ -158,40 +135,7 @@ struct DevPanelView: View {
                     .foregroundColor(.secondary)
             }
 
-            // Filter buttons
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(LogFilter.allCases, id: \.self) { filter in
-                        Button(action: {
-                            selectedFilter = filter
-                            if filter != .byGesture {
-                                selectedGestureFilter = nil
-                            }
-                        }) {
-                            Text(filter.rawValue)
-                                .font(.caption)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(selectedFilter == filter ? Color.blue : Color.secondary.opacity(0.2))
-                                .foregroundColor(selectedFilter == filter ? .white : .primary)
-                                .cornerRadius(8)
-                        }
-                    }
-                }
-            }
-
-            // Gesture filter picker (when "By Gesture" is selected)
-            if selectedFilter == .byGesture {
-                Picker("Gesture", selection: $selectedGestureFilter) {
-                    Text("All Gestures").tag(nil as GestureType?)
-                    ForEach(GestureType.allBasicGestures, id: \.self) { gesture in
-                        Text(gesture.displayName).tag(gesture as GestureType?)
-                    }
-                }
-                .pickerStyle(.menu)
-            }
-
-            // Selection helper buttons
+            // Selection helper buttons (simplified)
             HStack(spacing: 8) {
                 Button("Select Failures") {
                     config.selectAllFailures()
@@ -211,15 +155,6 @@ struct DevPanelView: View {
                 .background(Color.secondary.opacity(0.2))
                 .cornerRadius(6)
 
-                Button("Invert") {
-                    config.invertSelection()
-                }
-                .font(.caption)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.secondary.opacity(0.2))
-                .cornerRadius(6)
-
                 Spacer()
             }
 
@@ -229,15 +164,10 @@ struct DevPanelView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding()
-            } else if filteredLogs.isEmpty {
-                Text("No entries match the current filter")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding()
             } else {
                 ScrollView {
                     VStack(spacing: 4) {
-                        ForEach(filteredLogs) { log in
+                        ForEach(config.gameplayLogs.reversed()) { log in
                             LogEntryRow(log: log) {
                                 config.toggleSelection(for: log.id)
                             }
@@ -693,8 +623,7 @@ struct DevPanelView: View {
             if config.selectedCount > 0 {
                 Button(action: {
                     if let url = config.exportSelectedIssues() {
-                        exportIssuesURL = url
-                        showingExportIssuesSheet = true
+                        exportIssuesItem = IdentifiableURL(url: url)
                     }
                 }) {
                     HStack {
@@ -708,23 +637,6 @@ struct DevPanelView: View {
                     .cornerRadius(12)
                 }
 
-                // Generate XCTest Code
-                Button(action: {
-                    if let url = config.generateXCTestCode() {
-                        exportIssuesURL = url
-                        showingExportIssuesSheet = true
-                    }
-                }) {
-                    HStack {
-                        Image(systemName: "hammer")
-                        Text("Generate XCTest Code")
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.purple.opacity(0.2))
-                    .foregroundColor(.purple)
-                    .cornerRadius(12)
-                }
             }
 
             // Export Settings
@@ -760,10 +672,8 @@ struct DevPanelView: View {
                 .cornerRadius(12)
             }
         }
-        .sheet(isPresented: $showingExportIssuesSheet) {
-            if let url = exportIssuesURL {
-                ShareSheet(activityItems: [url])
-            }
+        .sheet(item: $exportIssuesItem) { item in
+            ShareSheet(activityItems: [item.url])
         }
     }
 }

@@ -988,6 +988,7 @@ enum GestureTestMode: String, CaseIterable {
     case raisePhone
     case lowerPhone
     case pinch
+    case stroop
 
     /// Display name for UI
     var displayName: String {
@@ -1006,6 +1007,7 @@ enum GestureTestMode: String, CaseIterable {
         case .raisePhone: return "Raise Phone"
         case .lowerPhone: return "Lower Phone"
         case .pinch: return "Pinch"
+        case .stroop: return "Stroop"
         }
     }
 
@@ -1026,6 +1028,7 @@ enum GestureTestMode: String, CaseIterable {
         case .raisePhone: return .raise
         case .lowerPhone: return .lower
         case .pinch: return .pinch
+        case .stroop: return .randomStroop()
         }
     }
 
@@ -1046,6 +1049,7 @@ enum GestureTestMode: String, CaseIterable {
         case .raisePhone: return "Raise the phone up"
         case .lowerPhone: return "Lower the phone down"
         case .pinch: return "Pinch with two fingers"
+        case .stroop: return "Swipe the color direction"
         }
     }
 
@@ -1066,6 +1070,7 @@ enum GestureTestMode: String, CaseIterable {
         case .raisePhone: return "arrow.up.circle"
         case .lowerPhone: return "arrow.down.circle"
         case .pinch: return "hand.pinch"
+        case .stroop: return "paintpalette"
         }
     }
 

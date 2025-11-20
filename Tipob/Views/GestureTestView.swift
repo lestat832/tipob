@@ -24,6 +24,7 @@ struct GestureTestView: View {
     @State private var isRecording = true
     @State private var detectedGesture: GestureType? = nil
     @State private var testStartTime: Date = Date()
+    @State private var actualGesture: GestureType? = nil  // Generated once on appear
 
     // Gesture detection state
     @State private var tapCount = 0
@@ -40,8 +41,8 @@ struct GestureTestView: View {
 
     var body: some View {
         ZStack {
-            // Background - tap target
-            Color.black.opacity(0.95)
+            // Background - match classic mode gradient
+            Color.toyBoxClassicGradient
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
 
@@ -63,16 +64,28 @@ struct GestureTestView: View {
 
                 Spacer()
 
-                // Gesture icon
-                Image(systemName: testMode.symbolName)
-                    .font(.system(size: 80))
-                    .foregroundColor(.white)
+                // Gesture display - use same components as gameplay
+                if let gesture = actualGesture {
+                    if case .stroop(let wordColor, let textColor, let upColor, let downColor, let leftColor, let rightColor) = gesture {
+                        StroopPromptView(
+                            wordColor: wordColor,
+                            textColor: textColor,
+                            upColor: upColor,
+                            downColor: downColor,
+                            leftColor: leftColor,
+                            rightColor: rightColor,
+                            isAnimating: false
+                        )
+                    } else {
+                        ArrowView(gesture: gesture, isAnimating: false)
+                    }
+                } else {
+                    // Loading state
+                    ProgressView()
+                        .tint(.white)
+                }
 
-                // Instruction
-                Text(testMode.instructionText)
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
+                Spacer()
 
                 // Recording indicator
                 HStack(spacing: 8) {
@@ -124,8 +137,11 @@ struct GestureTestView: View {
         timeRemaining = testDuration
         isRecording = true
 
+        // Generate the actual gesture once (important for Stroop which is random)
+        actualGesture = testMode.gestureType
+
         // Start motion detection if needed
-        if testMode.gestureType?.isMotionGesture == true {
+        if actualGesture?.isMotionGesture == true {
             motionDetector.startDetecting(for: testMode)
         }
 
@@ -201,7 +217,8 @@ struct GestureTestView: View {
 
     private func handleSwipe(_ direction: GestureType) {
         guard isRecording else { return }
-        guard [.swipeUp, .swipeDown, .swipeLeft, .swipeRight].contains(testMode) else { return }
+        // Allow swipes for swipe tests and Stroop (Stroop is answered with a swipe)
+        guard [.swipeUp, .swipeDown, .swipeLeft, .swipeRight, .stroop].contains(testMode) else { return }
         recordResult(detected: direction)
     }
 
@@ -223,7 +240,8 @@ struct GestureTestView: View {
         isRecording = false
         cleanup()
 
-        guard let expected = testMode.gestureType else { return }
+        // Use actualGesture (generated once) to ensure Stroop uses same instance
+        guard let expected = actualGesture else { return }
 
         // Capture sensor snapshot
         let sensorSnapshot = SensorCaptureBuffer.shared.captureSnapshot()

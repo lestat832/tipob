@@ -1,60 +1,38 @@
-# Session Summary - 2025-11-19
+# Session Summary - 2025-11-20
 
 ## Completed Tasks
+- Investigated dual gesture detection issues in depth
+- Identified two separate root causes for swipe/Stroop problems
+- Documented differences between GestureTestView and real game detection systems
 
-### Audio System Fixes
-- ✅ Fixed app launch hang by simplifying AudioManager (removed AVAudioEngine)
-- ✅ Fixed warbled failure sound by removing .duckOthers and stop-all logic
-- ✅ Removed countdown feature entirely (user decision)
-- ✅ Simplified AudioManager from 419 lines → 205 lines
-- ✅ Added explicit AudioManager.initialize() called after launch
+## In Progress
+- **Issue 1: Swipe in Classic Gameplay** (inconsistent detection)
+  - Root cause: SwipeGestureModifier has strict velocity (80px/s), edge buffer (24px), and GestureCoordinator checks
+  - GestureTestView bypasses these checks (simpler DragGesture)
+  - Proposed fixes: Lower velocity threshold, add debug logging, clear coordinator on game start
+  
+- **Issue 2: Stroop in GestureTestView** (not working)
+  - Root cause: Race condition - `isRecording = true` initially but `actualGesture = nil`
+  - Quick swipes get silently dropped in recordResult()
+  - Proposed fix: Set `@State private var isRecording = false` initially
 
-### Launch Screen Redesign
-- ✅ Changed branding from "TIPOB" to "OUT OF POCKET"
-- ✅ Created new stacked title animation ("OUT OF" / "POCKET")
-- ✅ Removed title from MenuView (shown only on launch)
-- ✅ Improved launch-to-menu fade transition:
-  - Added viewOpacity state for smooth fade-out
-  - Increased animation duration from 0.3s to 0.6s
-  - Timeline: spring in → hold → fade out → menu fades in
+## Next Session
+- Implement fix for Issue 2 (simple - change isRecording initial state)
+- Add debug logging for Issue 1 to diagnose specific swipe failures
+- Consider lowering minSwipeVelocity threshold (currently 80px/s)
+- Verify GestureCoordinator.clearExpectedGesture() called when starting Classic Mode
 
-### Stroop Layout Fix
-- ✅ Fixed Stroop center word cutoff (70pt → 50pt)
+## Key Decisions
+- Two issues are completely separate with different fixes
+- GestureTestView and real gameplay use different detection systems (important to understand)
+- Should add rejection reason logging to SwipeGestureModifier for better debugging
 
-## Files Modified
+## Blockers/Issues
+- User stayed in plan mode - no code changes implemented
+- Need to determine optimal velocity threshold for Classic gameplay
 
-- `Tipob/Utilities/AudioManager.swift` - Complete rewrite (simplified)
-- `Tipob/Utilities/FailureFeedbackManager.swift` - Uses AudioManager
-- `Tipob/ViewModels/GameViewModel.swift` - Removed countdown, kept audio calls
-- `Tipob/Views/LaunchView.swift` - New "Out of Pocket" animation with fade-out
-- `Tipob/Views/ContentView.swift` - AudioManager init, animation duration
-- `Tipob/Views/MenuView.swift` - Removed title
-- `Tipob/Components/StroopPromptView.swift` - Reduced center word size
-
-## Key Technical Decisions
-
-**Simplified Audio Architecture:**
-- Removed AVAudioEngine (was causing interference with system sounds)
-- Direct SystemSoundID playback for failure (no AVAudioSession interference)
-- AVAudioPlayer for success/round complete sounds
-- Explicit initialize() pattern instead of lazy blocking init
-
-**Launch Animation Timeline:**
-- 0-0.6s: Title springs in
-- 0.3-0.7s: Tagline fades in
-- 0.7-1.2s: Hold for user to read
-- 1.2-1.6s: Fade out
-- 1.6-2.2s: Menu fades in
-
-## Next Session Priorities
-
-1. Test full app flow on physical device
-2. Verify all audio sounds work correctly
-3. Test Stroop layout on various iPhone sizes
-4. Consider any additional polish for launch animation
-
-## Notes
-
-- User confirmed failure sound is back to normal
-- User confirmed countdown is removed (intentional)
-- Launch animation now properly fades into menu
+## Key Files Involved
+- `Tipob/Views/GestureTestView.swift` - Line 24 needs isRecording = false
+- `Tipob/Utilities/SwipeGestureModifier.swift` - Has strict validation guards
+- `Tipob/Utilities/GestureCoordinator.swift` - May have stale state from Tutorial
+- `Tipob/ViewModels/GameViewModel.swift` - Classic mode gesture handling
