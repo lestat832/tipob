@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-enum GestureType: Equatable {
+enum GestureType: Equatable, Codable {
     case up
     case down
     case left
@@ -24,6 +24,74 @@ enum GestureType: Equatable {
         leftColor: ColorType,      // Which color is assigned to LEFT direction
         rightColor: ColorType      // Which color is assigned to RIGHT direction
     )
+
+    // MARK: - Codable
+
+    private enum CodingKeys: String, CodingKey {
+        case type
+        case wordColor, textColor, upColor, downColor, leftColor, rightColor
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(String.self, forKey: .type)
+
+        switch type {
+        case "up": self = .up
+        case "down": self = .down
+        case "left": self = .left
+        case "right": self = .right
+        case "tap": self = .tap
+        case "doubleTap": self = .doubleTap
+        case "longPress": self = .longPress
+        case "pinch": self = .pinch
+        case "shake": self = .shake
+        case "tiltLeft": self = .tiltLeft
+        case "tiltRight": self = .tiltRight
+        case "raise": self = .raise
+        case "lower": self = .lower
+        case "stroop":
+            let wordColor = try container.decode(ColorType.self, forKey: .wordColor)
+            let textColor = try container.decode(ColorType.self, forKey: .textColor)
+            let upColor = try container.decode(ColorType.self, forKey: .upColor)
+            let downColor = try container.decode(ColorType.self, forKey: .downColor)
+            let leftColor = try container.decode(ColorType.self, forKey: .leftColor)
+            let rightColor = try container.decode(ColorType.self, forKey: .rightColor)
+            self = .stroop(wordColor: wordColor, textColor: textColor, upColor: upColor,
+                          downColor: downColor, leftColor: leftColor, rightColor: rightColor)
+        default:
+            throw DecodingError.dataCorruptedError(forKey: .type, in: container,
+                                                    debugDescription: "Unknown gesture type: \(type)")
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        switch self {
+        case .up: try container.encode("up", forKey: .type)
+        case .down: try container.encode("down", forKey: .type)
+        case .left: try container.encode("left", forKey: .type)
+        case .right: try container.encode("right", forKey: .type)
+        case .tap: try container.encode("tap", forKey: .type)
+        case .doubleTap: try container.encode("doubleTap", forKey: .type)
+        case .longPress: try container.encode("longPress", forKey: .type)
+        case .pinch: try container.encode("pinch", forKey: .type)
+        case .shake: try container.encode("shake", forKey: .type)
+        case .tiltLeft: try container.encode("tiltLeft", forKey: .type)
+        case .tiltRight: try container.encode("tiltRight", forKey: .type)
+        case .raise: try container.encode("raise", forKey: .type)
+        case .lower: try container.encode("lower", forKey: .type)
+        case .stroop(let wordColor, let textColor, let upColor, let downColor, let leftColor, let rightColor):
+            try container.encode("stroop", forKey: .type)
+            try container.encode(wordColor, forKey: .wordColor)
+            try container.encode(textColor, forKey: .textColor)
+            try container.encode(upColor, forKey: .upColor)
+            try container.encode(downColor, forKey: .downColor)
+            try container.encode(leftColor, forKey: .leftColor)
+            try container.encode(rightColor, forKey: .rightColor)
+        }
+    }
 
     /// All basic gestures (excluding Stroop) for random selection
     static var allBasicGestures: [GestureType] {

@@ -629,10 +629,78 @@ func testGesture_SessionXYZ_Issue1() {
    - Track success rates per configuration
    - Statistical significance calculation
 
-6. **Per-Gesture Standalone Test Buttons**
-   - Individual gesture test mode
-   - Isolated testing without full game flow
-   - Immediate feedback on detection
+6. **Per-Gesture Test Buttons (Detailed Spec)**
+
+   **Purpose**: Enable developers to test one gesture at a time (Double Tap, Swipe Left, Shake, etc.) without playing the full game. Each test captures expected vs detected results along with full diagnostic data (sensor snapshot, thresholds, timing, device info). Tests can be saved as log entries and exported like normal gesture issues.
+
+   **New Section in DevPanel** - "Per-Gesture Testers" listing:
+   - Test Double Tap
+   - Test Long Press
+   - Test Swipe Left / Right
+   - Test Shake
+   - Test Tilt Left / Right
+   - Test Raise Phone / Lower Phone
+   - Test Pinch
+
+   **Workflow**:
+   1. User taps a test button (e.g., "Test Double Tap")
+   2. DevPanel enters single-gesture "test mode"
+   3. User performs gesture (or timeout)
+   4. System captures:
+      - Expected gesture
+      - Detected gesture
+      - Auto issue type: notDetected / wrongDetection / success
+      - SensorSnapshot (1 second: 500ms before + 500ms after)
+      - ThresholdSnapshot
+      - GestureTiming
+      - DeviceContext
+   5. Test result shown in a compact result view:
+      - [ Save as Sample ] → converts into a normal GestureLogEntry (auto-selected)
+      - [ Retest ]
+      - [ Done ]
+
+   **New Data Types**:
+   ```swift
+   enum GestureTestMode {
+     none, doubleTap, longPress, swipeLeft, swipeRight,
+     shake, tiltLeft, tiltRight, raisePhone, lowerPhone, pinch
+   }
+
+   struct GestureTestResult {
+     id, timestamp
+     expected: GestureType
+     detected: GestureType?
+     issueType: IssueType?
+     sensorSnapshot: SensorData
+     thresholdsSnapshot: ThresholdSnapshot
+     timing: GestureTiming
+     deviceContext: DeviceContext
+   }
+   ```
+
+   **Integration Changes**:
+   - DevConfigManager:
+     - `@Published var testMode: GestureTestMode`
+     - `startTestMode(_)`
+     - `exitTestMode()`
+     - `recordTestResult(_)`
+   - DevPanelGestureRecognizer:
+     - When in `.testMode`: only listen for that specific gesture
+     - Auto-stop after detection or timeout
+     - Capture sensor snapshot same as normal gesture logs
+   - DevPanelView:
+     - New "Per-Gesture Testers" section
+     - New test-mode UI showing: "Perform [gesture] now…", "Detected: X"
+     - Buttons: Save, Retest, Done
+
+   **Export Behavior**: Saved test results become standard GestureLogEntries with `isSelected = true`, `issueType` auto-detected, and full `sensorSnapshot`. Then they can be exported via "Export Selected Issues."
+
+   **Sub-Future Extensions** (Not Implemented Yet):
+   - Auto-run full gesture test suite
+   - Calibration mode (capture multiple samples → auto-tune thresholds)
+   - Machine-driven gesture playback for regression testing
+
+   **Estimated Effort**: 12-16 hours
 
 7. **Persistent Badge/Indicator**
    - Show count of pending export issues

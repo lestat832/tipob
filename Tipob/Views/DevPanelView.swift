@@ -19,6 +19,19 @@ struct DevPanelView: View {
     @State private var exportURL: URL?
     @State private var showingResetAlert = false
 
+    // Log filtering
+    @State private var selectedFilter: LogFilter = .all
+    @State private var selectedGestureFilter: GestureType? = nil
+    @State private var showingExportIssuesSheet = false
+    @State private var exportIssuesURL: URL?
+
+    enum LogFilter: String, CaseIterable {
+        case all = "All"
+        case failures = "Failures"
+        case selected = "Selected"
+        case byGesture = "By Gesture"
+    }
+
     var body: some View {
         NavigationView {
             ScrollView {
@@ -93,23 +106,136 @@ struct DevPanelView: View {
 
     // MARK: - Gameplay Logs Section
 
+    private var filteredLogs: [GestureLogEntry] {
+        var logs = config.gameplayLogs
+
+        switch selectedFilter {
+        case .all:
+            break
+        case .failures:
+            logs = logs.filter { $0.issueType != .success }
+        case .selected:
+            logs = logs.filter { $0.isSelected }
+        case .byGesture:
+            if let gesture = selectedGestureFilter {
+                logs = logs.filter { $0.expectedGesture == gesture }
+            }
+        }
+
+        return logs.reversed()
+    }
+
     private var logsSection: some View {
-        DisclosureGroup("📋 Gameplay Logs (\(config.gameplayLogs.count) entries)") {
+        VStack(spacing: 12) {
+            // Header with selection badge
+            HStack {
+                Text("📋 Gameplay Logs")
+                    .font(.headline)
+
+                if config.selectedCount > 0 {
+                    Text("\(config.selectedCount)")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+
+                Spacer()
+
+                Text("\(config.gameplayLogs.count) entries")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            // Filter buttons
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(LogFilter.allCases, id: \.self) { filter in
+                        Button(action: {
+                            selectedFilter = filter
+                            if filter != .byGesture {
+                                selectedGestureFilter = nil
+                            }
+                        }) {
+                            Text(filter.rawValue)
+                                .font(.caption)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(selectedFilter == filter ? Color.blue : Color.secondary.opacity(0.2))
+                                .foregroundColor(selectedFilter == filter ? .white : .primary)
+                                .cornerRadius(8)
+                        }
+                    }
+                }
+            }
+
+            // Gesture filter picker (when "By Gesture" is selected)
+            if selectedFilter == .byGesture {
+                Picker("Gesture", selection: $selectedGestureFilter) {
+                    Text("All Gestures").tag(nil as GestureType?)
+                    ForEach(GestureType.allBasicGestures, id: \.self) { gesture in
+                        Text(gesture.displayName).tag(gesture as GestureType?)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+
+            // Selection helper buttons
+            HStack(spacing: 8) {
+                Button("Select Failures") {
+                    config.selectAllFailures()
+                }
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.red.opacity(0.2))
+                .cornerRadius(6)
+
+                Button("Clear") {
+                    config.clearSelection()
+                }
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.secondary.opacity(0.2))
+                .cornerRadius(6)
+
+                Button("Invert") {
+                    config.invertSelection()
+                }
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.secondary.opacity(0.2))
+                .cornerRadius(6)
+
+                Spacer()
+            }
+
+            // Log entries list
             if config.gameplayLogs.isEmpty {
                 Text("No logs yet - play a game to see gesture detection logs")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding()
+            } else if filteredLogs.isEmpty {
+                Text("No entries match the current filter")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding()
             } else {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 8) {
-                        ForEach(config.gameplayLogs.reversed()) { log in
-                            Text(log.displayText)
-                                .font(.system(size: 12, design: .monospaced))
-                                .foregroundColor(log.success ? .green : .red)
+                    VStack(spacing: 4) {
+                        ForEach(filteredLogs) { log in
+                            LogEntryRow(log: log) {
+                                config.toggleSelection(for: log.id)
+                            }
                         }
                     }
-                    .padding()
+                    .padding(.vertical, 8)
                 }
                 .frame(maxHeight: 300)
             }
@@ -490,7 +616,45 @@ struct DevPanelView: View {
                 .cornerRadius(12)
             }
 
-            // Secondary: Export
+            // Export Selected Issues (JSON)
+            if config.selectedCount > 0 {
+                Button(action: {
+                    if let url = config.exportSelectedIssues() {
+                        exportIssuesURL = url
+                        showingExportIssuesSheet = true
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: "doc.badge.arrow.up")
+                        Text("Export \(config.selectedCount) Selected Issues")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.orange.opacity(0.2))
+                    .foregroundColor(.orange)
+                    .cornerRadius(12)
+                }
+
+                // Generate XCTest Code
+                Button(action: {
+                    if let url = config.generateXCTestCode() {
+                        exportIssuesURL = url
+                        showingExportIssuesSheet = true
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: "hammer")
+                        Text("Generate XCTest Code")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.purple.opacity(0.2))
+                    .foregroundColor(.purple)
+                    .cornerRadius(12)
+                }
+            }
+
+            // Export Settings
             Button(action: {
                 if let url = config.exportToJSON() {
                     exportURL = url
@@ -521,6 +685,11 @@ struct DevPanelView: View {
                 .background(Color.red.opacity(0.2))
                 .foregroundColor(.red)
                 .cornerRadius(12)
+            }
+        }
+        .sheet(isPresented: $showingExportIssuesSheet) {
+            if let url = exportIssuesURL {
+                ShareSheet(activityItems: [url])
             }
         }
     }
@@ -577,6 +746,66 @@ private struct ShareSheet: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {
         // No update needed
+    }
+}
+
+// MARK: - Log Entry Row Component
+
+private struct LogEntryRow: View {
+    let log: GestureLogEntry
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 8) {
+                // Selection indicator
+                Image(systemName: log.isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(log.isSelected ? .blue : .secondary)
+                    .font(.system(size: 16))
+
+                // Issue type indicator
+                Circle()
+                    .fill(log.issueType.color)
+                    .frame(width: 8, height: 8)
+
+                // Gesture info
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(log.shortDisplayText)
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .foregroundColor(.primary)
+
+                    HStack(spacing: 4) {
+                        Text(log.timestamp.logTimestamp)
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundColor(.secondary)
+
+                        if let reactionTime = log.timing.actualDuration {
+                            Text("•")
+                                .foregroundColor(.secondary)
+                            Text(String(format: "%.2fs", reactionTime))
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
+                Spacer()
+
+                // Issue type badge
+                Text(log.issueType.displayName)
+                    .font(.system(size: 9, weight: .medium))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(log.issueType.color.opacity(0.2))
+                    .foregroundColor(log.issueType.color)
+                    .cornerRadius(4)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .background(log.isSelected ? Color.blue.opacity(0.1) : Color.clear)
+            .cornerRadius(8)
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
