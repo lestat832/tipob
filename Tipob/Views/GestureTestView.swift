@@ -110,8 +110,8 @@ struct GestureTestView: View {
         .onDisappear {
             cleanup()
         }
-        .onChange(of: motionDetector.detectedMotion) { motion in
-            if let motion = motion {
+        .onChange(of: motionDetector.detectedMotion) { _, newMotion in
+            if let motion = newMotion {
                 handleMotionDetected(motion)
             }
         }

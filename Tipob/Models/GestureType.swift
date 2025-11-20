@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-enum GestureType: Equatable, Codable {
+enum GestureType: Equatable, Hashable, Codable {
     case up
     case down
     case left
