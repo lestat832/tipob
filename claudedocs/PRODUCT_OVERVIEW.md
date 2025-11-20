@@ -1,8 +1,8 @@
-TIPOB - PRODUCT OVERVIEW
+OUT OF POCKET - PRODUCT OVERVIEW
 
-Last Updated: November 12, 2025
-Version: 3.1
-Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Integration
+Last Updated: November 20, 2025
+Version: 3.2
+Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Integration + Audio System
 
 ========================================
 
@@ -20,6 +20,7 @@ Hard to Master: Progressive difficulty keeps players engaged
 14 Diverse Gestures: Touch, motion, and cognitive challenges
 Discreet Mode: Toggle between public-friendly vs full gesture set
 Performance Optimized: 20-30% faster gesture response (Nov 2025)
+Audio Feedback: Success ticks, round complete chimes, and failure sounds
 Monetization Ready: Google AdMob integration with TEST credentials for beta testing
 Triple Game Modes: Three distinct gameplay experiences (Classic, Memory, and PvP)
 Visual Polish: Beautiful gradient UI with color-coded gestures
@@ -317,6 +318,15 @@ Haptic Feedback:
 - Button Tap: Impact haptic
 - Manager: FailureFeedbackManager with sound + haptic coordination
 
+Audio Feedback (Implemented November 18-20, 2025):
+- Success tick: Short 45-70ms tick for correct gestures (AVAudioPlayer)
+- Round complete chime: 180-300ms celebration sound (AVAudioPlayer)
+- Failure sound: SystemSoundID 1073 (clean, no interference)
+- Audio session: .ambient category, .mixWithOthers (doesn't interrupt Spotify)
+- Respects silent mode and user sound toggle
+- Lazy initialization: AudioManager.initialize() called after launch animation
+- Files: gesture_success_tick.caf, round_complete_chime.caf
+
 Performance Optimization (November 9, 2025):
 - 20-30% faster gesture response time
 - Sensor rates increased 2-5x
@@ -473,7 +483,7 @@ Utilities - Helper classes
 - GesturePoolManager.swift - Discreet/Unhinged mode pools (~90 lines)
 - HapticManager.swift - Haptic feedback
 - FailureFeedbackManager.swift - Unified failure feedback
-- SoundManager.swift - Audio feedback
+- AudioManager.swift - Simplified audio system (~150 lines, AVAudioPlayer + SystemSoundID)
 - PersistenceManager.swift - Local storage
 - LeaderboardManager.swift - High score tracking (~260 lines)
 - SwipeGestureModifier.swift - Swipe detection
@@ -546,10 +556,12 @@ Gesture Colors:
 Screen Layouts
 
 Launch Screen:
-- Animated "TIPOB" title with rotation
-- "Swipe to Survive" tagline
-- 1-second duration
-- Automatic transition to menu
+- Stacked title animation: "OUT OF" (48pt) above "POCKET" (64pt)
+- Spring scale animation (0.3 → 1.0)
+- "Swipe to Survive" tagline fades in after title
+- Fade-out transition before menu (smooth crossfade)
+- ~1.6 second duration total
+- AudioManager initialization after animation completes
 
 Menu Screen:
 - App title
@@ -852,6 +864,15 @@ Key Files
 Total Swift Files
 23 files across the project
 
+Recent Updates (November 18-20, 2025):
+- App rebranded from "TIPOB" to "Out of Pocket"
+- New launch animation with spring scale and fade-out transition
+- Simplified audio system implemented (success tick, round complete chime, failure sound)
+- Removed AVAudioEngine complexity - direct AVAudioPlayer + SystemSoundID
+- Fixed launch hang by deferring AudioManager initialization
+- StroopPromptView center word size reduced (70pt → 50pt)
+- Menu title removed (only shown on launch screen)
+
 Recent Updates (November 11-12, 2025):
 - Google AdMob integration complete (TEST credentials)
 - AdManager singleton for ad lifecycle management
@@ -904,6 +925,7 @@ Version 1.0 | October 10, 2025 | Initial product overview
 Version 2.0 | October 21, 2025 | Updated with 7 gestures, Memory Mode, and PvP Mode
 Version 3.0 | November 10, 2025 | Updated with 14 gestures, Stroop Mode, Discreet Mode, Leaderboard System, MotionGestureManager, gesture optimization complete
 Version 3.1 | November 12, 2025 | Added Google AdMob integration (TEST mode), AdManager, UIViewControllerHelper, Info.plist configuration
+Version 3.2 | November 20, 2025 | Rebranded to "Out of Pocket", new launch animation, simplified audio system (AVAudioPlayer + SystemSoundID)
 
 ========================================
 

@@ -1,20 +1,21 @@
-# Tipob Feature Scoping Document
-**Date**: October 10, 2025 (Updated: November 12, 2025)
-**Project**: Tipob - iOS SwiftUI Bop-It Style Game
+# Out of Pocket Feature Scoping Document
+**Date**: October 10, 2025 (Updated: November 20, 2025)
+**Project**: Out of Pocket - iOS SwiftUI Bop-It Style Game
 **Purpose**: Comprehensive feature planning and decision framework
-**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (TEST)
+**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (TEST) + Audio System
 
 ---
 
 ## 📋 Table of Contents
 1. [Gesture Expansion Options](#gesture-expansion-options)
-2. [Feature Roadmap](#feature-roadmap)
-3. [Monetization Strategy](#monetization-strategy)
-4. [Implementation Complexity Matrix](#implementation-complexity-matrix)
-5. [Revenue Projections](#revenue-projections)
-6. [Technical Requirements](#technical-requirements)
-7. [Risk Assessment](#risk-assessment)
-8. [Decision Framework](#decision-framework)
+2. [Audio System](#audio-system)
+3. [Feature Roadmap](#feature-roadmap)
+4. [Monetization Strategy](#monetization-strategy)
+5. [Implementation Complexity Matrix](#implementation-complexity-matrix)
+6. [Revenue Projections](#revenue-projections)
+7. [Technical Requirements](#technical-requirements)
+8. [Risk Assessment](#risk-assessment)
+9. [Decision Framework](#decision-framework)
 
 ---
 
@@ -153,6 +154,49 @@ All gestures including:
 - **Keys**: Separate UserDefaults keys per mode
 
 **Menu Integration**: Trophy button in menu (top-right corner)
+
+---
+
+## 🔊 Audio System (Implemented November 18-20, 2025)
+
+### Features
+**Status**: ✅ Complete - Simplified architecture for reliability
+
+- **Success Tick**: Short 45-70ms tick for correct gestures
+- **Round Complete Chime**: 180-300ms celebration sound
+- **Failure Sound**: SystemSoundID 1073 (clean, no interference)
+- **Silent Mode**: Respects device silent switch
+- **User Toggle**: Sound on/off setting with UserDefaults persistence
+
+### Implementation
+**File**: `AudioManager.swift` (~150 lines)
+
+**Architecture (Simplified from original 419 lines):**
+- AVAudioPlayer for success/round sounds (preloaded)
+- Direct SystemSoundID for failure (no AVAudioEngine interference)
+- AVAudioSession: `.ambient` category, `.mixWithOthers` option
+- Lazy initialization pattern (prevents launch hang)
+
+**Audio Session Configuration:**
+- Category: `.ambient` (doesn't interrupt other apps)
+- Options: `.mixWithOthers` (allows Spotify, podcasts, etc.)
+- Respects silent mode automatically
+
+**Sound Files (CAF format):**
+- `gesture_success_tick.caf` - Volume: 0.35
+- `round_complete_chime.caf` - Volume: 0.65
+
+**Key Design Decision:**
+Removed AVAudioEngine due to:
+- Complex scheduling issues with countdown sounds
+- Interference with SystemSoundID playback
+- Launch blocking from synchronous initialization
+
+**Integration Points:**
+- `GameViewModel` calls `playSuccess()` on correct gesture
+- `GameViewModel` calls `playRoundComplete()` on sequence completion
+- `FailureFeedbackManager` calls `playFailure()` for unified failure feedback
+- `ContentView` calls `AudioManager.shared.initialize()` after launch animation
 
 ---
 
