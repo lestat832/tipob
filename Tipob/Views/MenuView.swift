@@ -20,11 +20,9 @@ struct MenuView: View {
             .ignoresSafeArea()
 
             VStack(spacing: 40) {
-                Text("TIPOB")
-                    .font(.system(size: 64, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
-                    .shadow(radius: 10)
-                    .padding(.top, 60)
+                // Title removed - shown on launch screen
+                Spacer()
+                    .frame(height: 80)
 
                 // Combined Game Mode Pill + Discreet Toggle + Leaderboard
                 HStack(spacing: 10) {

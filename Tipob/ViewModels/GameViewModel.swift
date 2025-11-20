@@ -71,19 +71,9 @@ class GameViewModel: ObservableObject {
         gameState = .showSequence
         showingGestureIndex = 0
 
-        // Play countdown sequence (3-2-1-GO) before showing sequence
-        Task {
-            for step in [3, 2, 1, 0] {
-                AudioManager.shared.playCountdownStep(step: step)
-                try? await Task.sleep(nanoseconds: 350_000_000) // 350ms between beeps
-            }
-
-            // Add delay so player can read "Watch the sequence!" message after countdown
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
-
-            await MainActor.run {
-                self.showNextGestureInSequence()
-            }
+        // Brief delay before showing sequence
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.showNextGestureInSequence()
         }
     }
 

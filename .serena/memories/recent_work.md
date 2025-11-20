@@ -1,58 +1,48 @@
-# Recent Work - Audio System Implementation
+# Recent Work - Audio Simplification & Rebranding
 
-## Session: November 18, 2025
+## Session: November 19, 2025
 
-### Major Achievement: Complete Audio System
+### Major Achievement: Audio System Overhaul
 
-Successfully implemented comprehensive audio system for Out of Pocket game:
+**Problem Solved:** Multiple audio issues (hang, warbled failure sound, no countdown)
 
-**Sound Types Implemented (4 total):**
-1. Success tick (45-70ms) - After each correct gesture
-2. Round complete chime (180-300ms) - Sequence completion/milestones
-3. Countdown beeps (3-2-1-GO) - Pitch-shifted (600-850Hz)
-4. Failure sound (SystemSoundID 1073) - Wrong gesture/timeout
+**Root Causes Identified:**
+1. AVAudioEngine + stop-all-before-failure logic caused warbled system sounds
+2. initQueue.sync was blocking main thread
+3. Countdown timing was off and not desired
 
-**Key Learning: Audio Integration Performance**
+**Solution: Dramatic Simplification**
+- Removed AVAudioEngine entirely
+- Removed countdown feature
+- Direct SystemSoundID for failure (no interference)
+- Explicit initialize() pattern
 
-**Problem encountered:** Initial implementation caused app launch hang (0.28-0.43s)
-- AudioManager singleton initialized during app launch
-- AVAudioSession + AVAudioEngine + file preloading blocked main thread
+**Key Lesson:** Sometimes the solution is to remove complexity, not add more fixes. The original SoundManager worked because it was simple. We over-engineered with AVAudioEngine and broke what worked.
 
-**Solution:** Lazy initialization pattern
-- Empty init() - no blocking on launch
-- ensureInitialized() called on first use
-- Thread-safe with DispatchQueue
+### Rebranding: TIPOB → Out of Pocket
 
-**Lesson:** Always consider lazy initialization for singletons that perform expensive setup (audio, networking, ML models).
+**Launch Screen:**
+- Stacked title: "OUT OF" / "POCKET"
+- Spring scale animation
+- Smooth fade-out before transition
 
-**Key Learning: Audio Session Conflicts**
+**Menu Screen:**
+- Removed title (shown on launch)
+- Improved fade transition (0.6s)
 
-**Problem encountered:** Failure sound quality changed after integration
-- Two classes (SoundManager + AudioManager) configuring same shared AVAudioSession
-- Conflicting options: .mixWithOthers vs .mixWithOthers + .duckOthers
-- SystemSoundID playback affected by session state
+### Patterns Learned
 
-**Solution:** Consolidate to single audio system
-- Delete redundant SoundManager
-- AudioManager as single source of truth for audio session config
+**Audio Session Conflicts:**
+- Only ONE class should configure AVAudioSession
+- System sounds (SystemSoundID) are affected by AVAudioSession state
+- Simpler is often better for audio
 
-**Lesson:** Only one class should configure AVAudioSession in an app. Multiple configs create unpredictable behavior.
+**SwiftUI Transition Timing:**
+- Animation duration must match state change timing
+- Coordinated fade-out before state change creates smooth transitions
+- 0.3s is too fast for launch transitions, 0.6s feels natural
 
-## Patterns Learned
-
-**SwiftUI Layout Debugging:**
-- Large center elements can push side elements off screen
-- Always consider element size relative to screen width
-- Test on smallest target device (iPhone SE) first
-
-**Audio File Management:**
-- CAF format preferred for iOS (native Core Audio Format)
-- Preload small files (<1MB) for zero-latency playback
-- Use AVAudioEngine for effects (pitch shifting, reverb, etc.)
-- Use AVAudioPlayer for simple playback
-- Use SystemSoundID for system sounds (respects silent mode)
-
-**Swift Concurrency:**
-- Task {} for async operations without blocking
-- await Task.sleep() for delays in async context
-- MainActor.run {} for UI updates from async context
+**Debugging Approach:**
+- When fixes don't work, question the entire approach
+- User feedback about "just use what worked before" is valuable
+- Sometimes you need to undo complexity to fix issues

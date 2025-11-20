@@ -12,6 +12,8 @@ struct ContentView: View {
             switch viewModel.gameState {
             case .launch:
                 LaunchView {
+                    // Initialize audio after launch animation completes
+                    AudioManager.shared.initialize()
                     viewModel.transitionToMenu()
                 }
 
@@ -57,7 +59,7 @@ struct ContentView: View {
                     .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: viewModel.gameState)
+        .animation(.easeInOut(duration: 0.6), value: viewModel.gameState)
         #if DEBUG
         .sheet(isPresented: $showDevPanel) {
             DevPanelView(viewModel: viewModel)
