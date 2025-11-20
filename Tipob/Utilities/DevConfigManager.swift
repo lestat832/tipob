@@ -74,6 +74,12 @@ class DevConfigManager: ObservableObject {
     @Published var lastMemorySequence: [GestureType]? = nil
     @Published var lastClassicSequence: [GestureType]? = nil
 
+    // MARK: - Per-Gesture Test Mode
+
+    @Published var testMode: GestureTestMode = .none
+    @Published var activeTestResult: GestureTestResult? = nil
+    @Published var testStartTime: Date? = nil
+
     // MARK: - Default Values Storage
 
     private let defaults = GestureThresholds(
@@ -327,6 +333,81 @@ class DevConfigManager: ObservableObject {
     /// Filter logs by gesture type
     func entries(for gestureType: GestureType) -> [GestureLogEntry] {
         gameplayLogs.filter { $0.expectedGesture == gestureType }
+    }
+
+    // MARK: - Per-Gesture Test Mode Methods
+
+    /// Start a test session for a specific gesture
+    func startTestMode(_ mode: GestureTestMode) {
+        testMode = mode
+        activeTestResult = nil
+        testStartTime = Date()
+
+        // Start sensor capture
+        SensorCaptureBuffer.shared.startCapturing()
+
+        print("🧪 Started test mode: \(mode.displayName)")
+    }
+
+    /// Exit test mode and clean up
+    func exitTestMode() {
+        testMode = .none
+        activeTestResult = nil
+        testStartTime = nil
+
+        // Stop sensor capture
+        SensorCaptureBuffer.shared.stopCapturing()
+
+        print("🧪 Exited test mode")
+    }
+
+    /// Record the result of a gesture test
+    func recordTestResult(_ result: GestureTestResult) {
+        activeTestResult = result
+
+        // Stop sensor capture
+        SensorCaptureBuffer.shared.stopCapturing()
+
+        let status = result.issueType == .success ? "✅" : "❌"
+        print("🧪 Test result: \(status) Expected \(result.expected.displayName) → Detected \(result.detected?.displayName ?? "none")")
+    }
+
+    /// Save test result as a log entry (auto-selected for export)
+    func saveTestResultAsLogEntry() {
+        guard let result = activeTestResult else {
+            print("❌ No test result to save")
+            return
+        }
+
+        let entry = GestureLogEntry(
+            expected: result.expected,
+            detected: result.detected,
+            timing: result.timing,
+            sensorSnapshot: result.sensorSnapshot,
+            thresholdsSnapshot: result.thresholdsSnapshot,
+            deviceContext: result.deviceContext
+        )
+
+        // Auto-select for easy export
+        var mutableEntry = entry
+        mutableEntry.isSelected = true
+
+        gameplayLogs.append(mutableEntry)
+
+        print("📋 Saved test result as log entry (auto-selected)")
+
+        // Clear active result after saving
+        activeTestResult = nil
+    }
+
+    /// Get the expected gesture type for current test mode
+    var expectedGestureForTestMode: GestureType? {
+        testMode.gestureType
+    }
+
+    /// Check if currently in test mode
+    var isInTestMode: Bool {
+        testMode != .none
     }
 
     // MARK: - Export Selected Issues
@@ -886,6 +967,159 @@ struct SessionInfo: Codable {
             osVersion: device.systemVersion,
             exportTimestamp: Date().exportTimestamp
         )
+    }
+}
+
+// MARK: - Gesture Test Mode
+
+/// Test mode for isolated gesture testing
+enum GestureTestMode: String, CaseIterable {
+    case none
+    case tap
+    case doubleTap
+    case longPress
+    case swipeUp
+    case swipeDown
+    case swipeLeft
+    case swipeRight
+    case shake
+    case tiltLeft
+    case tiltRight
+    case raisePhone
+    case lowerPhone
+    case pinch
+
+    /// Display name for UI
+    var displayName: String {
+        switch self {
+        case .none: return "None"
+        case .tap: return "Tap"
+        case .doubleTap: return "Double Tap"
+        case .longPress: return "Long Press"
+        case .swipeUp: return "Swipe Up"
+        case .swipeDown: return "Swipe Down"
+        case .swipeLeft: return "Swipe Left"
+        case .swipeRight: return "Swipe Right"
+        case .shake: return "Shake"
+        case .tiltLeft: return "Tilt Left"
+        case .tiltRight: return "Tilt Right"
+        case .raisePhone: return "Raise Phone"
+        case .lowerPhone: return "Lower Phone"
+        case .pinch: return "Pinch"
+        }
+    }
+
+    /// Corresponding GestureType for this test mode
+    var gestureType: GestureType? {
+        switch self {
+        case .none: return nil
+        case .tap: return .tap
+        case .doubleTap: return .doubleTap
+        case .longPress: return .longPress
+        case .swipeUp: return .up
+        case .swipeDown: return .down
+        case .swipeLeft: return .left
+        case .swipeRight: return .right
+        case .shake: return .shake
+        case .tiltLeft: return .tiltLeft
+        case .tiltRight: return .tiltRight
+        case .raisePhone: return .raise
+        case .lowerPhone: return .lower
+        case .pinch: return .pinch
+        }
+    }
+
+    /// Instruction text for the test
+    var instructionText: String {
+        switch self {
+        case .none: return ""
+        case .tap: return "Tap the screen once"
+        case .doubleTap: return "Double tap the screen quickly"
+        case .longPress: return "Press and hold the screen"
+        case .swipeUp: return "Swipe up on the screen"
+        case .swipeDown: return "Swipe down on the screen"
+        case .swipeLeft: return "Swipe left on the screen"
+        case .swipeRight: return "Swipe right on the screen"
+        case .shake: return "Shake the phone"
+        case .tiltLeft: return "Tilt the phone left"
+        case .tiltRight: return "Tilt the phone right"
+        case .raisePhone: return "Raise the phone up"
+        case .lowerPhone: return "Lower the phone down"
+        case .pinch: return "Pinch with two fingers"
+        }
+    }
+
+    /// SF Symbol for the gesture
+    var symbolName: String {
+        switch self {
+        case .none: return "xmark"
+        case .tap: return "hand.tap"
+        case .doubleTap: return "hand.tap"
+        case .longPress: return "hand.tap.fill"
+        case .swipeUp: return "arrow.up"
+        case .swipeDown: return "arrow.down"
+        case .swipeLeft: return "arrow.left"
+        case .swipeRight: return "arrow.right"
+        case .shake: return "iphone.gen3.radiowaves.left.and.right"
+        case .tiltLeft: return "iphone.gen3.landscape"
+        case .tiltRight: return "iphone.gen3.landscape"
+        case .raisePhone: return "arrow.up.circle"
+        case .lowerPhone: return "arrow.down.circle"
+        case .pinch: return "hand.pinch"
+        }
+    }
+
+    /// All testable gestures (excluding .none)
+    static var allTestable: [GestureTestMode] {
+        allCases.filter { $0 != .none }
+    }
+}
+
+// MARK: - Gesture Test Result
+
+/// Result of a per-gesture test session
+struct GestureTestResult: Identifiable, Codable {
+    let id: UUID
+    let timestamp: Date
+    let expected: GestureType
+    let detected: GestureType?
+    let issueType: IssueType
+    let sensorSnapshot: SensorData
+    let thresholdsSnapshot: ThresholdSnapshot
+    let timing: GestureTiming
+    let deviceContext: DeviceContext
+
+    init(
+        expected: GestureType,
+        detected: GestureType?,
+        sensorSnapshot: SensorData,
+        timing: GestureTiming,
+        thresholdsSnapshot: ThresholdSnapshot? = nil,
+        deviceContext: DeviceContext? = nil
+    ) {
+        self.id = UUID()
+        self.timestamp = Date()
+        self.expected = expected
+        self.detected = detected
+        self.sensorSnapshot = sensorSnapshot
+        self.timing = timing
+        self.thresholdsSnapshot = thresholdsSnapshot ?? ThresholdSnapshot.capture()
+        self.deviceContext = deviceContext ?? DeviceContext.capture()
+
+        // Auto-determine issue type
+        if detected == nil {
+            self.issueType = .notDetected
+        } else if detected == expected {
+            self.issueType = .success
+        } else {
+            self.issueType = .wrongDetection
+        }
+    }
+
+    /// Display text for the result
+    var displayText: String {
+        let detectedName = detected?.displayName ?? "None"
+        return "\(expected.displayName) → \(detectedName)"
     }
 }
 

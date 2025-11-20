@@ -25,6 +25,11 @@ struct DevPanelView: View {
     @State private var showingExportIssuesSheet = false
     @State private var exportIssuesURL: URL?
 
+    // Per-gesture testing
+    @State private var showingGestureTest = false
+    @State private var activeTestMode: GestureTestMode = .none
+    @State private var showingTestResult = false
+
     enum LogFilter: String, CaseIterable {
         case all = "All"
         case failures = "Failures"
@@ -41,6 +46,9 @@ struct DevPanelView: View {
 
                     // Gameplay Logs
                     logsSection
+
+                    // Per-Gesture Testing
+                    gestureTestSection
 
                     // Sequence Replay
                     replaySection
@@ -243,6 +251,71 @@ struct DevPanelView: View {
         .padding()
         .background(Color.secondary.opacity(0.05))
         .cornerRadius(12)
+    }
+
+    // MARK: - Per-Gesture Test Section
+
+    private var gestureTestSection: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Text("🧪 Per-Gesture Testers")
+                    .font(.headline)
+                Spacer()
+            }
+
+            Text("Test individual gestures with full sensor capture")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Test buttons grid
+            LazyVGrid(columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ], spacing: 8) {
+                ForEach(GestureTestMode.allTestable, id: \.self) { mode in
+                    Button(action: {
+                        activeTestMode = mode
+                        config.startTestMode(mode)
+                        showingGestureTest = true
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: mode.symbolName)
+                                .font(.system(size: 14))
+                            Text(mode.displayName)
+                                .font(.system(size: 12, weight: .medium))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.purple.opacity(0.15))
+                        .foregroundColor(.purple)
+                        .cornerRadius(8)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color.secondary.opacity(0.05))
+        .cornerRadius(12)
+        .fullScreenCover(isPresented: $showingGestureTest) {
+            GestureTestView(testMode: activeTestMode) {
+                showingGestureTest = false
+                showingTestResult = true
+            }
+        }
+        .sheet(isPresented: $showingTestResult) {
+            GestureTestResultView(
+                onRetest: {
+                    showingTestResult = false
+                    config.startTestMode(activeTestMode)
+                    showingGestureTest = true
+                },
+                onDone: {
+                    showingTestResult = false
+                    activeTestMode = .none
+                }
+            )
+        }
     }
 
     // MARK: - Sequence Replay Section
