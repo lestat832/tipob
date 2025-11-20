@@ -441,171 +441,257 @@ class MotionManager: ObservableObject {
 
 > **Expert Validation**: "With WELDER we had a whole dev panel in the app to quickly tweak parameters between plays. Games like this live and die by tuning."
 
-#### Dev Panel Specification (WELDER-Inspired)
+#### ScholarTrail Gesture Debug Panel (DEBUG ONLY)
 
-**Core Concept**: In-app dev panel accessible via gesture (triple-tap with 3 fingers) or Settings toggle, allowing real-time parameter tweaking between plays without rebuilding.
+**Access**: 3-finger triple-tap gesture
+**Scope**: Wrapped in `#if DEBUG` - not included in production builds
 
-##### 1. Threshold Tuning Interface
+---
 
-**Gesture-Specific Controls:**
-```
-[Shake Gesture]
-├── Threshold: [1.5G] ←——●——→ [3.0G]  (current: 2.0G)
-├── Cooldown: [100ms] ←——●——→ [1000ms]  (current: 500ms)
-├── Update Rate: [10Hz] ←——●——→ [100Hz]  (current: 50Hz)
-└── [Test Gesture] [Reset to Default] [Export Config]
+##### Current Capabilities (Implemented)
 
-[Swipe Gesture]
-├── Min Distance: [30px] ←——●——→ [100px]  (current: 50px)
-├── Min Velocity: [50px/s] ←——●——→ [150px/s]  (current: 80px/s)
-├── Angle Tolerance: [±30°] ←——●——→ [±60°]  (current: ±45°)
-└── [Test Gesture] [Reset to Default] [Export Config]
+**1. Gesture Log**
+- Expected vs detected gesture comparison
+- Timestamps for each attempt
+- Color-coded success/failure indicators
+- Session history tracking
 
-[Pinch Gesture]
-├── Scale Change: [5%] ←——●——→ [30%]  (current: 15%)
-├── Min Duration: [0ms] ←——●——→ [500ms]  (current: 100ms)
-├── Sensitivity: [Low] ●——→ [High]  (current: Medium)
-└── [Test Gesture] [Reset to Default] [Export Config]
+**2. Sequence Replay**
+- Replays last Memory/Classic mode sequences
+- Useful for reproducing issues
 
-... (expandable for all 14 gestures)
-```
+**3. Threshold Tuning**
+- 20 gesture thresholds adjustable via sliders:
+  - Shake (G-force, cooldown, update rate)
+  - Tilt (angle threshold, sustained duration)
+  - Raise/Lower (G threshold, spike detection)
+  - Swipe (distance, velocity, angle tolerance)
+  - Tap (detection window, double-tap timing)
+  - Pinch (scale threshold, minimum change)
+  - Timing (per-gesture time, countdown durations)
 
-**Between-Play Workflow:**
-1. Play game → encounter gesture issue (too sensitive/not sensitive enough)
-2. Tap dev panel shortcut (triple-tap 3 fingers)
-3. Adjust relevant parameter(s) with sliders
-4. Tap "Play Again" button (returns to game with new settings)
-5. Test immediately → iterate until tuned
-6. Export final configuration to code
+**4. Action Buttons**
+- **Apply & Play Again**: Apply current thresholds and restart game
+- **Export Settings**: Export all thresholds as JSON
+- **Reset to Defaults**: Restore factory thresholds
 
-**Key Features:**
-- **Live Preview**: Visual feedback as sliders move (e.g., shake threshold shows G-force meter)
-- **Comparison Mode**: A/B test two configurations side-by-side
-- **Preset Profiles**: "Conservative", "Balanced", "Aggressive" presets
-- **Export to Code**: Generate Swift code snippet with optimal values
-- **Session History**: Track all parameter changes during tuning session
+---
 
-##### 2. Real-Time Debugging Overlay
+##### New Capabilities (Implement Now)
 
-**HUD Display (Overlay During Gameplay):**
-```
-┌─────────────────────────────────┐
-│ FPS: 60 | Latency: 45ms         │ ← Performance metrics
-├─────────────────────────────────┤
-│ Shake: 1.8G (threshold: 2.0G)   │ ← Live sensor readings
-│ Tilt: 18° (threshold: 25°)      │
-│ Accel: X:0.2 Y:-0.1 Z:0.9       │
-├─────────────────────────────────┤
-│ Last Gesture: Swipe Up (MATCH)  │ ← Detection events
-│ Response Time: 42ms              │
-│ False Positives: 0 (this round) │
-└─────────────────────────────────┘
+**1. Selectable Gesture Issues**
+
+Each `GestureLogEntry` includes:
+```swift
+struct GestureLogEntry: Identifiable {
+    let id: UUID
+    let timestamp: Date
+    let expected: GestureType
+    let detected: GestureType?
+    var isSelected: Bool
+    let issueType: IssueType  // .notDetected, .wrongDetection, .success
+    let sensorSnapshot: SensorData
+    let thresholdsSnapshot: ThresholdSnapshot
+    let timing: GestureTiming
+    let deviceContext: DeviceContext
+}
 ```
 
-**Visualization Modes:**
-- **Sensor Timeline**: Scrolling graph of motion data (last 5 seconds)
-- **Detection Events**: Color-coded dots for successful/failed detections
-- **Latency Waterfall**: Visual breakdown of detection pipeline stages
+**Row Colors:**
+- 🔴 Red = `.notDetected` (gesture not recognized)
+- 🟠 Orange = `.wrongDetection` (wrong gesture detected)
+- 🟢 Green = `.success` (correct detection)
 
-##### 3. Automated Test Suite
+**Filters:**
+- All | Only Failures | Only Selected | Filter by gesture type
 
-**Test Categories:**
-1. **Gesture Accuracy Tests**
-   - Record 100 swipes → measure recognition rate
-   - Target: >95% accuracy for all gestures
-   - Device-specific calibration profiles
+**Selection Helpers:**
+- Select All Failures
+- Clear Selection
+- Invert Selection
 
-2. **Performance Regression Tests**
-   - Benchmark response time for each gesture
-   - Alert if changes degrade performance >10%
-   - Track across iOS versions and devices
+**Badge**: "X issues selected" indicator
 
-3. **Conflict Detection Tests**
-   - Test all gesture pairs for interference
-   - Example: Does pinch trigger false tap?
-   - Generate conflict matrix report
+---
 
-4. **Edge Case Scenarios**
-   - Fast alternating gestures
-   - Rapid-fire same gesture
-   - Interrupted gestures (start but don't complete)
-   - Boundary conditions (exactly at threshold)
+**2. Sensor Snapshot System**
 
-**Test Execution:**
-- Manual trigger via dev panel
-- Automated pre-commit hook (CI/CD integration)
-- Export results as JSON/CSV for analysis
+**Circular Buffer Storage:**
+- Last 500ms of sensor data continuously captured:
+  - Accelerometer (x, y, z)
+  - Gyroscope (rotation rates)
+  - DeviceMotion (attitude, gravity, user acceleration)
+  - Touch events (location, force, phase)
 
-##### 4. Analytics Dashboard
+**Snapshot Capture:**
+On gesture attempt completion → capture 500ms before + 500ms after
 
-**Real-Time Metrics:**
-```
-Gesture Performance (Last 100 Rounds)
-├── Miss Rate by Gesture
-│   ├── Shake: 12% (↑ HIGH - needs tuning)
-│   ├── Pinch: 5% (✓ acceptable)
-│   ├── Swipe Up: 2% (✓ excellent)
-│   └── ...
-├── False Positive Tracking
-│   ├── Double Tap as Single Tap: 8 occurrences
-│   ├── Shake as Tilt: 3 occurrences
-│   └── ...
-└── User Behavior Patterns
-    ├── Avg Response Time: 450ms
-    ├── Fastest Gesture: Tap (280ms)
-    ├── Slowest Gesture: Pinch (620ms)
-    └── Hesitation Points: Stroop (45% pause >1s)
-```
+**Data Structures:**
+```swift
+struct SensorData {
+    let accelerometer: [(timestamp: TimeInterval, x: Double, y: Double, z: Double)]
+    let gyroscope: [(timestamp: TimeInterval, x: Double, y: Double, z: Double)]
+    let deviceMotion: [(timestamp: TimeInterval, attitude: CMAttitude, gravity: CMAcceleration)]
+    let touches: [(timestamp: TimeInterval, location: CGPoint, force: CGFloat, phase: UITouch.Phase)]
+}
 
-**Session Recording:**
-- Record entire play session with sensor data
-- Replay with adjustable speed (0.25x, 0.5x, 1x, 2x)
-- Annotate specific moments ("Why did this fail?")
-- Export recordings for bug reports
+struct ThresholdSnapshot {
+    // All 20 threshold values at time of gesture
+}
 
-##### 5. Configuration Management
+struct GestureTiming {
+    let latency: TimeInterval        // Detection delay
+    let duration: TimeInterval       // Gesture duration
+    let interTapDelays: [TimeInterval]?  // For double tap
+}
 
-**Profile System:**
-```
-Active Profile: [Production v1.0] ▼
-├── Production v1.0 (current live)
-├── Beta Test v2 (20% more sensitive)
-├── Accessibility Mode (30% more forgiving)
-├── Expert Mode (15% stricter)
-└── [Create New Profile...]
+struct DeviceContext {
+    let model: String      // "iPhone 14 Pro"
+    let osVersion: String  // "iOS 17.2"
+    let timestamp: Date
+}
 ```
 
-**Version Control Integration:**
-- Export configuration as `.tipob-config` file
-- Commit alongside code changes
-- Load from file for reproducible builds
-- Share configs with team via Git
+---
+
+**3. Export Selected Issues**
+
+**New Button**: "Export Selected Issues"
+
+**Output JSON Structure:**
+```json
+{
+    "session": {
+        "id": "UUID",
+        "timestamp": "ISO8601",
+        "appVersion": "3.2",
+        "deviceModel": "iPhone 14 Pro",
+        "osVersion": "iOS 17.2"
+    },
+    "selectedIssues": [
+        {
+            "expected": "swipeUp",
+            "detected": "tiltLeft",
+            "issueType": "wrongDetection",
+            "thresholdsSnapshot": { ... },
+            "sensorData": { ... },
+            "timing": {
+                "latency": 0.045,
+                "duration": 0.320
+            },
+            "deviceContext": { ... }
+        }
+    ]
+}
+```
+
+**Optional XCTest Generation:**
+```swift
+func testGesture_SessionXYZ_Issue1() {
+    // Auto-generated test case from exported issue
+    let expectedGesture = GestureType.swipeUp
+    let sensorData = loadSensorData("session_xyz_issue1.json")
+    // Replay sensor data through recognizer
+    // Assert expected detection
+}
+```
+
+**4. Maintain Existing "Export Settings"**
+- Current threshold export functionality preserved
+- Separate from issue export
+
+---
+
+##### Future Capabilities (Do Not Implement Yet)
+
+1. **Gesture Replay Simulator**
+   - Replay sensor snapshots through gesture recognizers
+   - Test threshold changes against historical data
+   - A/B compare detection results
+
+2. **Threshold Profiles**
+   - Conservative / Balanced / Aggressive presets
+   - Custom profile save/load
+   - Profile comparison mode
+
+3. **Session Persistence**
+   - Save gesture logs across app launches
+   - Load previous sessions for analysis
+   - Threshold history with timestamps
+
+4. **Live Sensor Visualization**
+   - Real-time graphs of accelerometer/gyroscope
+   - Threshold indicator lines on graphs
+   - Detection event markers
+
+5. **A/B Threshold Testing Mode**
+   - Split-test two threshold configurations
+   - Track success rates per configuration
+   - Statistical significance calculation
+
+6. **Per-Gesture Standalone Test Buttons**
+   - Individual gesture test mode
+   - Isolated testing without full game flow
+   - Immediate feedback on detection
+
+7. **Persistent Badge/Indicator**
+   - Show count of pending export issues
+   - Visible outside dev panel
+   - Quick access to review
+
+---
+
+##### Technical Requirements
+
+**DEBUG Guard:**
+- All dev panel code wrapped in `#if DEBUG`
+- Zero impact on production binary size
+- No debug data in App Store builds
+
+**Memory Efficiency:**
+- Circular buffer for sensor data (fixed 500ms window)
+- Lazy snapshot capture (only on gesture completion)
+- Compress JSON export where possible
+- Clear old entries when buffer full
+
+**Local-Only Operation:**
+- No network uploads
+- All data stays on device
+- Export to Files app only
+
+**Modular Architecture:**
+- Clean separation for future capability plugins
+- Protocol-based design for testability
+- SwiftUI sheet presentation pattern
+
+---
 
 ##### Implementation Approach
 
-**Phase 1: Dev Panel UI (10-12 hours)**
-- SwiftUI sheet with tabbed interface
-- Slider controls for all gesture parameters
-- "Apply" and "Reset" buttons
-- Profile selection picker
+**Phase 1: Selectable Issues UI (8-10 hours)**
+- GestureLogEntry model with selection state
+- Row tap to select/deselect
+- Filter controls
+- Selection helpers
+- Badge indicator
 
-**Phase 2: Live Parameter Injection (8-10 hours)**
-- Environment object for dev settings
-- Override mechanism in gesture detectors
-- Hot-reload without app restart
-- Export to UserDefaults for persistence
+**Phase 2: Sensor Snapshot System (10-12 hours)**
+- Circular buffer implementation
+- Snapshot capture on gesture completion
+- Data structure definitions
+- Memory management
 
-**Phase 3: Debugging Overlay (6-8 hours)**
-- ZStack overlay with conditional rendering
-- Real-time sensor data binding
-- Performance metrics tracking
-- Toggle via dev panel or gesture
+**Phase 3: Export System (8-10 hours)**
+- JSON serialization
+- File export via share sheet
+- Optional XCTest generation
+- Maintain existing settings export
 
-**Phase 4: Analytics & Testing (6-8 hours)**
-- Event logging system
-- Test automation framework
-- Results visualization
-- Export functionality
+**Phase 4: Integration & Testing (4-6 hours)**
+- Wire up all components
+- Test with real gesture failures
+- Optimize memory usage
+- Document usage patterns
 
 **Total Estimated Effort**: 30-40 hours
 
