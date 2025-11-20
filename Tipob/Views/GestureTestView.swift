@@ -9,6 +9,7 @@
 #if DEBUG
 import SwiftUI
 import CoreMotion
+import Combine
 
 /// Full-screen view for testing individual gestures
 struct GestureTestView: View {
