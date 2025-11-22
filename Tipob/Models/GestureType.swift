@@ -227,6 +227,33 @@ enum GestureType: Equatable, Hashable, Codable {
         }
     }
 
+    /// For Stroop gestures, returns the correct swipe direction based on textColor
+    /// Returns nil for non-Stroop gestures
+    var stroopCorrectAnswer: GestureType? {
+        guard case .stroop(_, let textColor, let upColor, let downColor, let leftColor, let rightColor) = self else {
+            return nil
+        }
+
+        if textColor == upColor { return .up }
+        if textColor == downColor { return .down }
+        if textColor == leftColor { return .left }
+        if textColor == rightColor { return .right }
+
+        return nil  // Should never happen if Stroop is properly configured
+    }
+
+    /// Checks if a detected gesture is the correct response for this expected gesture
+    /// Handles Stroop specially by checking if the swipe matches the textColor direction
+    func isCorrectResponse(_ detected: GestureType) -> Bool {
+        // Special handling for Stroop
+        if case .stroop = self {
+            return detected == stroopCorrectAnswer
+        }
+
+        // For all other gestures, simple equality check
+        return detected == self
+    }
+
     var animationStyle: AnimationStyle {
         switch self {
         case .tap: return .singlePulse

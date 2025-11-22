@@ -1,38 +1,37 @@
-# Session Summary - 2025-11-20
+# Session Summary - 2025-11-21
 
 ## Completed Tasks
-- Investigated dual gesture detection issues in depth
-- Identified two separate root causes for swipe/Stroop problems
-- Documented differences between GestureTestView and real game detection systems
+- Fixed Stroop race condition in GestureTestView (isRecording = false initially)
+- Unified gesture detection between GestureTestView and real gameplay
+- Added Stroop-aware comparison logic (isCorrectResponse method)
+- Reverted Lottie launch animation (back to SwiftUI animation)
 
 ## In Progress
-- **Issue 1: Swipe in Classic Gameplay** (inconsistent detection)
-  - Root cause: SwipeGestureModifier has strict velocity (80px/s), edge buffer (24px), and GestureCoordinator checks
-  - GestureTestView bypasses these checks (simpler DragGesture)
-  - Proposed fixes: Lower velocity threshold, add debug logging, clear coordinator on game start
-  
-- **Issue 2: Stroop in GestureTestView** (not working)
-  - Root cause: Race condition - `isRecording = true` initially but `actualGesture = nil`
-  - Quick swipes get silently dropped in recordResult()
-  - Proposed fix: Set `@State private var isRecording = false` initially
+- Stroop gesture tester should now work correctly with proper validation
 
 ## Next Session
-- Implement fix for Issue 2 (simple - change isRecording initial state)
-- Add debug logging for Issue 1 to diagnose specific swipe failures
-- Consider lowering minSwipeVelocity threshold (currently 80px/s)
-- Verify GestureCoordinator.clearExpectedGesture() called when starting Classic Mode
+- Test Stroop gesture tester to verify fix works
+- Re-attempt Lottie launch animation with proper file bundling
+- Continue with gesture testing improvements
 
 ## Key Decisions
-- Two issues are completely separate with different fixes
-- GestureTestView and real gameplay use different detection systems (important to understand)
-- Should add rejection reason logging to SwipeGestureModifier for better debugging
+- Reverted Lottie due to Xcode file bundling issues with synchronized root groups
+- Added stroopCorrectAnswer property to GestureType for proper Stroop validation
+- GestureTestView now uses same detection modifiers as real gameplay
 
 ## Blockers/Issues
-- User stayed in plan mode - no code changes implemented
-- Need to determine optimal velocity threshold for Classic gameplay
+- Xcode synchronized root groups causing file bundling issues
+- Need to investigate proper way to add JSON resources to Xcode 15+ projects
 
-## Key Files Involved
-- `Tipob/Views/GestureTestView.swift` - Line 24 needs isRecording = false
-- `Tipob/Utilities/SwipeGestureModifier.swift` - Has strict validation guards
-- `Tipob/Utilities/GestureCoordinator.swift` - May have stale state from Tutorial
-- `Tipob/ViewModels/GameViewModel.swift` - Classic mode gesture handling
+## Technical Details
+### Files Modified:
+- GestureType.swift - Added stroopCorrectAnswer and isCorrectResponse methods
+- DevConfigManager.swift - Updated issue type calculation for Stroop
+- GestureTestView.swift - Changed isRecording initial state, unified gesture detection
+- LaunchView.swift - Reverted to SwiftUI animation
+
+### Stroop Validation Fix:
+The correct answer for Stroop = swipe direction matching textColor
+- If textColor == upColor → correct = .up
+- If textColor == downColor → correct = .down
+- etc.

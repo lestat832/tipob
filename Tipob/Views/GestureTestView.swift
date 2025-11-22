@@ -21,15 +21,10 @@ struct GestureTestView: View {
 
     // State
     @State private var timeRemaining: Double = 3.0
-    @State private var isRecording = true
+    @State private var isRecording = false
     @State private var detectedGesture: GestureType? = nil
     @State private var testStartTime: Date = Date()
     @State private var actualGesture: GestureType? = nil  // Generated once on appear
-
-    // Gesture detection state
-    @State private var tapCount = 0
-    @State private var tapWorkItem: DispatchWorkItem?
-    @State private var longPressActive = false
 
     // Motion manager for motion gestures
     @StateObject private var motionDetector = TestMotionDetector()
@@ -108,14 +103,15 @@ struct GestureTestView: View {
             }
             .padding()
         }
-        // Apply gesture recognizers based on test mode
-        .applyTestGestures(
-            testMode: testMode,
-            onTap: handleTap,
-            onDoubleTap: handleDoubleTap,
-            onLongPress: handleLongPress,
-            onSwipe: handleSwipe,
-            onPinch: handlePinch
+        // Apply same gesture recognizers as real gameplay
+        .detectSwipes { gesture in
+            handleSwipe(gesture)
+        }
+        .detectTaps { gesture in
+            handleTapGesture(gesture)
+        }
+        .detectPinch(
+            onPinch: { handlePinch(1.0) }
         )
         .onAppear {
             startTest()
@@ -163,7 +159,6 @@ struct GestureTestView: View {
     private func cleanup() {
         timer?.invalidate()
         timer = nil
-        tapWorkItem?.cancel()
         motionDetector.stopDetecting()
     }
 
@@ -178,41 +173,24 @@ struct GestureTestView: View {
 
     // MARK: - Gesture Handlers
 
-    private func handleTap() {
-        guard isRecording, testMode == .tap || testMode == .doubleTap else { return }
-
-        tapWorkItem?.cancel()
-        tapCount += 1
-
-        if testMode == .tap {
-            // For single tap test, register immediately
-            recordResult(detected: .tap)
-        } else if testMode == .doubleTap {
-            if tapCount == 1 {
-                // Wait for potential second tap
-                tapWorkItem = DispatchWorkItem { [self] in
-                    // Single tap when expecting double
-                    recordResult(detected: .tap)
-                }
-                DispatchQueue.main.asyncAfter(
-                    deadline: .now() + config.doubleTapWindow,
-                    execute: tapWorkItem!
-                )
-            } else if tapCount >= 2 {
-                tapWorkItem?.cancel()
-                recordResult(detected: .doubleTap)
-            }
-        }
-    }
-
-    private func handleDoubleTap() {
+    /// Handles tap gestures from detectTaps modifier (same as real gameplay)
+    private func handleTapGesture(_ gesture: GestureType) {
         guard isRecording else { return }
-        recordResult(detected: .doubleTap)
-    }
 
-    private func handleLongPress() {
-        guard isRecording, testMode == .longPress else { return }
-        recordResult(detected: .longPress)
+        // Only process tap gestures relevant to current test mode
+        switch gesture {
+        case .tap:
+            guard testMode == .tap || testMode == .doubleTap else { return }
+            recordResult(detected: .tap)
+        case .doubleTap:
+            guard testMode == .doubleTap else { return }
+            recordResult(detected: .doubleTap)
+        case .longPress:
+            guard testMode == .longPress else { return }
+            recordResult(detected: .longPress)
+        default:
+            break
+        }
     }
 
     private func handleSwipe(_ direction: GestureType) {
@@ -274,57 +252,6 @@ struct GestureTestView: View {
     }
 }
 
-// MARK: - Gesture Modifiers Extension
-
-extension View {
-    @ViewBuilder
-    func applyTestGestures(
-        testMode: GestureTestMode,
-        onTap: @escaping () -> Void,
-        onDoubleTap: @escaping () -> Void,
-        onLongPress: @escaping () -> Void,
-        onSwipe: @escaping (GestureType) -> Void,
-        onPinch: @escaping (CGFloat) -> Void
-    ) -> some View {
-        self
-            // Tap gestures
-            .simultaneousGesture(
-                TapGesture()
-                    .onEnded { onTap() }
-            )
-            // Long press
-            .simultaneousGesture(
-                LongPressGesture(minimumDuration: DevConfigManager.shared.longPressDuration)
-                    .onEnded { _ in onLongPress() }
-            )
-            // Swipe gestures
-            .simultaneousGesture(
-                DragGesture(minimumDistance: DevConfigManager.shared.minSwipeDistance)
-                    .onEnded { value in
-                        let direction = detectSwipeDirection(from: value)
-                        onSwipe(direction)
-                    }
-            )
-            // Pinch gesture
-            .simultaneousGesture(
-                MagnificationGesture()
-                    .onEnded { scale in
-                        onPinch(scale)
-                    }
-            )
-    }
-
-    private func detectSwipeDirection(from value: DragGesture.Value) -> GestureType {
-        let horizontal = value.translation.width
-        let vertical = value.translation.height
-
-        if abs(horizontal) > abs(vertical) {
-            return horizontal > 0 ? .right : .left
-        } else {
-            return vertical > 0 ? .down : .up
-        }
-    }
-}
 
 // MARK: - Motion Detector for Tests
 

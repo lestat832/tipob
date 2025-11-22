@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9290AF3F2ED1387000D38335 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9290AF3E2ED1387000D38335 /* Lottie */; };
 		92F8CB4D2EC3E87C00E7A169 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 92F8CB4C2EC3E87C00E7A169 /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
@@ -56,6 +57,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				92F8CB4D2EC3E87C00E7A169 /* GoogleMobileAds in Frameworks */,
+				9290AF3F2ED1387000D38335 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +101,7 @@
 			name = Tipob;
 			packageProductDependencies = (
 				92F8CB4C2EC3E87C00E7A169 /* GoogleMobileAds */,
+				9290AF3E2ED1387000D38335 /* Lottie */,
 			);
 			productName = Tipob;
 			productReference = 9205ABDB2E89F6A8006A347A /* Tipob.app */;
@@ -130,6 +133,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				92F8CB4B2EC3E87C00E7A169 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+				9290AF3D2ED1387000D38335 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9205ABDC2E89F6A8006A347A /* Products */;
@@ -367,6 +371,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		9290AF3D2ED1387000D38335 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
 		92F8CB4B2EC3E87C00E7A169 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads";
@@ -378,6 +390,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9290AF3E2ED1387000D38335 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9290AF3D2ED1387000D38335 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
 		92F8CB4C2EC3E87C00E7A169 /* GoogleMobileAds */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 92F8CB4B2EC3E87C00E7A169 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;

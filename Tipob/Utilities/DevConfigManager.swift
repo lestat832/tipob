@@ -913,10 +913,10 @@ struct GestureLogEntry: Identifiable, Codable {
         self.detectedGesture = detected
         self.isSelected = false
 
-        // Determine issue type
+        // Determine issue type (with Stroop-aware comparison)
         if detected == nil {
             self.issueType = .notDetected
-        } else if detected == expected {
+        } else if expected.isCorrectResponse(detected!) {
             self.issueType = .success
         } else {
             self.issueType = .wrongDetection
@@ -1111,10 +1111,10 @@ struct GestureTestResult: Identifiable, Codable {
         self.thresholdsSnapshot = thresholdsSnapshot ?? ThresholdSnapshot.capture()
         self.deviceContext = deviceContext ?? DeviceContext.capture()
 
-        // Auto-determine issue type
+        // Auto-determine issue type (with Stroop-aware comparison)
         if detected == nil {
             self.issueType = .notDetected
-        } else if detected == expected {
+        } else if expected.isCorrectResponse(detected!) {
             self.issueType = .success
         } else {
             self.issueType = .wrongDetection
