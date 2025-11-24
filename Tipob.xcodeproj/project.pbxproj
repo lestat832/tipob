@@ -33,6 +33,7 @@
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			buildPhase = 92F8CC252ECD2C4100E7A169 /* Copy Files (3 items) */;
 			membershipExceptions = (
+				Resources/LaunchAnimation.json,
 				Resources/Sounds/countdown_beep.caf,
 				Resources/Sounds/gesture_success_tick.caf,
 				Resources/Sounds/round_complete_chime.caf,
