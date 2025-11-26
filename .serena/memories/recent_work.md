@@ -1,32 +1,22 @@
-# Recent Work - November 2025
+# Recent Work - Out of Pocket (Tipob)
 
-## Gesture Detection System Architecture (Key Discovery)
+## November 2025 Highlights
 
-**Two different detection systems in the app:**
+### Raw Gesture Data Capture System (Nov 26)
+- Implemented comprehensive gesture attempt logging for debugging "not_detected" failures
+- `GestureAttempt` struct captures: position, distance, velocity, scale, rejection reason
+- Static factory methods: `.swipe()`, `.pinch()`, `.tap()` for type-safe creation
+- Auto-attaches to `GestureLogEntry` on log, included in JSON export
+- Key insight: `GestureType` uses `displayName` property, not `rawValue`
 
-1. **Real Gameplay** (ClassicModeView, GamePlayView)
-   - Uses `SwipeGestureModifier`
-   - Velocity check: 80 px/s minimum
-   - Edge buffer: 24px
-   - GestureCoordinator filtering
-   - More strict validation
+### AdMob Production Integration (Nov 26)
+- Configured production App ID and Interstitial Ad Unit ID
+- Implemented ATT (App Tracking Transparency) permission request
+- Added SKAdNetwork identifiers to Info.plist
+- Ready for live testing
 
-2. **GestureTestView** 
-   - Uses `applyTestGestures` modifier
-   - Simple DragGesture with only distance check
-   - No velocity, edge, or coordinator checks
-   - More forgiving
-
-**Implication:** Gestures passing in tester may fail in real gameplay due to stricter validation.
-
-## Debug Tips for Gesture Issues
-- Check Xcode console for "⏸️ Swipe suppressed" (GestureCoordinator)
-- Check for "🎯 Swipe detected" (successful detection)
-- If neither appears, swipe failed distance/velocity/edge checks
-- Dev Panel has sliders to adjust thresholds in real-time
-
-## Common Issues
-- Slow swipes rejected (velocity < 80px/s)
-- Swipes near screen edge rejected (within 24px)
-- GestureCoordinator stale state from Tutorial mode
-- Race conditions when isRecording state not properly initialized
+### Patterns Learned
+- SwiftUI gesture modifiers use `#if DEBUG` for dev-only logging
+- `GestureCoordinator` manages gesture suppression during state transitions
+- `DevConfigManager` is the central hub for debug configuration and logging
+- Gesture attempts buffer pattern: accumulate → attach → clear

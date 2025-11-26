@@ -43,6 +43,17 @@ struct SwipeGestureModifier: ViewModifier {
         guard !isNearEdge(start, in: size) else {
             #if DEBUG
             print("[\(Date().logTimestamp)] ⚠️ Swipe \(potentialGesture.displayName) rejected - started near edge (start: \(Int(start.x)),\(Int(start.y)) screen: \(Int(size.width))x\(Int(size.height)))")
+            // Log rejection for raw gesture data capture
+            DevConfigManager.shared.logGestureAttempt(.swipe(
+                direction: potentialGesture,
+                wasAccepted: false,
+                rejectionReason: "edge_buffer",
+                startPosition: start,
+                endPosition: end,
+                distance: distance,
+                velocity: velocity,
+                screenSize: size
+            ))
             #endif
             return
         }
@@ -53,7 +64,19 @@ struct SwipeGestureModifier: ViewModifier {
             #if DEBUG
             let distOK = distance >= GameConfiguration.minSwipeDistance
             let velOK = velocity >= GameConfiguration.minSwipeVelocity
+            let reason = !distOK && !velOK ? "distance_and_velocity" : (!distOK ? "distance" : "velocity")
             print("[\(Date().logTimestamp)] ⚠️ Swipe \(potentialGesture.displayName) rejected - distance: \(Int(distance))px (min: \(Int(GameConfiguration.minSwipeDistance)), \(distOK ? "✓" : "✗")), velocity: \(Int(velocity))px/s (min: \(Int(GameConfiguration.minSwipeVelocity)), \(velOK ? "✓" : "✗"))")
+            // Log rejection for raw gesture data capture
+            DevConfigManager.shared.logGestureAttempt(.swipe(
+                direction: potentialGesture,
+                wasAccepted: false,
+                rejectionReason: reason,
+                startPosition: start,
+                endPosition: end,
+                distance: distance,
+                velocity: velocity,
+                screenSize: size
+            ))
             #endif
             return
         }
@@ -61,10 +84,36 @@ struct SwipeGestureModifier: ViewModifier {
         // Check gesture coordinator before triggering
         guard GestureCoordinator.shared.shouldAllowGesture(potentialGesture) else {
             print("[\(Date().logTimestamp)] ⏸️ Swipe \(potentialGesture.displayName) suppressed by coordinator")
+            #if DEBUG
+            // Log coordinator suppression
+            DevConfigManager.shared.logGestureAttempt(.swipe(
+                direction: potentialGesture,
+                wasAccepted: false,
+                rejectionReason: "coordinator_suppressed",
+                startPosition: start,
+                endPosition: end,
+                distance: distance,
+                velocity: velocity,
+                screenSize: size
+            ))
+            #endif
             return
         }
 
         print("[\(Date().logTimestamp)] 🎯 Swipe \(potentialGesture.displayName) detected - distance: \(Int(distance))px, velocity: \(Int(velocity))px/s")
+        #if DEBUG
+        // Log successful swipe
+        DevConfigManager.shared.logGestureAttempt(.swipe(
+            direction: potentialGesture,
+            wasAccepted: true,
+            rejectionReason: nil,
+            startPosition: start,
+            endPosition: end,
+            distance: distance,
+            velocity: velocity,
+            screenSize: size
+        ))
+        #endif
         onSwipe(potentialGesture)
     }
 

@@ -69,6 +69,17 @@ struct PinchGestureModifier: ViewModifier {
 
                         if hasInwardMotion && (hasLargeChange || hasFastMotion) && !isPinching {
                             isPinching = true
+                            #if DEBUG
+                            // Log successful pinch
+                            DevConfigManager.shared.logGestureAttempt(.pinch(
+                                wasAccepted: true,
+                                rejectionReason: nil,
+                                initialScale: initialScale,
+                                finalScale: value,
+                                scaleChange: changeAmount,
+                                pinchVelocity: averageVelocity
+                            ))
+                            #endif
                             onPinch()
 
                             // Reset after debounce delay
@@ -83,6 +94,23 @@ struct PinchGestureModifier: ViewModifier {
                                 self.velocityCount = 0
                             }
                         } else {
+                            #if DEBUG
+                            // Log rejected pinch with reason
+                            var rejectionReason = "unknown"
+                            if !hasInwardMotion {
+                                rejectionReason = "not_inward_motion"
+                            } else if !hasLargeChange && !hasFastMotion {
+                                rejectionReason = "insufficient_change_and_velocity"
+                            }
+                            DevConfigManager.shared.logGestureAttempt(.pinch(
+                                wasAccepted: false,
+                                rejectionReason: rejectionReason,
+                                initialScale: initialScale,
+                                finalScale: value,
+                                scaleChange: changeAmount,
+                                pinchVelocity: averageVelocity
+                            ))
+                            #endif
                             // Reset if conditions not met
                             currentScale = 1.0
                             initialScale = 1.0

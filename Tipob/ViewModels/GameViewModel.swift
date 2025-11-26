@@ -407,10 +407,8 @@ class GameViewModel: ObservableObject {
             DevConfigManager.shared.logGesture(expected: currentGesture, detected: nil, success: false)
         }
 
-        // Capture sequence for replay debugging
-        if !classicGestureHistory.isEmpty {
-            DevConfigManager.shared.captureClassicSequence(classicGestureHistory)
-        }
+        // Capture sequence for replay debugging (always capture to replace previous)
+        DevConfigManager.shared.captureClassicSequence(classicGestureHistory)
         #endif
 
         // Calculate final score (Classic Mode uses score)

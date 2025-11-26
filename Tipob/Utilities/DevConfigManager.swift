@@ -74,6 +74,11 @@ class DevConfigManager: ObservableObject {
     @Published var lastMemorySequence: [GestureType]? = nil
     @Published var lastClassicSequence: [GestureType]? = nil
 
+    // MARK: - Raw Gesture Attempt Capture
+
+    /// Buffer for capturing gesture attempts (accepted and rejected) during gameplay
+    @Published var gestureAttempts: [GestureAttempt] = []
+
     // MARK: - Per-Gesture Test Mode
 
     @Published var testMode: GestureTestMode = .none
@@ -213,13 +218,21 @@ class DevConfigManager: ObservableObject {
             allowedDuration: 3.0,  // Default
             timeoutOccurred: detected == nil
         )
+
+        // Capture and clear gesture attempts
+        let attempts = gestureAttempts.isEmpty ? nil : gestureAttempts
+        gestureAttempts.removeAll()
+
         let entry = GestureLogEntry(
             expected: expected,
             detected: detected,
-            timing: timing
+            timing: timing,
+            gestureAttempts: attempts
         )
         gameplayLogs.append(entry)
-        print("📋 Log: [\(entry.timestamp.logTimestamp)] Expected: \(expected.displayName) → Detected: \(detected?.displayName ?? "none") \(success ? "✓" : "✗")")
+
+        let attemptCount = attempts?.count ?? 0
+        print("📋 Log: [\(entry.timestamp.logTimestamp)] Expected: \(expected.displayName) → Detected: \(detected?.displayName ?? "none") \(success ? "✓" : "✗") (\(attemptCount) attempts)")
     }
 
     /// Log a gesture attempt with full timing and sensor data
@@ -229,15 +242,21 @@ class DevConfigManager: ObservableObject {
         timing: GestureTiming,
         sensorSnapshot: SensorData? = nil
     ) {
+        // Capture and clear gesture attempts
+        let attempts = gestureAttempts.isEmpty ? nil : gestureAttempts
+        gestureAttempts.removeAll()
+
         let entry = GestureLogEntry(
             expected: expected,
             detected: detected,
             timing: timing,
-            sensorSnapshot: sensorSnapshot
+            sensorSnapshot: sensorSnapshot,
+            gestureAttempts: attempts
         )
         gameplayLogs.append(entry)
         let reactionStr = timing.actualDuration.map { String(format: "%.2fs", $0) } ?? "timeout"
-        print("📋 Log: [\(entry.timestamp.logTimestamp)] Expected: \(expected.displayName) → Detected: \(detected?.displayName ?? "none") (\(reactionStr))")
+        let attemptCount = attempts?.count ?? 0
+        print("📋 Log: [\(entry.timestamp.logTimestamp)] Expected: \(expected.displayName) → Detected: \(detected?.displayName ?? "none") (\(reactionStr), \(attemptCount) attempts)")
     }
 
     /// Clear all gameplay logs (call at start of new game)
@@ -263,6 +282,31 @@ class DevConfigManager: ObservableObject {
         lastMemorySequence = nil
         lastClassicSequence = nil
         print("🔄 Cleared stored sequences")
+    }
+
+    // MARK: - Gesture Attempt Capture Methods
+
+    /// Log a gesture attempt (accepted or rejected)
+    func logGestureAttempt(_ attempt: GestureAttempt) {
+        gestureAttempts.append(attempt)
+        let status = attempt.wasAccepted ? "✓" : "✗"
+        let reason = attempt.rejectionReason.map { " (\($0))" } ?? ""
+        print("📝 Attempt: \(attempt.gestureType) \(status)\(reason)")
+    }
+
+    /// Clear all gesture attempts (call when new gesture prompt starts)
+    func clearGestureAttempts() {
+        gestureAttempts.removeAll()
+    }
+
+    /// Get recent attempts since a given timestamp (for attaching to log entry)
+    func getAttemptsSince(_ timestamp: Date) -> [GestureAttempt] {
+        gestureAttempts.filter { $0.timestamp >= timestamp }
+    }
+
+    /// Get all attempts for the current gesture window
+    var recentAttempts: [GestureAttempt] {
+        gestureAttempts
     }
 
     // MARK: - Selection Logic
@@ -701,6 +745,117 @@ struct TouchSample: Codable, Identifiable {
     }
 }
 
+// MARK: - Gesture Attempt (Raw Gesture Data Capture)
+
+/// Captures a single gesture attempt (accepted or rejected) for debugging
+struct GestureAttempt: Codable, Identifiable {
+    let id: UUID
+    let timestamp: Date
+    let gestureType: String      // "swipe_up", "swipe_down", "pinch", "tap", etc.
+    let wasAccepted: Bool
+    let rejectionReason: String? // "edge_buffer", "distance", "velocity", "coordinator", "scale", etc.
+
+    // Swipe-specific data
+    let startPosition: CGPoint?
+    let endPosition: CGPoint?
+    let distance: CGFloat?
+    let velocity: CGFloat?
+    let screenSize: CGSize?
+
+    // Pinch-specific data
+    let initialScale: CGFloat?
+    let finalScale: CGFloat?
+    let scaleChange: CGFloat?
+    let pinchVelocity: CGFloat?
+
+    // Tap-specific data
+    let tapCount: Int?
+
+    /// Initialize for swipe gesture attempt
+    static func swipe(
+        direction: GestureType,
+        wasAccepted: Bool,
+        rejectionReason: String? = nil,
+        startPosition: CGPoint,
+        endPosition: CGPoint,
+        distance: CGFloat,
+        velocity: CGFloat,
+        screenSize: CGSize
+    ) -> GestureAttempt {
+        GestureAttempt(
+            id: UUID(),
+            timestamp: Date(),
+            gestureType: "swipe_\(direction.displayName.lowercased())",
+            wasAccepted: wasAccepted,
+            rejectionReason: rejectionReason,
+            startPosition: startPosition,
+            endPosition: endPosition,
+            distance: distance,
+            velocity: velocity,
+            screenSize: screenSize,
+            initialScale: nil,
+            finalScale: nil,
+            scaleChange: nil,
+            pinchVelocity: nil,
+            tapCount: nil
+        )
+    }
+
+    /// Initialize for pinch gesture attempt
+    static func pinch(
+        wasAccepted: Bool,
+        rejectionReason: String? = nil,
+        initialScale: CGFloat,
+        finalScale: CGFloat,
+        scaleChange: CGFloat,
+        pinchVelocity: CGFloat
+    ) -> GestureAttempt {
+        GestureAttempt(
+            id: UUID(),
+            timestamp: Date(),
+            gestureType: "pinch",
+            wasAccepted: wasAccepted,
+            rejectionReason: rejectionReason,
+            startPosition: nil,
+            endPosition: nil,
+            distance: nil,
+            velocity: nil,
+            screenSize: nil,
+            initialScale: initialScale,
+            finalScale: finalScale,
+            scaleChange: scaleChange,
+            pinchVelocity: pinchVelocity,
+            tapCount: nil
+        )
+    }
+
+    /// Initialize for tap gesture attempt
+    static func tap(
+        type: GestureType,
+        wasAccepted: Bool,
+        rejectionReason: String? = nil,
+        tapCount: Int = 1
+    ) -> GestureAttempt {
+        GestureAttempt(
+            id: UUID(),
+            timestamp: Date(),
+            gestureType: type.displayName.lowercased().replacingOccurrences(of: " ", with: "_"),
+            wasAccepted: wasAccepted,
+            rejectionReason: rejectionReason,
+            startPosition: nil,
+            endPosition: nil,
+            distance: nil,
+            velocity: nil,
+            screenSize: nil,
+            initialScale: nil,
+            finalScale: nil,
+            scaleChange: nil,
+            pinchVelocity: nil,
+            tapCount: tapCount
+        )
+    }
+}
+
 // MARK: - Sensor Data Container
 
 /// Container for 500ms of sensor data around a gesture event
@@ -879,6 +1034,9 @@ struct GestureLogEntry: Identifiable, Codable {
     let timing: GestureTiming
     let deviceContext: DeviceContext
 
+    // Raw gesture attempts (accepted and rejected) captured during this gesture window
+    var gestureAttempts: [GestureAttempt]?
+
     // Computed properties
     var success: Bool {
         issueType == .success
@@ -905,7 +1063,8 @@ struct GestureLogEntry: Identifiable, Codable {
         timing: GestureTiming,
         sensorSnapshot: SensorData? = nil,
         thresholdsSnapshot: ThresholdSnapshot? = nil,
-        deviceContext: DeviceContext? = nil
+        deviceContext: DeviceContext? = nil,
+        gestureAttempts: [GestureAttempt]? = nil
     ) {
         self.id = UUID()
         self.timestamp = Date()
@@ -926,6 +1085,7 @@ struct GestureLogEntry: Identifiable, Codable {
         self.thresholdsSnapshot = thresholdsSnapshot ?? ThresholdSnapshot.capture()
         self.timing = timing
         self.deviceContext = deviceContext ?? DeviceContext.capture()
+        self.gestureAttempts = gestureAttempts
     }
 }
 

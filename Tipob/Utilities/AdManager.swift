@@ -3,7 +3,7 @@
 //  Tipob
 //
 //  Created on 2025-11-11
-//  Google AdMob Integration - TEST MODE ONLY
+//  Google AdMob Integration - PRODUCTION
 //
 
 import Foundation
@@ -11,7 +11,6 @@ import UIKit
 import GoogleMobileAds
 
 /// Manages interstitial ad loading and presentation
-/// IMPORTANT: Uses TEST Ad Unit IDs only - never uses production IDs
 class AdManager: NSObject {
 
     // MARK: - Singleton
@@ -20,9 +19,8 @@ class AdManager: NSObject {
 
     // MARK: - Properties
 
-    /// Google AdMob TEST Interstitial Ad Unit ID
-    /// WARNING: This is a TEST ID - do NOT use in production
-    private let testAdUnitID = "ca-app-pub-3940256099942544/4411468910"
+    /// Google AdMob Interstitial Ad Unit ID (Production)
+    private let interstitialAdUnitID = "ca-app-pub-8372563313053067/2149863647"
 
     /// Currently loaded interstitial ad
     private var interstitialAd: InterstitialAd?
@@ -54,7 +52,7 @@ class AdManager: NSObject {
         // Preload first ad
         loadInterstitialAd()
 
-        print("✅ AdManager initialized with TEST ID: \(testAdUnitID)")
+        print("✅ AdManager initialized with production ID")
     }
 
     // MARK: - Public Methods
@@ -105,7 +103,7 @@ class AdManager: NSObject {
         let request = Request()
 
         InterstitialAd.load(
-            with: testAdUnitID,
+            with: interstitialAdUnitID,
             request: request
         ) { [weak self] ad, error in
             guard let self = self else { return }

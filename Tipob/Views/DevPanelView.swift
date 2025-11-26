@@ -259,7 +259,7 @@ struct DevPanelView: View {
                 .foregroundColor(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            if let memorySeq = config.lastMemorySequence {
+            if let memorySeq = config.lastMemorySequence, !memorySeq.isEmpty {
                 Button(action: {
                     HapticManager.shared.impact()
                     dismiss()
@@ -283,7 +283,7 @@ struct DevPanelView: View {
                 }
             }
 
-            if let classicSeq = config.lastClassicSequence {
+            if let classicSeq = config.lastClassicSequence, !classicSeq.isEmpty {
                 Button(action: {
                     HapticManager.shared.impact()
                     dismiss()
@@ -307,7 +307,10 @@ struct DevPanelView: View {
                 }
             }
 
-            if config.lastMemorySequence == nil && config.lastClassicSequence == nil {
+            // Show message if no sequences available (nil or empty)
+            let hasMemorySeq = config.lastMemorySequence?.isEmpty == false
+            let hasClassicSeq = config.lastClassicSequence?.isEmpty == false
+            if !hasMemorySeq && !hasClassicSeq {
                 Text("Play a game to enable sequence replay")
                     .font(.caption)
                     .foregroundColor(.secondary)

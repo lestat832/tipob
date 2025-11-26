@@ -38,9 +38,23 @@ struct TapDetectionModifier: ViewModifier {
                         // Check gesture coordinator before triggering
                         if GestureCoordinator.shared.shouldAllowGesture(.longPress) {
                             print("[\(Date().logTimestamp)] 🎯 Long Press detected")
+                            #if DEBUG
+                            DevConfigManager.shared.logGestureAttempt(.tap(
+                                type: .longPress,
+                                wasAccepted: true,
+                                rejectionReason: nil
+                            ))
+                            #endif
                             onTap(.longPress)
                         } else {
                             print("[\(Date().logTimestamp)] ⏸️ Long Press suppressed by coordinator")
+                            #if DEBUG
+                            DevConfigManager.shared.logGestureAttempt(.tap(
+                                type: .longPress,
+                                wasAccepted: false,
+                                rejectionReason: "coordinator_suppressed"
+                            ))
+                            #endif
                         }
 
                         // Reset flag after a delay
@@ -66,9 +80,25 @@ struct TapDetectionModifier: ViewModifier {
                             // Only one tap received - check if allowed
                             if GestureCoordinator.shared.shouldAllowGesture(.tap) {
                                 print("[\(Date().logTimestamp)] 🎯 Single Tap detected")
+                                #if DEBUG
+                                DevConfigManager.shared.logGestureAttempt(.tap(
+                                    type: .tap,
+                                    wasAccepted: true,
+                                    rejectionReason: nil,
+                                    tapCount: 1
+                                ))
+                                #endif
                                 onTap(.tap)
                             } else {
                                 print("[\(Date().logTimestamp)] ⏸️ Single Tap suppressed by coordinator")
+                                #if DEBUG
+                                DevConfigManager.shared.logGestureAttempt(.tap(
+                                    type: .tap,
+                                    wasAccepted: false,
+                                    rejectionReason: "coordinator_suppressed",
+                                    tapCount: 1
+                                ))
+                                #endif
                             }
                         }
                         self.tapCount = 0
@@ -80,9 +110,25 @@ struct TapDetectionModifier: ViewModifier {
                     singleTapTimer?.cancel()
                     if GestureCoordinator.shared.shouldAllowGesture(.doubleTap) {
                         print("[\(Date().logTimestamp)] 🎯 Double Tap detected")
+                        #if DEBUG
+                        DevConfigManager.shared.logGestureAttempt(.tap(
+                            type: .doubleTap,
+                            wasAccepted: true,
+                            rejectionReason: nil,
+                            tapCount: 2
+                        ))
+                        #endif
                         onTap(.doubleTap)
                     } else {
                         print("[\(Date().logTimestamp)] ⏸️ Double Tap suppressed by coordinator")
+                        #if DEBUG
+                        DevConfigManager.shared.logGestureAttempt(.tap(
+                            type: .doubleTap,
+                            wasAccepted: false,
+                            rejectionReason: "coordinator_suppressed",
+                            tapCount: 2
+                        ))
+                        #endif
                     }
                     tapCount = 0
                 }
