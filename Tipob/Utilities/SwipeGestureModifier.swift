@@ -31,28 +31,41 @@ struct SwipeGestureModifier: ViewModifier {
     }
 
     private func handleSwipe(from start: CGPoint, to end: CGPoint, in size: CGSize) {
-        guard !isNearEdge(start, in: size) else { return }
-
         let deltaX = end.x - start.x
         let deltaY = end.y - start.y
         let distance = sqrt(deltaX * deltaX + deltaY * deltaY)
         let timeDelta = Date().timeIntervalSince(dragStartTime)
         let velocity = timeDelta > 0 ? distance / CGFloat(timeDelta) : 0
-
-        guard distance >= GameConfiguration.minSwipeDistance,
-              velocity >= GameConfiguration.minSwipeVelocity else { return }
-
         let angle = atan2(deltaY, deltaX)
-        let gesture = determineGesture(from: angle)
+        let potentialGesture = determineGesture(from: angle)
 
-        // Check gesture coordinator before triggering
-        guard GestureCoordinator.shared.shouldAllowGesture(gesture) else {
-            print("[\(Date().logTimestamp)] ⏸️ Swipe \(gesture.displayName) suppressed by coordinator")
+        // Check edge proximity
+        guard !isNearEdge(start, in: size) else {
+            #if DEBUG
+            print("[\(Date().logTimestamp)] ⚠️ Swipe \(potentialGesture.displayName) rejected - started near edge (start: \(Int(start.x)),\(Int(start.y)) screen: \(Int(size.width))x\(Int(size.height)))")
+            #endif
             return
         }
 
-        print("[\(Date().logTimestamp)] 🎯 Swipe \(gesture.displayName) detected - distance: \(Int(distance))px, velocity: \(Int(velocity))px/s")
-        onSwipe(gesture)
+        // Check distance and velocity thresholds
+        guard distance >= GameConfiguration.minSwipeDistance,
+              velocity >= GameConfiguration.minSwipeVelocity else {
+            #if DEBUG
+            let distOK = distance >= GameConfiguration.minSwipeDistance
+            let velOK = velocity >= GameConfiguration.minSwipeVelocity
+            print("[\(Date().logTimestamp)] ⚠️ Swipe \(potentialGesture.displayName) rejected - distance: \(Int(distance))px (min: \(Int(GameConfiguration.minSwipeDistance)), \(distOK ? "✓" : "✗")), velocity: \(Int(velocity))px/s (min: \(Int(GameConfiguration.minSwipeVelocity)), \(velOK ? "✓" : "✗"))")
+            #endif
+            return
+        }
+
+        // Check gesture coordinator before triggering
+        guard GestureCoordinator.shared.shouldAllowGesture(potentialGesture) else {
+            print("[\(Date().logTimestamp)] ⏸️ Swipe \(potentialGesture.displayName) suppressed by coordinator")
+            return
+        }
+
+        print("[\(Date().logTimestamp)] 🎯 Swipe \(potentialGesture.displayName) detected - distance: \(Int(distance))px, velocity: \(Int(velocity))px/s")
+        onSwipe(potentialGesture)
     }
 
     private func isNearEdge(_ point: CGPoint, in size: CGSize) -> Bool {

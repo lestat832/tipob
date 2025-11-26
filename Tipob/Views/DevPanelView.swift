@@ -33,6 +33,12 @@ struct DevPanelView: View {
     @State private var activeTestMode: GestureTestMode = .none
     @State private var showingTestResult = false
 
+    // Section expansion state (Gameplay Logs expanded by default)
+    @State private var isLogsExpanded = true
+    @State private var isReplayExpanded = false
+    @State private var isGestureTestExpanded = false
+    @State private var isThresholdTuningExpanded = false
+
     var body: some View {
         NavigationView {
             ScrollView {
@@ -40,25 +46,47 @@ struct DevPanelView: View {
                     // Header Info
                     infoHeader
 
-                    // Gameplay Logs
-                    logsSection
+                    // Gameplay Logs (expanded by default)
+                    CollapsibleSection(
+                        title: "📋 Gameplay Logs",
+                        badge: config.selectedCount > 0 ? "\(config.selectedCount)" : nil,
+                        subtitle: "\(config.gameplayLogs.count) entries",
+                        isExpanded: $isLogsExpanded
+                    ) {
+                        logsContent
+                    }
+
+                    // Sequence Replay (moved above gesture tester)
+                    CollapsibleSection(
+                        title: "🔄 Sequence Replay",
+                        isExpanded: $isReplayExpanded
+                    ) {
+                        replayContent
+                    }
 
                     // Per-Gesture Testing
-                    gestureTestSection
+                    CollapsibleSection(
+                        title: "🧪 Per-Gesture Testers",
+                        isExpanded: $isGestureTestExpanded
+                    ) {
+                        gestureTestContent
+                    }
 
-                    // Sequence Replay
-                    replaySection
-
-                    // Gesture Sections
-                    shakeSection
-                    tiltSection
-                    raiseLowerSection
-                    swipeSection
-                    tapSection
-                    pinchSection
-
-                    // Timing Settings
-                    timingSection
+                    // Gesture Threshold Tuning (parent section)
+                    CollapsibleSection(
+                        title: "🎛️ Gesture Threshold Tuning",
+                        isExpanded: $isThresholdTuningExpanded
+                    ) {
+                        VStack(spacing: 12) {
+                            shakeSection
+                            tiltSection
+                            raiseLowerSection
+                            swipeSection
+                            tapSection
+                            pinchSection
+                            timingSection
+                        }
+                    }
 
                     // Action Buttons
                     actionButtons
@@ -108,35 +136,21 @@ struct DevPanelView: View {
         .cornerRadius(12)
     }
 
-    // MARK: - Gameplay Logs Section
+    // MARK: - Gameplay Logs Content
 
-    private var logsSection: some View {
+    private var logsContent: some View {
         VStack(spacing: 12) {
-            // Header with selection badge
-            HStack {
-                Text("📋 Gameplay Logs")
-                    .font(.headline)
-
-                if config.selectedCount > 0 {
-                    Text("\(config.selectedCount)")
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-
-                Spacer()
-
-                Text("\(config.gameplayLogs.count) entries")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            // Selection helper buttons (simplified)
+            // Selection helper buttons
             HStack(spacing: 8) {
+                Button("Select All") {
+                    config.selectAll()
+                }
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.blue.opacity(0.2))
+                .cornerRadius(6)
+
                 Button("Select Failures") {
                     config.selectAllFailures()
                 }
@@ -178,21 +192,12 @@ struct DevPanelView: View {
                 .frame(maxHeight: 300)
             }
         }
-        .padding()
-        .background(Color.secondary.opacity(0.05))
-        .cornerRadius(12)
     }
 
-    // MARK: - Per-Gesture Test Section
+    // MARK: - Per-Gesture Test Content
 
-    private var gestureTestSection: some View {
+    private var gestureTestContent: some View {
         VStack(spacing: 12) {
-            HStack {
-                Text("🧪 Per-Gesture Testers")
-                    .font(.headline)
-                Spacer()
-            }
-
             Text("Test individual gestures with full sensor capture")
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -224,9 +229,6 @@ struct DevPanelView: View {
                 }
             }
         }
-        .padding()
-        .background(Color.secondary.opacity(0.05))
-        .cornerRadius(12)
         .fullScreenCover(isPresented: $showingGestureTest) {
             GestureTestView(testMode: activeTestMode) {
                 showingGestureTest = false
@@ -248,14 +250,10 @@ struct DevPanelView: View {
         }
     }
 
-    // MARK: - Sequence Replay Section
+    // MARK: - Sequence Replay Content
 
-    private var replaySection: some View {
+    private var replayContent: some View {
         VStack(spacing: 12) {
-            Text("🔄 Sequence Replay")
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
             Text("Replay the last game sequence with updated threshold settings")
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -317,9 +315,6 @@ struct DevPanelView: View {
                     .frame(maxWidth: .infinity)
             }
         }
-        .padding()
-        .background(Color.secondary.opacity(0.05))
-        .cornerRadius(12)
     }
 
     // MARK: - Shake Detection Section
@@ -729,6 +724,71 @@ private struct ShareSheet: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {
         // No update needed
+    }
+}
+
+// MARK: - Collapsible Section Component
+
+private struct CollapsibleSection<Content: View>: View {
+    let title: String
+    var badge: String? = nil
+    var subtitle: String? = nil
+    @Binding var isExpanded: Bool
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header (always visible, tappable)
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundColor(.primary)
+
+                    if let badge = badge {
+                        Text(badge)
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
+
+                    Spacer()
+
+                    if let subtitle = subtitle {
+                        Text(subtitle)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+                .padding()
+                .background(Color.secondary.opacity(0.05))
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            // Content (collapsible)
+            if isExpanded {
+                content()
+                    .padding()
+                    .background(Color.secondary.opacity(0.02))
+            }
+        }
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.secondary.opacity(0.1), lineWidth: 1)
+        )
     }
 }
 

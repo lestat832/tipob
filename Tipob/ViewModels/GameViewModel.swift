@@ -19,6 +19,7 @@ class GameViewModel: ObservableObject {
     private var classicGestureHistory: [GestureType] = []
     private var classicModeReplaySequence: [GestureType]? = nil
     private var classicModeReplayIndex: Int = 0
+    private var isMemoryModeReplay: Bool = false
     #endif
 
     init() {
@@ -65,6 +66,7 @@ class GameViewModel: ObservableObject {
 
         #if DEBUG
         DevConfigManager.shared.clearLogs()
+        isMemoryModeReplay = false  // Reset replay flag for normal game
         #endif
 
         gameModel.startNewRound(with: &randomNumberGenerator, discreetMode: discreetModeEnabled)
@@ -79,11 +81,23 @@ class GameViewModel: ObservableObject {
 
     private func showNextGestureInSequence() {
         guard showingGestureIndex < gameModel.sequence.count else {
+            #if DEBUG
+            if isMemoryModeReplay {
+                print("🔄 REPLAY DEBUG: Finished showing all \(gameModel.sequence.count) gestures")
+            }
+            #endif
             DispatchQueue.main.asyncAfter(deadline: .now() + GameConfiguration.transitionDelay) {
                 self.transitionToAwaitInput()
             }
             return
         }
+
+        #if DEBUG
+        if isMemoryModeReplay {
+            let gesture = gameModel.sequence[showingGestureIndex]
+            print("🔄 REPLAY DEBUG: Showing gesture \(showingGestureIndex + 1)/\(gameModel.sequence.count): \(gesture.displayName)")
+        }
+        #endif
 
         // Wait for arrow animation to complete: show duration + gap duration
         let displayDuration = GameConfiguration.sequenceShowDuration + GameConfiguration.sequenceGapDuration
@@ -180,6 +194,19 @@ class GameViewModel: ObservableObject {
             flashColor = .clear
         }
 
+        #if DEBUG
+        // In replay mode, end after completing the stored sequence instead of adding new gestures
+        if isMemoryModeReplay {
+            print("✅ Replay completed successfully!")
+            isMemoryModeReplay = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + GameConfiguration.transitionDelay) {
+                // Go back to menu after successful replay
+                self.gameState = .menu
+            }
+            return
+        }
+        #endif
+
         DispatchQueue.main.asyncAfter(deadline: .now() + GameConfiguration.transitionDelay) {
             self.gameModel.startNewRound(with: &self.randomNumberGenerator, discreetMode: self.discreetModeEnabled)
             self.gameState = .showSequence
@@ -198,8 +225,12 @@ class GameViewModel: ObservableObject {
             DevConfigManager.shared.logGesture(expected: expectedGesture, detected: nil, success: false)
         }
 
-        // Capture sequence for replay debugging
-        DevConfigManager.shared.captureMemorySequence(gameModel.sequence)
+        // Only capture sequence for replay if NOT already in replay mode
+        // (don't overwrite stored sequence with itself)
+        if !isMemoryModeReplay {
+            DevConfigManager.shared.captureMemorySequence(gameModel.sequence)
+        }
+        isMemoryModeReplay = false  // Reset replay flag
         #endif
 
         // Calculate final score (Memory Mode uses round number)
@@ -411,12 +442,24 @@ class GameViewModel: ObservableObject {
             return
         }
 
+        // Diagnostic: Log what we're about to replay
+        print("🔄 REPLAY DEBUG: Stored sequence from DevConfigManager:")
+        print("   Count: \(storedSequence.count)")
+        print("   Gestures: \(storedSequence.map { $0.displayName }.joined(separator: ", "))")
+
         isClassicMode = false
+        isMemoryModeReplay = true  // Track that we're in replay mode
         gameModel.reset()
 
         // Inject stored sequence instead of generating new one
         gameModel.sequence = storedSequence
         gameModel.round = storedSequence.count
+
+        // Diagnostic: Verify assignment
+        print("🔄 REPLAY DEBUG: After assignment to gameModel:")
+        print("   Count: \(gameModel.sequence.count)")
+        print("   Gestures: \(gameModel.sequence.map { $0.displayName }.joined(separator: ", "))")
+        print("   Round: \(gameModel.round)")
 
         DevConfigManager.shared.clearLogs()
 

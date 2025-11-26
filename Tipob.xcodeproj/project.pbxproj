@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9290AF3F2ED1387000D38335 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9290AF3E2ED1387000D38335 /* Lottie */; };
+		92B93E062ED76EAC004BCA2B /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 92B93E052ED76EAC004BCA2B /* GoogleMobileAds */; };
 		92F8CB4D2EC3E87C00E7A169 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 92F8CB4C2EC3E87C00E7A169 /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
@@ -26,7 +27,69 @@
 
 /* Begin PBXFileReference section */
 		9205ABDB2E89F6A8006A347A /* Tipob.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tipob.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		92B93DC22ED76BC9004BCA2B /* OutofPocket.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OutofPocket.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		92B93DD12ED76D11004BCA2B /* Exceptions for "Tipob" folder in "OutofPocket" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets2.xcassets,
+				Components/ArrowView.swift,
+				Components/CountdownRing.swift,
+				Components/StroopPromptView.swift,
+				"Extensions/Color+ToyBox.swift",
+				Models/ClassicModeModel.swift,
+				Models/ColorType.swift,
+				Models/GameMode.swift,
+				Models/GameModel.swift,
+				Models/GameState.swift,
+				Models/GestureType.swift,
+				Models/LeaderboardEntry.swift,
+				Resources/LaunchAnimation.json,
+				Resources/Sounds/countdown_beep.caf,
+				Resources/Sounds/gesture_success_tick.caf,
+				Resources/Sounds/round_complete_chime.caf,
+				TipobApp.swift,
+				Utilities/AdManager.swift,
+				Utilities/AudioManager.swift,
+				Utilities/DateExtension.swift,
+				Utilities/DevConfigManager.swift,
+				Utilities/DevPanelGestureRecognizer.swift,
+				Utilities/FailureFeedbackManager.swift,
+				Utilities/GestureCoordinator.swift,
+				Utilities/GesturePoolManager.swift,
+				Utilities/HapticManager.swift,
+				Utilities/LeaderboardManager.swift,
+				Utilities/MotionGestureManager.swift,
+				Utilities/PersistenceManager.swift,
+				Utilities/PinchGestureModifier.swift,
+				Utilities/PinchGestureView.swift,
+				Utilities/SensorCaptureBuffer.swift,
+				Utilities/SwipeGestureModifier.swift,
+				Utilities/TapGestureModifier.swift,
+				Utilities/UIViewControllerHelper.swift,
+				Utilities/UserSettings.swift,
+				ViewModels/GameViewModel.swift,
+				Views/ClassicModeView.swift,
+				Views/ContentView.swift,
+				Views/DevPanelView.swift,
+				Views/GameModeSheet.swift,
+				Views/GameOverView.swift,
+				Views/GamePlayView.swift,
+				Views/GameVsPlayerVsPlayerView.swift,
+				Views/GestureTestView.swift,
+				Views/LaunchView.swift,
+				Views/LeaderboardView.swift,
+				Views/MenuView.swift,
+				Views/PlayerVsPlayerView.swift,
+				Views/SequenceDisplayView.swift,
+				Views/TutorialCompletionView.swift,
+				Views/TutorialView.swift,
+			);
+			target = 92B93DC12ED76BC9004BCA2B /* OutofPocket */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 		92F8CC292ECD2C6E00E7A169 /* Exceptions for "Tipob" folder in "Copy Files (3 items)" phase from "Tipob" target */ = {
@@ -46,6 +109,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				92F8CC292ECD2C6E00E7A169 /* Exceptions for "Tipob" folder in "Copy Files (3 items)" phase from "Tipob" target */,
+				92B93DD12ED76D11004BCA2B /* Exceptions for "Tipob" folder in "OutofPocket" target */,
 			);
 			path = Tipob;
 			sourceTree = "<group>";
@@ -62,6 +126,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		92B93DBF2ED76BC9004BCA2B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				92B93E062ED76EAC004BCA2B /* GoogleMobileAds in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -69,6 +141,7 @@
 			isa = PBXGroup;
 			children = (
 				9205ABDD2E89F6A8006A347A /* Tipob */,
+				92B93E042ED76EAC004BCA2B /* Frameworks */,
 				9205ABDC2E89F6A8006A347A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -77,8 +150,16 @@
 			isa = PBXGroup;
 			children = (
 				9205ABDB2E89F6A8006A347A /* Tipob.app */,
+				92B93DC22ED76BC9004BCA2B /* OutofPocket.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		92B93E042ED76EAC004BCA2B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -108,6 +189,26 @@
 			productReference = 9205ABDB2E89F6A8006A347A /* Tipob.app */;
 			productType = "com.apple.product-type.application";
 		};
+		92B93DC12ED76BC9004BCA2B /* OutofPocket */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 92B93DCC2ED76BCB004BCA2B /* Build configuration list for PBXNativeTarget "OutofPocket" */;
+			buildPhases = (
+				92B93DBE2ED76BC9004BCA2B /* Sources */,
+				92B93DBF2ED76BC9004BCA2B /* Frameworks */,
+				92B93DC02ED76BC9004BCA2B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OutofPocket;
+			packageProductDependencies = (
+				92B93E052ED76EAC004BCA2B /* GoogleMobileAds */,
+			);
+			productName = OutofPocket;
+			productReference = 92B93DC22ED76BC9004BCA2B /* OutofPocket.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -115,11 +216,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2600;
+				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					9205ABDA2E89F6A8006A347A = {
 						CreatedOnToolsVersion = 26.0.1;
+					};
+					92B93DC12ED76BC9004BCA2B = {
+						CreatedOnToolsVersion = 26.1;
 					};
 				};
 			};
@@ -142,12 +246,30 @@
 			projectRoot = "";
 			targets = (
 				9205ABDA2E89F6A8006A347A /* Tipob */,
+				92B93DC12ED76BC9004BCA2B /* OutofPocket */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		92B93DC02ED76BC9004BCA2B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		9205ABD72E89F6A8006A347A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92B93DBE2ED76BC9004BCA2B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -348,6 +470,76 @@
 			};
 			name = Release;
 		};
+		92B93DCA2ED76BCB004BCA2B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9UMZ2D4D3D;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Tipob/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mgeraldez.OutofPocket;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		92B93DCB2ED76BCB004BCA2B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9UMZ2D4D3D;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Tipob/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mgeraldez.OutofPocket;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -365,6 +557,15 @@
 			buildConfigurations = (
 				9205ABE72E89F6A9006A347A /* Debug */,
 				9205ABE82E89F6A9006A347A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		92B93DCC2ED76BCB004BCA2B /* Build configuration list for PBXNativeTarget "OutofPocket" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				92B93DCA2ED76BCB004BCA2B /* Debug */,
+				92B93DCB2ED76BCB004BCA2B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -395,6 +596,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9290AF3D2ED1387000D38335 /* XCRemoteSwiftPackageReference "lottie-ios" */;
 			productName = Lottie;
+		};
+		92B93E052ED76EAC004BCA2B /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 92F8CB4B2EC3E87C00E7A169 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
 		};
 		92F8CB4C2EC3E87C00E7A169 /* GoogleMobileAds */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -1,33 +1,28 @@
-# Session Summary - 2025-11-25
+# Session Summary - 2025-11-26
 
 ## Completed Tasks
-- Diagnosed app icon issue - determined current "Tipob" target is not a properly configured iOS app target
-- Created plan to fix by adding new iOS app target "OutOfPocket"
+- ✅ Dev Panel UI improvements: Made all sections collapsible, Gameplay Logs expanded by default
+- ✅ Moved Sequence Replay section above Per-Gesture Testers
+- ✅ Added "Gesture Threshold Tuning" as parent header for all threshold sections
+- ✅ Fixed Replay Sequence bug (added isMemoryModeReplay flag to prevent new gestures being added)
+- ✅ Added gesture logging for diagnostics (detailed swipe rejection logging)
+- ✅ Added "Select All" button to Gameplay Logs
+- ✅ Moved Timing Settings under Gesture Threshold Tuning section
+- ✅ Reverted Pinch/Swipe conflict changes (broke pinch detection)
 
 ## In Progress
-- App icon not appearing on device
-- Need to create proper iOS app target in Xcode
+- Investigating replay sequence issue - added diagnostic logging but user reports sequence still different from beginning
 
 ## Next Session
-- Execute plan: Create new iOS App target named "OutOfPocket"
-  1. File → New → Target → iOS App
-  2. Name: OutOfPocket, SwiftUI, Swift
-  3. Configure App Icon in General tab
-  4. Add all source files to new target (Target Membership)
-  5. Add Assets.xcassets to new target
-  6. Select OutOfPocket scheme
-  7. Clean build, delete app from device, rebuild
+- Test replay functionality with diagnostic logs to identify root cause
+- Find alternative solution for pinch/swipe conflict (current approach broke pinch)
+- Investigate "swipe up failed after lower" gesture issue
 
 ## Key Decisions
-- Root cause: Current Tipob target missing proper iOS app target configuration (no App Icons section, no Copy Bundle Resources phase)
-- Solution: Create new proper iOS app target rather than trying to fix corrupted target
-- New target name: "OutOfPocket" (matches rebranding)
+- Pinch/Swipe coordination via shared state was reverted - negatively affected all pinch detection
+- Timing Settings logically belongs under Gesture Threshold Tuning, not separate section
+- Added comprehensive diagnostic logging for replay debugging
 
 ## Blockers/Issues
-- RESOLVED diagnosis: App icon issue is NOT caching or synchronized folders
-- ACTUAL issue: Tipob target is not a proper iOS app target, Xcode uses temporary host app
-
-## Technical Details
-- Xcode uses PBXFileSystemSynchronizedRootGroup (Xcode 15+ feature)
-- Even though project.pbxproj has productType = application, the target is missing essential iOS app sections
-- Creating fresh iOS app target will properly configure all necessary build phases
+- Replay sequence bug not fully resolved - need to analyze diagnostic logs
+- Pinch/Swipe conflict needs alternative solution
