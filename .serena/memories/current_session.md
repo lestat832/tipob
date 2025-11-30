@@ -1,30 +1,23 @@
-# Session Summary - 2025-11-26
+# Session Summary - 2025-11-30
 
 ## Completed Tasks
-- Implemented Raw Gesture Data Capture System for debugging gesture failures
-- Added `GestureAttempt` struct with static factory methods (`.swipe()`, `.pinch()`, `.tap()`)
-- Modified SwipeGestureModifier to log all swipe attempts with rejection reasons
-- Modified PinchGestureModifier to log pinch attempts with scale/velocity data
-- Modified TapGestureModifier to log tap/double-tap/long-press attempts
-- Added `gestureAttempts` field to `GestureLogEntry` for JSON export
-- Fixed build error: `GestureType` doesn't have `.rawValue` - used `.displayName.lowercased()` instead
-- Verified successful build
+- Fixed AdManager race condition (removed premature loadInterstitialAd() call)
+- Added preloadIfNeeded() to game start methods for reliable ad loading
+- Diagnosed AdMob "No ad to show" error (production ads need 24-48hrs to start serving)
+- Created CNAME file for getoutofpocket.com custom domain
+- Connected waitlist form to Google Sheets via Apps Script
 
 ## In Progress
-- Testing live interstitial ads (production AdMob credentials configured)
-- Gesture testing with new raw data capture system
+- AdMob production ads returning "No ad to show" - waiting for AdMob to start serving
 
 ## Next Session
-- Verify live interstitial ads work in production
-- Test raw gesture data capture during gameplay
-- Review exported JSON to validate gesture attempts are included
-- Continue App Store submission preparation
+- Verify production ads are serving (check after 24-48 hours)
+- Test waitlist form → spreadsheet integration
+- Continue App Store submission prep
 
 ## Key Decisions
-- Used static factory methods on `GestureAttempt` for type-safe gesture attempt creation
-- Gesture attempts buffer auto-clears when attached to `GestureLogEntry`
-- All logging code wrapped in `#if DEBUG` guards (DEBUG-only feature)
-- Used `displayName.lowercased()` instead of non-existent `rawValue` for gesture type strings
+- Used Google Apps Script (free) for form → spreadsheet integration instead of paid services
+- Removed premature ad preloading to fix race condition where newly loaded ads were wiped
 
 ## Blockers/Issues
-- None currently - build verified successful
+- AdMob production ads not serving yet (expected - new ad units take 24-48 hours)

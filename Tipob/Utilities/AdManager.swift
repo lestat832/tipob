@@ -37,6 +37,9 @@ class AdManager: NSObject {
     /// App launch time (to prevent ads in first 30 seconds)
     private let appLaunchTime: Date
 
+    /// Flag to prevent duplicate load requests
+    private var isLoading = false
+
     // MARK: - Configuration
 
     // REMOVED COOLDOWN RESTRICTIONS FOR TESTING
@@ -86,9 +89,7 @@ class AdManager: NSObject {
 
         print("📺 Presenting interstitial ad...")
         ad.present(from: viewController)
-
-        // Preload next ad
-        loadInterstitialAd()
+        // Note: Next ad is preloaded when new game starts via preloadIfNeeded()
     }
 
     /// Increment the completed games counter (no-op - cooldowns removed)
@@ -96,10 +97,25 @@ class AdManager: NSObject {
         // No-op: Game counting disabled for testing
     }
 
+    /// Preload an ad if one isn't already loaded or loading
+    /// Call this when a new game starts to ensure ad is ready for game over
+    func preloadIfNeeded() {
+        if interstitialAd == nil && !isLoading {
+            print("🔄 Preloading ad for next game over...")
+            loadInterstitialAd()
+        }
+    }
+
     // MARK: - Private Methods
 
     /// Load a new interstitial ad
     private func loadInterstitialAd() {
+        guard !isLoading else {
+            print("⏳ Ad load already in progress, skipping duplicate request")
+            return
+        }
+
+        isLoading = true
         let request = Request()
 
         InterstitialAd.load(
@@ -107,6 +123,8 @@ class AdManager: NSObject {
             request: request
         ) { [weak self] ad, error in
             guard let self = self else { return }
+
+            self.isLoading = false
 
             if let error = error {
                 print("❌ Interstitial ad failed to load: \(error.localizedDescription)")

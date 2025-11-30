@@ -48,15 +48,22 @@ class GameViewModel: ObservableObject {
         classicGestureHistory.removeAll()
         #endif
 
+        // Preload ad for game over screen
+        AdManager.shared.preloadIfNeeded()
+
         gameState = .classicMode
         showNextClassicGesture()
     }
 
     func startGameVsPlayerVsPlayer() {
+        // Preload ad for game over screen
+        AdManager.shared.preloadIfNeeded()
         gameState = .gameVsPlayerVsPlayer
     }
 
     func startPlayerVsPlayer() {
+        // Preload ad for game over screen
+        AdManager.shared.preloadIfNeeded()
         gameState = .playerVsPlayer
     }
 
@@ -68,6 +75,9 @@ class GameViewModel: ObservableObject {
         DevConfigManager.shared.clearLogs()
         isMemoryModeReplay = false  // Reset replay flag for normal game
         #endif
+
+        // Preload ad for game over screen
+        AdManager.shared.preloadIfNeeded()
 
         gameModel.startNewRound(with: &randomNumberGenerator, discreetMode: discreetModeEnabled)
         gameState = .showSequence

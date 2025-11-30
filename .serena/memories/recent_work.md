@@ -1,22 +1,19 @@
-# Recent Work - Out of Pocket (Tipob)
+# Recent Work - Out of Pocket
 
-## November 2025 Highlights
+## November 30, 2025
 
-### Raw Gesture Data Capture System (Nov 26)
-- Implemented comprehensive gesture attempt logging for debugging "not_detected" failures
-- `GestureAttempt` struct captures: position, distance, velocity, scale, rejection reason
-- Static factory methods: `.swipe()`, `.pinch()`, `.tap()` for type-safe creation
-- Auto-attaches to `GestureLogEntry` on log, included in JSON export
-- Key insight: `GestureType` uses `displayName` property, not `rawValue`
+### AdMob Integration Fixes
+- Fixed race condition in AdManager where ads were being wiped after dismiss
+- Root cause: loadInterstitialAd() was called in showInterstitialAd() before ad dismissed
+- Fix: Removed premature preload, now only preloads in game start methods
+- Production ads showing "No ad to show" - normal for new ad units (24-48hr wait)
 
-### AdMob Production Integration (Nov 26)
-- Configured production App ID and Interstitial Ad Unit ID
-- Implemented ATT (App Tracking Transparency) permission request
-- Added SKAdNetwork identifiers to Info.plist
-- Ready for live testing
+### Landing Page Updates (oop-door-b59dd403)
+- Added CNAME file for getoutofpocket.com custom domain
+- Connected waitlist email form to Google Sheets via Apps Script
+- Web App URL: https://script.google.com/macros/s/AKfycbzxe7mRldcBgrZ4G44zZlp7MN1D8K8nrdAamNobL6Y5FS67slgAhPMS0WvVf1GvCSfIhw/exec
 
 ### Patterns Learned
-- SwiftUI gesture modifiers use `#if DEBUG` for dev-only logging
-- `GestureCoordinator` manages gesture suppression during state transitions
-- `DevConfigManager` is the central hub for debug configuration and logging
-- Gesture attempts buffer pattern: accumulate → attach → clear
+- Google Apps Script is free/simple way to connect static sites to Google Sheets
+- AdMob production ads need time to start serving after ad unit creation
+- Race conditions can occur when async operations overlap with state clearing
