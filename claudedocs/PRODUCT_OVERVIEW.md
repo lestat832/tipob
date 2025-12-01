@@ -1,8 +1,8 @@
 OUT OF POCKET - PRODUCT OVERVIEW
 
-Last Updated: November 20, 2025
-Version: 3.2
-Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Integration + Audio System
+Last Updated: November 30, 2025
+Version: 3.3
+Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Production + Audio System
 
 ========================================
 
@@ -21,7 +21,7 @@ Hard to Master: Progressive difficulty keeps players engaged
 Discreet Mode: Toggle between public-friendly vs full gesture set
 Performance Optimized: 20-30% faster gesture response (Nov 2025)
 Audio Feedback: Success ticks, round complete chimes, and failure sounds
-Monetization Ready: Google AdMob integration with TEST credentials for beta testing
+Monetization Ready: Google AdMob integration with PRODUCTION credentials (awaiting ad fill)
 Triple Game Modes: Three distinct gameplay experiences (Classic, Memory, and PvP)
 Visual Polish: Beautiful gradient UI with color-coded gestures
 
@@ -445,7 +445,7 @@ Technology Stack
 - Architecture Pattern: MVVM (Model-View-ViewModel)
 - State Management: @Published properties with ObservableObject
 - Persistence: UserDefaults
-- Monetization: Google AdMob (TEST mode)
+- Monetization: Google AdMob (PRODUCTION mode, awaiting ad fill)
 
 Project Structure
 
@@ -647,7 +647,7 @@ Completed Features:
 - PvP turn management
 - Fair sequence replay (PvP modes)
 - Portrait orientation lock
-- Google AdMob integration (TEST mode, interstitial ads)
+- Google AdMob integration (PRODUCTION mode, interstitial ads, awaiting ad fill)
 - Ad triggers on game over screens (Home/Play Again buttons)
 - Ad preloading during gameplay
 - 49 SKAdNetwork identifiers for iOS 14+ attribution
@@ -674,29 +674,33 @@ Planned Features:
 - Cloud save and global leaderboards
 - Share scores to social media
 - Monetization expansion (rewarded ads, banner ads, IAP, subscription)
-- Production AdMob credentials (after beta testing)
 - Remove Ads IAP ($4.99)
 
 ========================================
 
 MONETIZATION SYSTEM
 
-Status: TEST Mode (Implemented November 11-12, 2025)
+Status: PRODUCTION Mode (Updated November 30, 2025, Awaiting Ad Fill)
 
 Google AdMob Integration
 SDK: Google Mobile Ads (GoogleMobileAds framework)
-Configuration: TEST credentials for beta testing
+Configuration: PRODUCTION credentials active
 Ad Type: Interstitial ads (full-screen)
 
-TEST Credentials:
-- Ad Unit ID: ca-app-pub-3940256099942544/4411468910
-- Application ID: ca-app-pub-3940256099942544~1458002511
+PRODUCTION Credentials (Updated November 30, 2025):
+- Ad Unit ID: ca-app-pub-8372563313053067/2149863647
+- Application ID: ca-app-pub-8372563313053067~4654955095
+- Status: Awaiting ad fill (new ad units take 24-48 hours to start serving)
 
 Implementation Architecture:
-- AdManager.swift: Singleton managing ad lifecycle (~150 lines)
+- AdManager.swift: Singleton managing ad lifecycle (~180 lines)
+  - `preloadIfNeeded()` method for game start preloading (Nov 30, 2025)
+  - `isLoading` flag prevents duplicate load requests (Nov 30, 2025)
+  - Race condition fix: removed premature loadInterstitialAd() call (Nov 30, 2025)
 - UIViewControllerHelper.swift: SwiftUI/UIKit bridge for presenting ads (~80 lines)
 - Ad initialization in TipobApp.swift (SDK startup)
 - Integration in game over views (GameOverView, PlayerVsPlayerView, GameVsPlayerVsPlayerView)
+- GameViewModel calls `preloadIfNeeded()` on all game start methods
 
 Ad Display Logic (Updated November 12, 2025):
 - Trigger: EVERY button tap on end-of-game screens
@@ -742,11 +746,11 @@ Files Modified:
 - GameVsPlayerVsPlayerView.swift (ad trigger integration)
 - Info.plist (49 SKAdNetwork IDs, portrait lock, scene delegate fix)
 
-Production Readiness:
-- Current: TEST mode with Google test credentials
-- Next Step: Replace TEST IDs with production AdMob account IDs
-- Required: Create AdMob account, register app, obtain production IDs
-- No code changes needed, only ID swaps in AdManager.swift
+Production Readiness (Updated November 30, 2025):
+- Current: PRODUCTION mode with real AdMob credentials
+- Status: Awaiting ad fill (new ad units take 24-48 hours)
+- Completed: Production IDs configured, race condition fixed, preload pattern implemented
+- Pending: Re-enable cooldown restrictions after verifying ad fill
 
 Performance Impact:
 - Preloading during gameplay: Minimal (background thread)
@@ -864,6 +868,15 @@ Key Files
 Total Swift Files
 23 files across the project
 
+Recent Updates (November 30, 2025):
+- AdMob switched from TEST to PRODUCTION credentials
+- Production Ad Unit ID: ca-app-pub-8372563313053067/2149863647
+- Production App ID: ca-app-pub-8372563313053067~4654955095
+- Fixed race condition: removed premature loadInterstitialAd() from showInterstitialAd()
+- Added preloadIfNeeded() method called on all game starts
+- Added isLoading flag to prevent duplicate ad load requests
+- Status: Awaiting ad fill (new ad units take 24-48 hours)
+
 Recent Updates (November 18-20, 2025):
 - App rebranded from "TIPOB" to "Out of Pocket"
 - New launch animation with spring scale and fade-out transition
@@ -926,6 +939,7 @@ Version 2.0 | October 21, 2025 | Updated with 7 gestures, Memory Mode, and PvP M
 Version 3.0 | November 10, 2025 | Updated with 14 gestures, Stroop Mode, Discreet Mode, Leaderboard System, MotionGestureManager, gesture optimization complete
 Version 3.1 | November 12, 2025 | Added Google AdMob integration (TEST mode), AdManager, UIViewControllerHelper, Info.plist configuration
 Version 3.2 | November 20, 2025 | Rebranded to "Out of Pocket", new launch animation, simplified audio system (AVAudioPlayer + SystemSoundID)
+Version 3.3 | November 30, 2025 | AdMob production mode: production credentials, race condition fix, preloadIfNeeded() pattern
 
 ========================================
 

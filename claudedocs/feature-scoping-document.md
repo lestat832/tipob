@@ -1800,26 +1800,28 @@ enum GameMode {
 
 ### IMPLEMENTED: AdMob Integration (November 11-12, 2025) ✅
 
-**Status**: Complete - TEST Mode Active
+**Status**: Complete - PRODUCTION Mode (Awaiting Ad Fill)
 
 **Implementation Details:**
 
 #### SDK & Configuration
 - **Framework**: Google Mobile Ads (GoogleMobileAds)
 - **Ad Type**: Interstitial ads (full-screen)
-- **TEST Credentials**:
-  - Ad Unit ID: `ca-app-pub-3940256099942544/4411468910`
-  - Application ID: `ca-app-pub-3940256099942544~1458002511`
-- **Production Note**: TEST IDs only - never uses production credentials
+- **PRODUCTION Credentials** (Updated November 30, 2025):
+  - Ad Unit ID: `ca-app-pub-8372563313053067/2149863647`
+  - Application ID: `ca-app-pub-8372563313053067~4654955095`
+- **Current Status**: Production IDs active, awaiting ad fill (new ad units take 24-48 hours)
 
 #### Core Components
 
-**AdManager.swift** (~165 lines)
+**AdManager.swift** (~180 lines)
 - Singleton pattern for centralized ad lifecycle management
-- Automatic ad preloading during gameplay
+- `preloadIfNeeded()` method for preloading during game starts (Nov 30, 2025)
+- `isLoading` flag prevents duplicate ad load requests (Nov 30, 2025)
 - Retry logic with 30-second backoff on failure
 - Graceful degradation (game continues if ad unavailable)
 - FullScreenContentDelegate conformance for ad events
+- **Race Condition Fix** (Nov 30, 2025): Removed premature `loadInterstitialAd()` call from `showInterstitialAd()` - previously caused newly loaded ads to be wiped when dismiss callback set `interstitialAd = nil`
 
 **UIViewControllerHelper.swift** (~80 lines)
 - SwiftUI/UIKit bridge for presenting UIKit ad controllers
@@ -1866,15 +1868,17 @@ enum GameMode {
 - Added 49 SKAdNetwork identifiers for iOS 14+ ad attribution
 - Updated Xcode project settings to match Info.plist
 
-#### Ad Flow Sequence
+#### Ad Flow Sequence (Updated November 30, 2025)
 
 1. **Initialization**: AdManager preloads first ad on app launch
-2. **Gameplay**: Ad loads in background during game
-3. **Game Over**: User taps Home or Play Again
-4. **Check**: `shouldShowEndOfGameAd()` verifies ad is loaded
-5. **Present**: Ad displays via UIViewController helper
-6. **Completion**: Callback executes (navigates home or restarts game)
-7. **Preload**: Next ad loads immediately after dismissal
+2. **Game Start**: `preloadIfNeeded()` called to ensure ad ready for game over
+3. **Gameplay**: Ad loads in background if not already loaded
+4. **Game Over**: User taps Home or Play Again
+5. **Check**: `shouldShowEndOfGameAd()` verifies ad is loaded
+6. **Present**: Ad displays via UIViewController helper
+7. **Completion**: Callback executes (navigates home or restarts game)
+8. **Dismiss**: `interstitialAd` set to nil (one-time use object)
+9. **Next Game**: Next `preloadIfNeeded()` call triggers new ad load
 
 #### Testing Observations
 
@@ -1907,18 +1911,24 @@ enum GameMode {
 - Easier to test ad integration and UX flow
 - Can dial back frequency before production launch
 
-#### Future Production Transition
+#### Production Transition (Completed November 30, 2025)
 
-**Before App Store Submission:**
-- [ ] Replace TEST Ad Unit IDs with production IDs
-- [ ] Replace TEST Application ID with production ID
+**Completed Steps:**
+- [x] Replace TEST Ad Unit IDs with production IDs ✅
+- [x] Replace TEST Application ID with production ID ✅
+- [x] Update AdManager comments to reflect production status ✅
+- [x] Fix race condition preventing ad reload ✅
+- [x] Add `preloadIfNeeded()` for reliable ad availability ✅
+
+**Pending Steps:**
+- [ ] Verify ads serving after 24-48 hour ad fill period
 - [ ] Re-enable cooldown restrictions (recommended: 30s + every 2 games)
-- [ ] Update AdManager comments to reflect production status
 - [ ] Test fill rates with real production ads
+- [ ] Monitor analytics for ad performance
 
-**Recommended Production Logic:**
+**Recommended Production Logic (for later):**
 ```swift
-// Restore these constants:
+// Restore these constants when ready:
 private let minimumTimeBetweenAds: TimeInterval = 30.0
 private let gamesPerAd: Int = 2
 private let minimumTimeSinceLaunch: TimeInterval = 30.0
