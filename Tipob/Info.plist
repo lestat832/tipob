@@ -43,7 +43,7 @@
 	<dict/>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 	</array>
 	<key>UIRequiresFullScreen</key>
 	<true/>
@@ -55,6 +55,8 @@
 	<string>ca-app-pub-8372563313053067~4654955095</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>This allows us to show you more relevant ads and support free gameplay.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>This app uses motion sensors for shake, tilt, raise, and lower gestures during gameplay.</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
