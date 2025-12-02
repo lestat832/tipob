@@ -1,41 +1,47 @@
-# Session Summary - 2025-12-01
+# Session Summary - 2025-12-02
 
 ## Completed Tasks
-- Fixed Info.plist missing keys (lost during Xcode bundle ID changes):
-  - NSUserTrackingUsageDescription (ATT for AdMob)
-  - NSMotionUsageDescription (CoreMotion permissions)
-  - UIRequiredDeviceCapabilities (arm64 only)
-  - UISupportedInterfaceOrientations (portrait only)
-- Committed and pushed Info.plist fixes
+- ✅ Guided user through TestFlight submission process (step-by-step)
+- ✅ Registered bundle ID `com.ourappologies.outofpocket` in Apple Developer Portal
+- ✅ Registered device "Marc's Test iPhone" (UDID: 00008020-000920140282002E) to OUR APPOLOGIES LLC team
+- ✅ Resolved Xcode signing errors (device registration + provisioning profiles)
+- ✅ Successfully created archive for OutofPocket target (Version 1.0, Build 1)
 
-## In Progress
-- TestFlight build submission for OutofPocket target
-- Bundle ID: `com.ourappologies.outofpocket`
-- Team: OUR APPOLOGIES LLC
+## Blocked / In Progress
+- ❌ App Store Connect app creation failed with two errors:
+  1. **Missing company name attribute** - Required by App Store Connect
+  2. **App name "OutofPocket" already taken** - Need different name
+- User reached distribution step but couldn't auto-create app in ASC
 
-## Blockers
-- **DEVICE REGISTRATION REQUIRED**: The OUR APPOLOGIES LLC team has no registered devices
-- User needs to connect iPhone via USB to register device with team
-- This resolves the "no devices from which to generate a provisioning profile" error
-
-## Next Session
-1. User connects iPhone via USB → device registers with team
-2. Archive OutofPocket target (Product → Archive)
-3. Distribute to App Store Connect
-4. Create app in App Store Connect with bundle ID `com.ourappologies.outofpocket`
-5. Enable TestFlight and add testers
+## Next Session - IMMEDIATE ACTIONS
+1. **Choose new app name** (suggestions: "Out of Pocket Game", "OutOfPocket", "OOP Game", or completely different)
+2. **Create app manually in App Store Connect:**
+   - Go to https://appstoreconnect.apple.com
+   - My Apps → + → New App
+   - Platform: iOS
+   - Name: [chosen name]
+   - Bundle ID: com.ourappologies.outofpocket
+   - SKU: outofpocket001
+3. **Upload archive from Xcode Organizer:**
+   - Archive is already created and ready
+   - Distribute App → App Store Connect → Upload
+   - Should now detect existing app and upload successfully
+4. **Complete TestFlight setup** (after upload processes)
 
 ## Key Decisions
-- Bundle ID changed from `com.mgeraldez.OutofPocket` to `com.ourappologies.outofpocket`
-- Using OUR APPOLOGIES LLC team (not Personal Team)
-- iOS 17.0 deployment target (lowered from 18.6)
-- Portrait-only orientation
+- Bundle ID: `com.ourappologies.outofpocket` (registered and working)
+- Team: OUR APPOLOGIES LLC
+- Device registered: Marc's Test iPhone
+- Archive created successfully, ready to upload
 
-## Configuration Summary
-- ✅ iOS 17.0 deployment target
-- ✅ Portrait-only orientation
-- ✅ OUR APPOLOGIES LLC team selected
-- ✅ Bundle ID: com.ourappologies.outofpocket
-- ✅ Info.plist keys restored
-- ✅ AdMob production credentials configured
-- ✅ 46 SKAdNetwork IDs in place
+## Technical Details
+- Archive location: Xcode Organizer (Dec 2, 2025)
+- Version: 1.0 (1)
+- iOS Deployment: 17.0
+- Orientation: Portrait only
+- All Info.plist keys properly configured
+
+## Lessons Learned
+- Xcode's auto-create app feature requires company name attribute
+- Popular names like "OutofPocket" may already be taken
+- Better to create app manually in ASC first, then upload from Xcode
