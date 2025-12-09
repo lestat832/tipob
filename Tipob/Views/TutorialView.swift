@@ -172,6 +172,32 @@ struct TutorialView: View {
                 }
             }
 
+            // X button to exit tutorial (top-left)
+            if !showCompletionSheet {
+                VStack {
+                    HStack {
+                        Button(action: {
+                            HapticManager.shared.impact()
+                            viewModel.resetToMenu()
+                        }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(width: 36, height: 36)
+                                .background(
+                                    Circle()
+                                        .fill(Color.white.opacity(0.25))
+                                )
+                        }
+                        .padding(.leading, 20)
+                        .padding(.top, 16)
+
+                        Spacer()
+                    }
+                    Spacer()
+                }
+            }
+
             // Completion view overlay
             if showCompletionSheet {
                 TutorialCompletionView(

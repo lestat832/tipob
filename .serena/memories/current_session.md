@@ -1,33 +1,39 @@
-# Session Summary - 2025-12-08
+# Session Summary - 2025-12-09
 
 ## Completed Tasks
-- **Function Rename Refactor**: Renamed `startClassicMode()` → `startClassic()` and `startGame()` → `startMemory()` across 3 files (GameViewModel.swift, MenuView.swift, GameOverView.swift)
-- **Analytics Foundation Implementation**:
-  - Created `AnalyticsManager.swift` with singleton pattern and 13 event cases
-  - Added `analyticsValue` computed property to `GameMode.swift` (tutorial, classic, memory, gvpvp, pvp)
-  - Added `analyticsValue` computed property to `GestureType.swift` (14 gesture types)
-  - Added `gameStartTime: Date?` property to `GameViewModel.swift`
-  - Wired `logStartGame(mode:discreetMode:)` into all 5 start functions
-  - Fixed tutorial to always pass `discreetMode: false` since it doesn't support discreet mode
-- **Verified** all analytics events logging correctly in Xcode console
+- **Analytics: `discreet_mode_toggled` event** - Added `logDiscreetModeToggled(isOn:)` to AnalyticsManager, wired in MenuView's onChange
+- **Tutorial X Button** - Added subtle X button (top-left) to TutorialView for early exit, matches menu capsule styling with `Color.white.opacity(0.25)`
 
-## Key Files Modified
-- `Tipob/Utilities/AnalyticsManager.swift` (NEW)
-- `Tipob/ViewModels/GameViewModel.swift`
-- `Tipob/Models/GameMode.swift`
-- `Tipob/Models/GestureType.swift`
+## Previous Session Work (carried forward)
+- `start_game` analytics event (all 5 modes)
+- Function renames: `startClassicMode()` → `startClassic()`, `startGame()` → `startMemory()`
+- AnalyticsManager foundation with 13 event cases
 
-## Next Session
-- Add remaining analytics events (end_game, replay_game, gesture events, ad events)
-- Integrate Firebase Analytics when ready
-- Continue TestFlight submission process
+## Analytics Events Implemented
+1. ✅ `start_game` - mode, discreet_mode params
+2. ✅ `discreet_mode_toggled` - state param ("on"/"off")
+
+## Analytics Events Remaining
+- `end_game`
+- `replay_game`
+- `tutorial_continue`
+- `gesture_prompted`
+- `gesture_completed`
+- `gesture_failed`
+- Ad events (6 total)
 
 ## Key Decisions
-- Analytics uses `#if DEBUG` for console logging only - no Firebase yet
-- Tutorial mode always logs `discreet_mode: false` since it doesn't support discreet mode
-- Event names use snake_case (e.g., `start_game`, `double_tap`)
-- Mode values: classic, memory, tutorial, gvpvp, pvp
+- Tutorial X button uses `xmark` SF Symbol (new pattern - codebase previously used text buttons)
+- X button hidden when completion sheet shows (`if !showCompletionSheet`)
+- Discreet mode default is OFF (motion gestures included by default)
+- Tutorial always logs `discreet_mode: false` since it doesn't support discreet mode
 
-## Technical Notes
-- AnalyticsManager.swift must be added to OutofPocket target membership manually in Xcode
-- Source of truth for discreetMode is `GameViewModel.discreetModeEnabled`
+## Files Modified This Session
+- `Tipob/Utilities/AnalyticsManager.swift` - Added `logDiscreetModeToggled`
+- `Tipob/Views/MenuView.swift` - Added analytics call in onChange
+- `Tipob/Views/TutorialView.swift` - Added X button overlay (lines 175-199)
+
+## Next Session
+- Continue with remaining analytics events (`end_game`, `replay_game`, etc.)
+- Firebase Analytics integration when ready
+- TestFlight submission progress

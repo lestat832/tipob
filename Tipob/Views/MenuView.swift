@@ -75,6 +75,7 @@ struct MenuView: View {
                         .onChange(of: discreetModeEnabled) { _, newValue in
                             HapticManager.shared.impact()
                             viewModel.discreetModeEnabled = newValue
+                            AnalyticsManager.shared.logDiscreetModeToggled(isOn: newValue)
                         }
                     }
 

@@ -39,6 +39,15 @@ extension AnalyticsManager {
         ]
         log(.startGame, parameters: params)
     }
+
+    /// Logs when the user toggles discreet mode.
+    /// - Parameter isOn: Whether discreet mode was turned on or off
+    func logDiscreetModeToggled(isOn: Bool) {
+        let params: [String: Any] = [
+            "state": isOn ? "on" : "off"
+        ]
+        log(.discreetModeToggled, parameters: params)
+    }
 }
 
 // MARK: - Private Logging Implementation
