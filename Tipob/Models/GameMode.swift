@@ -38,4 +38,15 @@ enum GameMode: String, CaseIterable, Identifiable {
             return "Take turns repeating and expanding a gesture chain. The first to mess up loses!"
         }
     }
+
+    /// Analytics-friendly lowercase string for event parameters
+    var analyticsValue: String {
+        switch self {
+        case .tutorial: return "tutorial"
+        case .classic: return "classic"
+        case .memory: return "memory"
+        case .gameVsPlayerVsPlayer: return "gvpvp"
+        case .playerVsPlayer: return "pvp"
+        }
+    }
 }

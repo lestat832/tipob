@@ -88,25 +88,25 @@ struct GameOverView: View {
                                 AdManager.shared.showInterstitialAd(from: viewController) {
                                     // After ad dismisses, start new game
                                     if viewModel.isClassicMode {
-                                        viewModel.startClassicMode()
+                                        viewModel.startClassic()
                                     } else {
-                                        viewModel.startGame()
+                                        viewModel.startMemory()
                                     }
                                 }
                             } else {
                                 // No view controller - start game immediately
                                 if viewModel.isClassicMode {
-                                    viewModel.startClassicMode()
+                                    viewModel.startClassic()
                                 } else {
-                                    viewModel.startGame()
+                                    viewModel.startMemory()
                                 }
                             }
                         } else {
                             // No ad - start game immediately
                             if viewModel.isClassicMode {
-                                viewModel.startClassicMode()
+                                viewModel.startClassic()
                             } else {
-                                viewModel.startGame()
+                                viewModel.startMemory()
                             }
                         }
                     }) {

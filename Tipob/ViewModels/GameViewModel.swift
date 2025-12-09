@@ -12,6 +12,9 @@ class GameViewModel: ObservableObject {
     @Published var discreetModeEnabled: Bool = false
     @Published var isNewHighScore: Bool = false
 
+    // MARK: - Analytics timing
+    var gameStartTime: Date?
+
     private var timer: Timer?
     var randomNumberGenerator: RandomNumberGenerator = SystemRandomNumberGenerator()
 
@@ -36,10 +39,14 @@ class GameViewModel: ObservableObject {
     }
 
     func startTutorial() {
+        gameStartTime = Date()
+        AnalyticsManager.shared.logStartGame(mode: .tutorial, discreetMode: false)
         gameState = .tutorial
     }
 
-    func startClassicMode() {
+    func startClassic() {
+        gameStartTime = Date()
+        AnalyticsManager.shared.logStartGame(mode: .classic, discreetMode: discreetModeEnabled)
         isClassicMode = true
         classicModeModel.reset()
 
@@ -56,18 +63,24 @@ class GameViewModel: ObservableObject {
     }
 
     func startGameVsPlayerVsPlayer() {
+        gameStartTime = Date()
+        AnalyticsManager.shared.logStartGame(mode: .gameVsPlayerVsPlayer, discreetMode: discreetModeEnabled)
         // Preload ad for game over screen
         AdManager.shared.preloadIfNeeded()
         gameState = .gameVsPlayerVsPlayer
     }
 
     func startPlayerVsPlayer() {
+        gameStartTime = Date()
+        AnalyticsManager.shared.logStartGame(mode: .playerVsPlayer, discreetMode: discreetModeEnabled)
         // Preload ad for game over screen
         AdManager.shared.preloadIfNeeded()
         gameState = .playerVsPlayer
     }
 
-    func startGame() {
+    func startMemory() {
+        gameStartTime = Date()
+        AnalyticsManager.shared.logStartGame(mode: .memory, discreetMode: discreetModeEnabled)
         isClassicMode = false
         gameModel.reset()
 

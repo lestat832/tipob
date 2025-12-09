@@ -1,47 +1,33 @@
-# Session Summary - 2025-12-02
+# Session Summary - 2025-12-08
 
 ## Completed Tasks
-- ✅ Guided user through TestFlight submission process (step-by-step)
-- ✅ Registered bundle ID `com.ourappologies.outofpocket` in Apple Developer Portal
-- ✅ Registered device "Marc's Test iPhone" (UDID: 00008020-000920140282002E) to OUR APPOLOGIES LLC team
-- ✅ Resolved Xcode signing errors (device registration + provisioning profiles)
-- ✅ Successfully created archive for OutofPocket target (Version 1.0, Build 1)
+- **Function Rename Refactor**: Renamed `startClassicMode()` → `startClassic()` and `startGame()` → `startMemory()` across 3 files (GameViewModel.swift, MenuView.swift, GameOverView.swift)
+- **Analytics Foundation Implementation**:
+  - Created `AnalyticsManager.swift` with singleton pattern and 13 event cases
+  - Added `analyticsValue` computed property to `GameMode.swift` (tutorial, classic, memory, gvpvp, pvp)
+  - Added `analyticsValue` computed property to `GestureType.swift` (14 gesture types)
+  - Added `gameStartTime: Date?` property to `GameViewModel.swift`
+  - Wired `logStartGame(mode:discreetMode:)` into all 5 start functions
+  - Fixed tutorial to always pass `discreetMode: false` since it doesn't support discreet mode
+- **Verified** all analytics events logging correctly in Xcode console
 
-## Blocked / In Progress
-- ❌ App Store Connect app creation failed with two errors:
-  1. **Missing company name attribute** - Required by App Store Connect
-  2. **App name "OutofPocket" already taken** - Need different name
-- User reached distribution step but couldn't auto-create app in ASC
+## Key Files Modified
+- `Tipob/Utilities/AnalyticsManager.swift` (NEW)
+- `Tipob/ViewModels/GameViewModel.swift`
+- `Tipob/Models/GameMode.swift`
+- `Tipob/Models/GestureType.swift`
 
-## Next Session - IMMEDIATE ACTIONS
-1. **Choose new app name** (suggestions: "Out of Pocket Game", "OutOfPocket", "OOP Game", or completely different)
-2. **Create app manually in App Store Connect:**
-   - Go to https://appstoreconnect.apple.com
-   - My Apps → + → New App
-   - Platform: iOS
-   - Name: [chosen name]
-   - Bundle ID: com.ourappologies.outofpocket
-   - SKU: outofpocket001
-3. **Upload archive from Xcode Organizer:**
-   - Archive is already created and ready
-   - Distribute App → App Store Connect → Upload
-   - Should now detect existing app and upload successfully
-4. **Complete TestFlight setup** (after upload processes)
+## Next Session
+- Add remaining analytics events (end_game, replay_game, gesture events, ad events)
+- Integrate Firebase Analytics when ready
+- Continue TestFlight submission process
 
 ## Key Decisions
-- Bundle ID: `com.ourappologies.outofpocket` (registered and working)
-- Team: OUR APPOLOGIES LLC
-- Device registered: Marc's Test iPhone
-- Archive created successfully, ready to upload
+- Analytics uses `#if DEBUG` for console logging only - no Firebase yet
+- Tutorial mode always logs `discreet_mode: false` since it doesn't support discreet mode
+- Event names use snake_case (e.g., `start_game`, `double_tap`)
+- Mode values: classic, memory, tutorial, gvpvp, pvp
 
-## Technical Details
-- Archive location: Xcode Organizer (Dec 2, 2025)
-- Version: 1.0 (1)
-- iOS Deployment: 17.0
-- Orientation: Portrait only
-- All Info.plist keys properly configured
-
-## Lessons Learned
-- Xcode's auto-create app feature requires company name attribute
-- Popular names like "OutofPocket" may already be taken
-- Better to create app manually in ASC first, then upload from Xcode
+## Technical Notes
+- AnalyticsManager.swift must be added to OutofPocket target membership manually in Xcode
+- Source of truth for discreetMode is `GameViewModel.discreetModeEnabled`

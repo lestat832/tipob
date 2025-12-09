@@ -284,4 +284,24 @@ enum GestureType: Equatable, Hashable, Codable {
         case lowerDown
         case stroopFlash
     }
+
+    /// Analytics-friendly string for event parameters
+    var analyticsValue: String {
+        switch self {
+        case .up: return "up"
+        case .down: return "down"
+        case .left: return "left"
+        case .right: return "right"
+        case .tap: return "tap"
+        case .doubleTap: return "double_tap"
+        case .longPress: return "long_press"
+        case .pinch: return "pinch"
+        case .shake: return "shake"
+        case .tiltLeft: return "tilt_left"
+        case .tiltRight: return "tilt_right"
+        case .raise: return "raise"
+        case .lower: return "lower"
+        case .stroop: return "stroop"
+        }
+    }
 }

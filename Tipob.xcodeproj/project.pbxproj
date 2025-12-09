@@ -52,6 +52,7 @@
 				Resources/Sounds/round_complete_chime.caf,
 				TipobApp.swift,
 				Utilities/AdManager.swift,
+				Utilities/AnalyticsManager.swift,
 				Utilities/AudioManager.swift,
 				Utilities/DateExtension.swift,
 				Utilities/DevConfigManager.swift,

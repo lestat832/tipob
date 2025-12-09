@@ -103,9 +103,9 @@ struct MenuView: View {
                     case .tutorial:
                         viewModel.startTutorial()
                     case .classic:
-                        viewModel.startClassicMode()
+                        viewModel.startClassic()
                     case .memory:
-                        viewModel.startGame()
+                        viewModel.startMemory()
                     case .gameVsPlayerVsPlayer:
                         viewModel.startGameVsPlayerVsPlayer()
                     case .playerVsPlayer:
