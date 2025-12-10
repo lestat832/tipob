@@ -1,7 +1,7 @@
 import Foundation
+import FirebaseAnalytics
 
 /// Centralized analytics manager for tracking game events.
-/// Currently logs to console only. Firebase/other SDKs will be integrated later.
 final class AnalyticsManager {
     static let shared = AnalyticsManager()
     private init() {}
@@ -48,6 +48,18 @@ extension AnalyticsManager {
         ]
         log(.discreetModeToggled, parameters: params)
     }
+
+    /// Logs when user taps "Play Again" after game over.
+    /// - Parameters:
+    ///   - mode: The game mode being replayed
+    ///   - discreetMode: Whether discreet mode is enabled
+    func logReplayGame(mode: GameMode, discreetMode: Bool) {
+        let params: [String: Any] = [
+            "mode": mode.analyticsValue,
+            "discreet_mode": discreetMode
+        ]
+        log(.replayGame, parameters: params)
+    }
 }
 
 // MARK: - Private Logging Implementation
@@ -57,8 +69,6 @@ private extension AnalyticsManager {
         print("📊 Analytics Event → \(event.rawValue) | params: \(parameters ?? [:])")
         #endif
 
-        // NOTE: Firebase (or any other analytics SDK) will be plugged in here later.
-        // Example future implementation:
-        // Analytics.logEvent(event.rawValue, parameters: parameters)
+        Analytics.logEvent(event.rawValue, parameters: parameters)
     }
 }

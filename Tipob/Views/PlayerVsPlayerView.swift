@@ -410,6 +410,9 @@ struct PlayerVsPlayerView: View {
             VStack(spacing: 20) {
                 // Play Again button
                 Button(action: {
+                    // Log replay_game analytics
+                    AnalyticsManager.shared.logReplayGame(mode: .playerVsPlayer, discreetMode: viewModel.discreetModeEnabled)
+
                     // Check if we should show an ad
                     if AdManager.shared.shouldShowEndOfGameAd() {
                         // Get top view controller and show ad

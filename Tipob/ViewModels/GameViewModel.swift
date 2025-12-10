@@ -44,9 +44,11 @@ class GameViewModel: ObservableObject {
         gameState = .tutorial
     }
 
-    func startClassic() {
+    func startClassic(isReplay: Bool = false) {
         gameStartTime = Date()
-        AnalyticsManager.shared.logStartGame(mode: .classic, discreetMode: discreetModeEnabled)
+        if !isReplay {
+            AnalyticsManager.shared.logStartGame(mode: .classic, discreetMode: discreetModeEnabled)
+        }
         isClassicMode = true
         classicModeModel.reset()
 
@@ -62,25 +64,31 @@ class GameViewModel: ObservableObject {
         showNextClassicGesture()
     }
 
-    func startGameVsPlayerVsPlayer() {
+    func startGameVsPlayerVsPlayer(isReplay: Bool = false) {
         gameStartTime = Date()
-        AnalyticsManager.shared.logStartGame(mode: .gameVsPlayerVsPlayer, discreetMode: discreetModeEnabled)
+        if !isReplay {
+            AnalyticsManager.shared.logStartGame(mode: .gameVsPlayerVsPlayer, discreetMode: discreetModeEnabled)
+        }
         // Preload ad for game over screen
         AdManager.shared.preloadIfNeeded()
         gameState = .gameVsPlayerVsPlayer
     }
 
-    func startPlayerVsPlayer() {
+    func startPlayerVsPlayer(isReplay: Bool = false) {
         gameStartTime = Date()
-        AnalyticsManager.shared.logStartGame(mode: .playerVsPlayer, discreetMode: discreetModeEnabled)
+        if !isReplay {
+            AnalyticsManager.shared.logStartGame(mode: .playerVsPlayer, discreetMode: discreetModeEnabled)
+        }
         // Preload ad for game over screen
         AdManager.shared.preloadIfNeeded()
         gameState = .playerVsPlayer
     }
 
-    func startMemory() {
+    func startMemory(isReplay: Bool = false) {
         gameStartTime = Date()
-        AnalyticsManager.shared.logStartGame(mode: .memory, discreetMode: discreetModeEnabled)
+        if !isReplay {
+            AnalyticsManager.shared.logStartGame(mode: .memory, discreetMode: discreetModeEnabled)
+        }
         isClassicMode = false
         gameModel.reset()
 

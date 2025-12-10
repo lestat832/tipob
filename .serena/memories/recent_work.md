@@ -1,19 +1,22 @@
-# Recent Work - Out of Pocket
+# Recent Work - Firebase Analytics & Crashlytics Integration
 
-## November 30, 2025
+## December 2025
+- Integrated Firebase Analytics with type-safe AnalyticsManager
+- Added Crashlytics for crash reporting
+- Implemented `start_game`, `replay_game`, `discreet_mode_toggled` events
+- Fixed duplicate event firing with `isReplay` parameter pattern
 
-### AdMob Integration Fixes
-- Fixed race condition in AdManager where ads were being wiped after dismiss
-- Root cause: loadInterstitialAd() was called in showInterstitialAd() before ad dismissed
-- Fix: Removed premature preload, now only preloads in game start methods
-- Production ads showing "No ad to show" - normal for new ad units (24-48hr wait)
+## Key Pattern: Analytics Event Deduplication
+When calling a method that already logs an event, use a boolean parameter to skip:
+```swift
+func startClassic(isReplay: Bool = false) {
+    if !isReplay {
+        AnalyticsManager.shared.logStartGame(...)
+    }
+    // ... rest of method
+}
+```
 
-### Landing Page Updates (oop-door-b59dd403)
-- Added CNAME file for getoutofpocket.com custom domain
-- Connected waitlist email form to Google Sheets via Apps Script
-- Web App URL: https://script.google.com/macros/s/AKfycbzxe7mRldcBgrZ4G44zZlp7MN1D8K8nrdAamNobL6Y5FS67slgAhPMS0WvVf1GvCSfIhw/exec
-
-### Patterns Learned
-- Google Apps Script is free/simple way to connect static sites to Google Sheets
-- AdMob production ads need time to start serving after ad unit creation
-- Race conditions can occur when async operations overlap with state clearing
+## Architecture Note
+Classic/Memory modes: State in ViewModel (correct)
+PvP modes: State in View (needs refactor - see FUTURE_TASKS.md)

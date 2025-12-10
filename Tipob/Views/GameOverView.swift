@@ -79,6 +79,10 @@ struct GameOverView: View {
                 VStack(spacing: 20) {
                     // Play Again Button
                     Button(action: {
+                        // Log replay_game analytics
+                        let mode: GameMode = viewModel.isClassicMode ? .classic : .memory
+                        AnalyticsManager.shared.logReplayGame(mode: mode, discreetMode: viewModel.discreetModeEnabled)
+
                         HapticManager.shared.impact()
 
                         // Check if we should show an ad
@@ -88,25 +92,25 @@ struct GameOverView: View {
                                 AdManager.shared.showInterstitialAd(from: viewController) {
                                     // After ad dismisses, start new game
                                     if viewModel.isClassicMode {
-                                        viewModel.startClassic()
+                                        viewModel.startClassic(isReplay: true)
                                     } else {
-                                        viewModel.startMemory()
+                                        viewModel.startMemory(isReplay: true)
                                     }
                                 }
                             } else {
                                 // No view controller - start game immediately
                                 if viewModel.isClassicMode {
-                                    viewModel.startClassic()
+                                    viewModel.startClassic(isReplay: true)
                                 } else {
-                                    viewModel.startMemory()
+                                    viewModel.startMemory(isReplay: true)
                                 }
                             }
                         } else {
                             // No ad - start game immediately
                             if viewModel.isClassicMode {
-                                viewModel.startClassic()
+                                viewModel.startClassic(isReplay: true)
                             } else {
-                                viewModel.startMemory()
+                                viewModel.startMemory(isReplay: true)
                             }
                         }
                     }) {

@@ -2,12 +2,17 @@ import SwiftUI
 import GoogleMobileAds
 import AppTrackingTransparency
 import AdSupport
+import FirebaseCore
+import FirebaseCrashlytics
 
 @main
 struct TipobApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     init() {
+        // Initialize Firebase
+        FirebaseApp.configure()
+
         // Initialize Google Mobile Ads SDK
         MobileAds.shared.start()
         print("🎯 AdMob initialized - ready for interstitial ads")
