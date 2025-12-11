@@ -105,4 +105,20 @@ xcodebuild test -scheme Tipob -destination 'platform=iOS Simulator,name=iPhone 1
 
 1. Open `Tipob.xcodeproj` in Xcode
 2. Select your development team
-3. Build and run on simulator or device
+3. **Set up Firebase** (see below)
+4. Build and run on simulator or device
+
+## Firebase Setup (Required)
+
+The `GoogleService-Info.plist` file is not included in the repository for security reasons.
+
+**To set up Firebase:**
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Select the **out-of-pocket-c21ae** project (or create one)
+3. Go to **Project Settings** (gear icon)
+4. Under "Your apps", select the iOS app
+5. Click **Download GoogleService-Info.plist**
+6. Place the downloaded file in the `Tipob/` directory
+
+**Important:** The `GoogleService-Info.plist` is gitignored and should never be committed to version control.
