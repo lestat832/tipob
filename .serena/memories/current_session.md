@@ -1,30 +1,28 @@
 # Session Summary - 2025-12-10
 
 ## Completed Tasks
-- ✅ Added `replay_game` analytics event across all game modes
-- ✅ Fixed duplicate analytics bug (replay_game + start_game firing together)
-- ✅ Added `isReplay` parameter to GameViewModel start methods
-- ✅ Created ErrorLogger.swift utility for Crashlytics
-- ✅ Fixed DWARF with dSYM build setting for Crashlytics symbolication
-- ✅ Added Tutorial X button analytics tracking
-- ✅ Documented PvP state management refactor in FUTURE_TASKS.md
+- ✅ Fixed GitHub security alert - removed GoogleService-Info.plist from git history
+- ✅ Added GoogleService-Info.plist to .gitignore
+- ✅ Used git filter-branch to purge secret from all commits
+- ✅ Force pushed cleaned history
+- ✅ Added Firebase setup instructions to README.md
+- ✅ Re-downloaded GoogleService-Info.plist from Firebase Console
 
-## Analytics Events Now Active
-- `start_game` - Menu "Start Playing" only
-- `replay_game` - "Play Again" button only  
-- `discreet_mode_toggled` - Toggle switch
+## Security Fix Details
+- Secret exposed: Firebase API key in GoogleService-Info.plist
+- Solution: Removed from git tracking, purged from history, added to .gitignore
+- Prevention: .gitignore now includes GoogleService-Info.plist and other secret patterns
 
 ## Key Decisions
-- Used `isReplay: Bool = false` parameter pattern to prevent duplicate analytics
-- Kept PvP modes as-is (local state) - documented refactor as future task
-- ViewModel state management is correct architecture pattern
-
-## Technical Debt Documented
-- PvP modes (GameVsPlayerVsPlayerView, PlayerVsPlayerView) use local @State
-- Should be refactored to use ViewModel like Classic/Memory modes
-- Details in claudedocs/FUTURE_TASKS.md
+- Used git filter-branch (BFG not installed)
+- Did not rotate API key (Firebase keys are bundle-ID restricted)
+- Documented setup process in README for future contributors
 
 ## Next Session
-- Verify Firebase DebugView shows events
-- Consider adding `end_game` analytics event
-- TestFlight submission prep
+- Verify GitHub security alert is cleared (may take hours)
+- Consider rotating Firebase API key for extra security
+- Continue with TestFlight prep or new analytics events
+
+## Files Changed
+- .gitignore - Added secrets section
+- README.md - Added Firebase setup instructions
