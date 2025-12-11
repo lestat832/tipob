@@ -58,6 +58,13 @@ fastlane/test_output
 !default.xcworkspace
 iOSInjectionProject/
 
+# Secrets & API Keys
+GoogleService-Info.plist
+**/GoogleService-Info.plist
+*.xcconfig
+secrets/
+credentials/
+
 # macOS
 .DS_Store
 .AppleDouble
