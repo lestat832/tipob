@@ -46,6 +46,14 @@ struct PlayerVsPlayerView: View {
     @State private var isNewHighScore: Bool = false
     @State private var showingLeaderboard: Bool = false
 
+    // Gesture drawer
+    @State private var isDrawerExpanded: Bool = false
+
+    // Dev panel
+    #if DEBUG
+    @State private var showDevPanel: Bool = false
+    #endif
+
     enum PvPGamePhase {
         case nameEntry
         case firstGesture
@@ -56,11 +64,9 @@ struct PlayerVsPlayerView: View {
 
     // MARK: - Computed Properties
 
-    /// Generates dynamic gesture hint based on discreet mode setting
-    /// Uses GesturePoolManager to filter gestures appropriately
-    private var availableGesturesHint: String {
-        let gestures = GesturePoolManager.gesturesWithoutStroop(discreetMode: discreetModeEnabled)
-        return gestures.map { $0.symbol }.joined(separator: " ")
+    /// Whether to show the gesture drawer tab (only during firstGesture and addGesture phases)
+    private var shouldShowDrawerTab: Bool {
+        (gamePhase == .firstGesture || gamePhase == .addGesture) && !showGestureAnimation
     }
 
     var body: some View {
@@ -102,6 +108,26 @@ struct PlayerVsPlayerView: View {
             .detectPinch(
                 onPinch: { handleGesture(.pinch) }
             )
+
+            // Gesture drawer tab (bottom center)
+            if shouldShowDrawerTab {
+                VStack {
+                    Spacer()
+                    GestureDrawerTabView {
+                        isDrawerExpanded = true
+                    }
+                    .padding(.bottom, 30)
+                }
+            }
+
+            // Gesture drawer overlay - only render when tab is visible or drawer is open
+            if shouldShowDrawerTab || isDrawerExpanded {
+                GestureDrawerView(
+                    isExpanded: $isDrawerExpanded,
+                    discreetMode: discreetModeEnabled,
+                    includeStroop: false
+                )
+            }
         }
     }
 
@@ -216,9 +242,8 @@ struct PlayerVsPlayerView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
 
-                    // Gesture hint - dynamically updates based on discreet mode
-                    Text(availableGesturesHint)
-                        .font(.system(size: 48, weight: .light, design: .rounded))
+                    Text("Tap 'Gestures' below for options")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.white.opacity(0.5))
                 }
             }
@@ -312,9 +337,8 @@ struct PlayerVsPlayerView: View {
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .foregroundColor(.white.opacity(0.7))
 
-                    // Gesture hint - dynamically updates based on discreet mode
-                    Text(availableGesturesHint)
-                        .font(.system(size: 48, weight: .light, design: .rounded))
+                    Text("Tap 'Gestures' below for options")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.white.opacity(0.5))
                 }
             }
@@ -502,6 +526,29 @@ struct PlayerVsPlayerView: View {
         .sheet(isPresented: $showingLeaderboard) {
             LeaderboardView()
         }
+        #if DEBUG
+        .sheet(isPresented: $showDevPanel) {
+            DevPanelView(viewModel: viewModel)
+        }
+        #endif
+        .overlay(alignment: .topTrailing) {
+            #if DEBUG
+            Button(action: {
+                HapticManager.shared.impact()
+                showDevPanel = true
+            }) {
+                Image(systemName: "gearshape.fill")
+                    .font(.title)
+                    .foregroundColor(.white)
+                    .padding(12)
+                    .background(
+                        Circle()
+                            .fill(Color.black.opacity(0.3))
+                    )
+                    .padding(8)
+            }
+            #endif
+        }
         .onAppear {
             // Increment game count when results appear
             AdManager.shared.incrementGameCount()
@@ -550,6 +597,9 @@ struct PlayerVsPlayerView: View {
     private func handleFirstGesture(_ gesture: GestureType) {
         guard gamePhase == .firstGesture && !showGestureAnimation else { return }
 
+        // Close drawer when gesture is performed
+        isDrawerExpanded = false
+
         // Add gesture to sequence
         sequence.append(gesture)
         HapticManager.shared.impact()
@@ -570,6 +620,7 @@ struct PlayerVsPlayerView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             showGestureAnimation = false
             animatedGesture = nil
+            isDrawerExpanded = false  // Ensure drawer closes before Player 2's turn
             currentPlayer = 2
             perGestureTime = calculatePerGestureTime(round: currentRound)
             startRepeatPhase()
@@ -581,6 +632,7 @@ struct PlayerVsPlayerView: View {
         userBuffer = []
         timeRemaining = perGestureTime
         isAddingGesture = false  // Reset adding mode
+        isDrawerExpanded = false  // Close drawer on phase transition
         gamePhase = .repeatPhase
 
         #if DEBUG
@@ -710,6 +762,9 @@ struct PlayerVsPlayerView: View {
     private func handleAddGesture(_ gesture: GestureType) {
         guard gamePhase == .addGesture && !showGestureAnimation else { return }
 
+        // Close drawer when gesture is performed
+        isDrawerExpanded = false
+
         // Add gesture to sequence
         sequence.append(gesture)
         HapticManager.shared.impact()
@@ -742,6 +797,7 @@ struct PlayerVsPlayerView: View {
 
     private func switchToNextPlayer() {
         currentPlayer = currentPlayer == 1 ? 2 : 1
+        isDrawerExpanded = false  // Close drawer when switching players
 
         // Only increment round when completing a full cycle (P2 → P1)
         if currentPlayer == 1 {

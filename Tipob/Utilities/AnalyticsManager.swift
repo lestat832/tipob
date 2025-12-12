@@ -60,6 +60,11 @@ extension AnalyticsManager {
         ]
         log(.replayGame, parameters: params)
     }
+
+    /// Logs when user taps "Keep Practicing" to continue the tutorial
+    func logTutorialContinue() {
+        log(.tutorialContinue, parameters: nil)
+    }
 }
 
 // MARK: - Private Logging Implementation

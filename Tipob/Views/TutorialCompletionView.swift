@@ -44,6 +44,7 @@ struct TutorialCompletionView: View {
                 VStack(spacing: 15) {
                     // Keep Practicing button (primary)
                     Button(action: {
+                        AnalyticsManager.shared.logTutorialContinue()
                         HapticManager.shared.impact()
                         onKeepPracticing()
                     }) {
