@@ -6,7 +6,7 @@
 //  Admin Dev Panel - Live Gesture Threshold Tuning UI (DEBUG ONLY)
 //
 
-#if DEBUG
+#if DEBUG || TESTFLIGHT
 import SwiftUI
 
 /// Wrapper to make URL identifiable for sheet presentation

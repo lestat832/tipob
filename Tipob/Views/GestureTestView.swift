@@ -6,7 +6,7 @@
 //  Per-gesture test view for isolated gesture testing (DEBUG ONLY)
 //
 
-#if DEBUG
+#if DEBUG || TESTFLIGHT
 import SwiftUI
 import CoreMotion
 import Combine

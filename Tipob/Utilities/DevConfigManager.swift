@@ -6,7 +6,7 @@
 //  Admin Dev Panel - Centralized Gesture Threshold Configuration (DEBUG ONLY)
 //
 
-#if DEBUG
+#if DEBUG || TESTFLIGHT
 import Foundation
 import SwiftUI
 import Combine

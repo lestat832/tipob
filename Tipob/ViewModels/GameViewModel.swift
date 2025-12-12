@@ -18,7 +18,7 @@ class GameViewModel: ObservableObject {
     private var timer: Timer?
     var randomNumberGenerator: RandomNumberGenerator = SystemRandomNumberGenerator()
 
-    #if DEBUG
+    #if DEBUG || TESTFLIGHT
     private var classicGestureHistory: [GestureType] = []
     private var classicModeReplaySequence: [GestureType]? = nil
     private var classicModeReplayIndex: Int = 0
@@ -52,7 +52,7 @@ class GameViewModel: ObservableObject {
         isClassicMode = true
         classicModeModel.reset()
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         DevConfigManager.shared.clearLogs()
         classicGestureHistory.removeAll()
         #endif
@@ -92,7 +92,7 @@ class GameViewModel: ObservableObject {
         isClassicMode = false
         gameModel.reset()
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         DevConfigManager.shared.clearLogs()
         isMemoryModeReplay = false  // Reset replay flag for normal game
         #endif
@@ -112,7 +112,7 @@ class GameViewModel: ObservableObject {
 
     private func showNextGestureInSequence() {
         guard showingGestureIndex < gameModel.sequence.count else {
-            #if DEBUG
+            #if DEBUG || TESTFLIGHT
             if isMemoryModeReplay {
                 print("🔄 REPLAY DEBUG: Finished showing all \(gameModel.sequence.count) gestures")
             }
@@ -123,7 +123,7 @@ class GameViewModel: ObservableObject {
             return
         }
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         if isMemoryModeReplay {
             let gesture = gameModel.sequence[showingGestureIndex]
             print("🔄 REPLAY DEBUG: Showing gesture \(showingGestureIndex + 1)/\(gameModel.sequence.count): \(gesture.displayName)")
@@ -144,7 +144,7 @@ class GameViewModel: ObservableObject {
         gameModel.currentGestureIndex = 0
         timeRemaining = GameConfiguration.perGestureTime
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         // Apply grace period if transitioning from motion to touch gesture
         if gameModel.currentGestureIndex < gameModel.sequence.count {
             let currentGesture = gameModel.sequence[gameModel.currentGestureIndex]
@@ -175,7 +175,7 @@ class GameViewModel: ObservableObject {
     func handleGesture(_ gesture: GestureType) {
         guard gameState == .awaitInput else { return }
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         // Log expected vs detected gesture
         if gameModel.currentGestureIndex < gameModel.sequence.count {
             let expectedGesture = gameModel.sequence[gameModel.currentGestureIndex]
@@ -197,7 +197,7 @@ class GameViewModel: ObservableObject {
                 activateMemoryModeDetector()
                 timeRemaining = GameConfiguration.perGestureTime
 
-                #if DEBUG
+                #if DEBUG || TESTFLIGHT
                 // Apply grace period if transitioning from motion to touch gesture
                 if gameModel.currentGestureIndex < gameModel.sequence.count {
                     let currentGesture = gameModel.sequence[gameModel.currentGestureIndex]
@@ -225,7 +225,7 @@ class GameViewModel: ObservableObject {
             flashColor = .clear
         }
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         // In replay mode, end after completing the stored sequence instead of adding new gestures
         if isMemoryModeReplay {
             print("✅ Replay completed successfully!")
@@ -249,7 +249,7 @@ class GameViewModel: ObservableObject {
     private func gameOver() {
         timer?.invalidate()
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         // Log timeout if applicable (no gesture detected before time ran out)
         if gameModel.currentGestureIndex < gameModel.sequence.count {
             let expectedGesture = gameModel.sequence[gameModel.currentGestureIndex]
@@ -345,7 +345,7 @@ class GameViewModel: ObservableObject {
         // Start countdown
         timeRemaining = classicModeModel.reactionTime
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         // Apply grace period if transitioning from motion to touch gesture
         if let currentGesture = classicModeModel.currentGesture,
            !currentGesture.isMotionGesture,
@@ -375,7 +375,7 @@ class GameViewModel: ObservableObject {
 
         timer?.invalidate()
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         // Log expected vs detected gesture
         let isCorrect = isGestureCorrect(gesture, expected: currentGesture)
         DevConfigManager.shared.logGesture(expected: currentGesture, detected: gesture, success: isCorrect)
@@ -432,7 +432,7 @@ class GameViewModel: ObservableObject {
     private func classicModeGameOver() {
         timer?.invalidate()
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         // Log timeout if applicable (no gesture detected before time ran out)
         if let currentGesture = classicModeModel.currentGesture {
             DevConfigManager.shared.logGesture(expected: currentGesture, detected: nil, success: false)
@@ -463,7 +463,7 @@ class GameViewModel: ObservableObject {
 
     // MARK: - Replay Methods (DEBUG ONLY)
 
-    #if DEBUG
+    #if DEBUG || TESTFLIGHT
     /// Replay the last played Memory Mode sequence for debugging
     func replayLastMemorySequence() {
         guard let storedSequence = DevConfigManager.shared.lastMemorySequence else {

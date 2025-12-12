@@ -6,7 +6,7 @@
 //  Admin Dev Panel - 3-Finger Triple-Tap Access Gesture (DEBUG ONLY)
 //
 
-#if DEBUG
+#if DEBUG || TESTFLIGHT
 import SwiftUI
 import UIKit
 

@@ -50,7 +50,7 @@ struct PlayerVsPlayerView: View {
     @State private var isDrawerExpanded: Bool = false
 
     // Dev panel
-    #if DEBUG
+    #if DEBUG || TESTFLIGHT
     @State private var showDevPanel: Bool = false
     #endif
 
@@ -526,13 +526,13 @@ struct PlayerVsPlayerView: View {
         .sheet(isPresented: $showingLeaderboard) {
             LeaderboardView()
         }
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         .sheet(isPresented: $showDevPanel) {
             DevPanelView(viewModel: viewModel)
         }
         #endif
         .overlay(alignment: .topTrailing) {
-            #if DEBUG
+            #if DEBUG || TESTFLIGHT
             Button(action: {
                 HapticManager.shared.impact()
                 showDevPanel = true
@@ -604,6 +604,11 @@ struct PlayerVsPlayerView: View {
         sequence.append(gesture)
         HapticManager.shared.impact()
 
+        #if DEBUG || TESTFLIGHT
+        // Log first gesture creation (success - player chose their gesture)
+        DevConfigManager.shared.logGesture(expected: gesture, detected: gesture, success: true)
+        #endif
+
         // Show success flash
         flashColor = .green
         withAnimation(.easeInOut(duration: 0.3)) {
@@ -635,7 +640,7 @@ struct PlayerVsPlayerView: View {
         isDrawerExpanded = false  // Close drawer on phase transition
         gamePhase = .repeatPhase
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         // Apply grace period if transitioning from motion to touch gesture
         if currentGestureIndex < sequence.count {
             let currentGesture = sequence[currentGestureIndex]
@@ -675,6 +680,11 @@ struct PlayerVsPlayerView: View {
             // Still repeating sequence
             if currentGestureIndex < sequence.count && sequence[currentGestureIndex] == gesture {
                 // Correct gesture
+                #if DEBUG || TESTFLIGHT
+                let expectedGesture = sequence[currentGestureIndex]
+                DevConfigManager.shared.logGesture(expected: expectedGesture, detected: gesture, success: true)
+                #endif
+
                 userBuffer.append(gesture)
                 currentGestureIndex += 1
                 HapticManager.shared.impact()
@@ -688,7 +698,7 @@ struct PlayerVsPlayerView: View {
                     activatePvPDetector()
                     timeRemaining = perGestureTime
 
-                    #if DEBUG
+                    #if DEBUG || TESTFLIGHT
                     // Apply grace period if transitioning from motion to touch gesture
                     if currentGestureIndex < sequence.count {
                         let currentGesture = sequence[currentGestureIndex]
@@ -702,6 +712,12 @@ struct PlayerVsPlayerView: View {
                 }
             } else {
                 // Wrong gesture - immediate loss
+                #if DEBUG || TESTFLIGHT
+                if currentGestureIndex < sequence.count {
+                    let expectedGesture = sequence[currentGestureIndex]
+                    DevConfigManager.shared.logGesture(expected: expectedGesture, detected: gesture, success: false)
+                }
+                #endif
                 handleWrongGesture()
             }
         } else {
@@ -709,6 +725,11 @@ struct PlayerVsPlayerView: View {
             sequence.append(gesture)
             currentGestureIndex += 1
             HapticManager.shared.impact()
+
+            #if DEBUG || TESTFLIGHT
+            // Log gesture addition (success - player chose their gesture)
+            DevConfigManager.shared.logGesture(expected: gesture, detected: gesture, success: true)
+            #endif
 
             // Immediately exit adding mode to prevent title flash
             isAddingGesture = false
@@ -768,6 +789,11 @@ struct PlayerVsPlayerView: View {
         // Add gesture to sequence
         sequence.append(gesture)
         HapticManager.shared.impact()
+
+        #if DEBUG || TESTFLIGHT
+        // Log gesture addition (success - player chose their gesture)
+        DevConfigManager.shared.logGesture(expected: gesture, detected: gesture, success: true)
+        #endif
 
         // Show success flash
         flashColor = .green
@@ -842,6 +868,14 @@ struct PlayerVsPlayerView: View {
 
     private func handleTimeout() {
         stopTimer()
+
+        #if DEBUG || TESTFLIGHT
+        // Log timeout as failure (no gesture detected in time)
+        if currentGestureIndex < sequence.count {
+            let expectedGesture = sequence[currentGestureIndex]
+            DevConfigManager.shared.logGesture(expected: expectedGesture, detected: nil, success: false)
+        }
+        #endif
 
         // Calculate final score (Player vs Player uses sequence length)
         let finalScore = sequence.count

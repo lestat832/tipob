@@ -6,7 +6,7 @@
 //  Circular buffer for capturing sensor data during gesture attempts (DEBUG ONLY)
 //
 
-#if DEBUG
+#if DEBUG || TESTFLIGHT
 import Foundation
 import CoreMotion
 import UIKit

@@ -41,6 +41,11 @@ struct GameVsPlayerVsPlayerView: View {
     @State private var isNewHighScore: Bool = false
     @State private var showingLeaderboard: Bool = false
 
+    // Dev panel
+    #if DEBUG || TESTFLIGHT
+    @State private var showDevPanel: Bool = false
+    #endif
+
     enum PvPGamePhase {
         case nameEntry
         case watchSequence
@@ -424,6 +429,29 @@ struct GameVsPlayerVsPlayerView: View {
         .sheet(isPresented: $showingLeaderboard) {
             LeaderboardView()
         }
+        #if DEBUG || TESTFLIGHT
+        .sheet(isPresented: $showDevPanel) {
+            DevPanelView(viewModel: viewModel)
+        }
+        #endif
+        .overlay(alignment: .topTrailing) {
+            #if DEBUG || TESTFLIGHT
+            Button(action: {
+                HapticManager.shared.impact()
+                showDevPanel = true
+            }) {
+                Image(systemName: "gearshape.fill")
+                    .font(.title)
+                    .foregroundColor(.white)
+                    .padding(12)
+                    .background(
+                        Circle()
+                            .fill(Color.black.opacity(0.3))
+                    )
+                    .padding(8)
+            }
+            #endif
+        }
         .onAppear {
             // Increment game count when results appear
             AdManager.shared.incrementGameCount()
@@ -516,7 +544,7 @@ struct GameVsPlayerVsPlayerView: View {
         timeRemaining = perGestureTime
         gamePhase = .playerTurn
 
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         // Apply grace period if transitioning from motion to touch gesture
         if currentGestureIndex < sequence.count {
             let currentGesture = sequence[currentGestureIndex]
@@ -536,9 +564,16 @@ struct GameVsPlayerVsPlayerView: View {
 
     private func startTimer() {
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [self] _ in
             timeRemaining -= 0.1
             if timeRemaining <= 0 {
+                #if DEBUG || TESTFLIGHT
+                // Log timeout as failure (no gesture detected in time)
+                if currentGestureIndex < sequence.count {
+                    let expectedGesture = sequence[currentGestureIndex]
+                    DevConfigManager.shared.logGesture(expected: expectedGesture, detected: nil, success: false)
+                }
+                #endif
                 recordPlayerFailure()
             }
         }
@@ -554,6 +589,11 @@ struct GameVsPlayerVsPlayerView: View {
 
         if currentGestureIndex < sequence.count && isGestureCorrect(gesture, expected: sequence[currentGestureIndex]) {
             // Correct gesture
+            #if DEBUG || TESTFLIGHT
+            let expectedGesture = sequence[currentGestureIndex]
+            DevConfigManager.shared.logGesture(expected: expectedGesture, detected: gesture, success: true)
+            #endif
+
             userBuffer.append(gesture)
             currentGestureIndex += 1
             HapticManager.shared.impact()
@@ -566,7 +606,7 @@ struct GameVsPlayerVsPlayerView: View {
                 activateGameVsPvPDetector()
                 timeRemaining = perGestureTime
 
-                #if DEBUG
+                #if DEBUG || TESTFLIGHT
                 // Apply grace period if transitioning from motion to touch gesture
                 if currentGestureIndex < sequence.count {
                     let currentGesture = sequence[currentGestureIndex]
@@ -580,6 +620,12 @@ struct GameVsPlayerVsPlayerView: View {
             }
         } else {
             // Wrong gesture
+            #if DEBUG || TESTFLIGHT
+            if currentGestureIndex < sequence.count {
+                let expectedGesture = sequence[currentGestureIndex]
+                DevConfigManager.shared.logGesture(expected: expectedGesture, detected: gesture, success: false)
+            }
+            #endif
             recordPlayerFailure()
         }
     }

@@ -3,7 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var viewModel = GameViewModel()
 
-    #if DEBUG
+    #if DEBUG || TESTFLIGHT
     @State private var showDevPanel = false
     #endif
 
@@ -46,7 +46,7 @@ struct ContentView: View {
                     .transition(.opacity)
 
             case .gameOver:
-                #if DEBUG
+                #if DEBUG || TESTFLIGHT
                 GameOverView(viewModel: viewModel, showDevPanel: $showDevPanel)
                     .transition(.slide)
                 #else
@@ -60,7 +60,7 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.6), value: viewModel.gameState)
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         .sheet(isPresented: $showDevPanel) {
             DevPanelView(viewModel: viewModel)
         }

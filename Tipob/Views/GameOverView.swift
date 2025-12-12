@@ -3,7 +3,7 @@ import SwiftUI
 struct GameOverView: View {
     @ObservedObject var viewModel: GameViewModel
 
-    #if DEBUG
+    #if DEBUG || TESTFLIGHT
     @Binding var showDevPanel: Bool
     #endif
 
@@ -188,7 +188,7 @@ struct GameOverView: View {
             .padding(.top, 100)
         }
         .overlay(alignment: .topTrailing) {
-            #if DEBUG
+            #if DEBUG || TESTFLIGHT
             Button(action: {
                 HapticManager.shared.impact()
                 showDevPanel = true
