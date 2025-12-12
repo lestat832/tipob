@@ -227,6 +227,16 @@ enum GestureType: Equatable, Hashable, Codable {
         }
     }
 
+    /// Returns true if this gesture is a swipe direction (up, down, left, right)
+    var isSwipeGesture: Bool {
+        switch self {
+        case .up, .down, .left, .right:
+            return true
+        default:
+            return false
+        }
+    }
+
     /// For Stroop gestures, returns the correct swipe direction based on textColor
     /// Returns nil for non-Stroop gestures
     var stroopCorrectAnswer: GestureType? {

@@ -65,6 +65,18 @@ extension AnalyticsManager {
     func logTutorialContinue() {
         log(.tutorialContinue, parameters: nil)
     }
+
+    /// Logs when a gesture becomes the next required player input.
+    /// - Parameters:
+    ///   - gesture: The gesture the player needs to perform
+    ///   - mode: The game mode (Classic or Memory only)
+    func logGesturePrompted(gesture: GestureType, mode: GameMode) {
+        let params: [String: Any] = [
+            "gesture": gesture.analyticsValue,
+            "mode": mode.analyticsValue
+        ]
+        log(.gesturePrompted, parameters: params)
+    }
 }
 
 // MARK: - Private Logging Implementation

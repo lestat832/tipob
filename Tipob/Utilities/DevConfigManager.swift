@@ -59,7 +59,23 @@ class DevConfigManager: ObservableObject {
 
     // MARK: - Pinch Detection
 
-    @Published var pinchScaleThreshold: CGFloat = 0.85  // scale (15% reduction triggers)
+    @Published var pinchScaleThreshold: CGFloat = 0.85  // scale (15% reduction triggers) - STRICT (Tutorial)
+
+    // MARK: - Pinch Intent Locking (Game Modes Only)
+
+    @Published var pinchIntentLockDuration: TimeInterval = 0.15  // 150ms - suppress swipe when pinch begins
+    @Published var pinchIntentLockEnabled: Bool = true  // Can disable for testing
+
+    // MARK: - Lenient Pinch Detection (OR-based, Game Modes Only)
+
+    @Published var pinchLenientScaleThreshold: CGFloat = 0.92  // 8% reduction (more lenient than Tutorial)
+    @Published var pinchVelocityThreshold: CGFloat = -0.3  // negative = pinching inward
+    @Published var pinchMinDuration: TimeInterval = 0.08  // 80ms sustained inward motion
+
+    // MARK: - Pinch Grace Window
+
+    @Published var pinchGraceWindow: TimeInterval = 0.1  // 100ms post-gesture forgiveness
+    @Published var pinchGraceScaleThreshold: CGFloat = 0.94  // 6% reduction for grace window
 
     // MARK: - Timing Settings
 
@@ -104,7 +120,15 @@ class DevConfigManager: ObservableObject {
             dragMinimum: 20.0
         ),
         tap: TapThresholds(doubleTapWindow: 0.3, longPressDuration: 0.7),
-        pinch: PinchThresholds(scaleThreshold: 0.85),
+        pinch: PinchThresholds(
+            scaleThreshold: 0.85,
+            lenientScaleThreshold: 0.92,
+            velocityThreshold: -0.3,
+            minDuration: 0.08,
+            intentLockDuration: 0.15,
+            graceWindow: 0.1,
+            graceScaleThreshold: 0.94
+        ),
         timing: TimingThresholds(motionToTouchGracePeriod: 0.5)
     )
 
@@ -142,6 +166,12 @@ class DevConfigManager: ObservableObject {
 
         // Pinch
         pinchScaleThreshold = defaults.pinch.scaleThreshold
+        pinchLenientScaleThreshold = defaults.pinch.lenientScaleThreshold
+        pinchVelocityThreshold = defaults.pinch.velocityThreshold
+        pinchMinDuration = defaults.pinch.minDuration
+        pinchIntentLockDuration = defaults.pinch.intentLockDuration
+        pinchGraceWindow = defaults.pinch.graceWindow
+        pinchGraceScaleThreshold = defaults.pinch.graceScaleThreshold
 
         // Timing
         motionToTouchGracePeriod = defaults.timing.motionToTouchGracePeriod
@@ -182,7 +212,13 @@ class DevConfigManager: ObservableObject {
                 longPressDuration: longPressDuration
             ),
             pinch: PinchThresholds(
-                scaleThreshold: pinchScaleThreshold
+                scaleThreshold: pinchScaleThreshold,
+                lenientScaleThreshold: pinchLenientScaleThreshold,
+                velocityThreshold: pinchVelocityThreshold,
+                minDuration: pinchMinDuration,
+                intentLockDuration: pinchIntentLockDuration,
+                graceWindow: pinchGraceWindow,
+                graceScaleThreshold: pinchGraceScaleThreshold
             ),
             timing: TimingThresholds(
                 motionToTouchGracePeriod: motionToTouchGracePeriod
@@ -620,7 +656,13 @@ struct TapThresholds: Codable {
 }
 
 struct PinchThresholds: Codable {
-    let scaleThreshold: CGFloat
+    let scaleThreshold: CGFloat  // Strict (Tutorial)
+    let lenientScaleThreshold: CGFloat  // Lenient (Game modes)
+    let velocityThreshold: CGFloat
+    let minDuration: TimeInterval
+    let intentLockDuration: TimeInterval
+    let graceWindow: TimeInterval
+    let graceScaleThreshold: CGFloat
 }
 
 struct TimingThresholds: Codable {
@@ -917,6 +959,12 @@ struct ThresholdSnapshot: Codable {
 
     // Pinch
     let pinchScaleThreshold: CGFloat
+    let pinchLenientScaleThreshold: CGFloat
+    let pinchVelocityThreshold: CGFloat
+    let pinchMinDuration: TimeInterval
+    let pinchIntentLockDuration: TimeInterval
+    let pinchGraceWindow: TimeInterval
+    let pinchGraceScaleThreshold: CGFloat
 
     // Timing
     let motionToTouchGracePeriod: TimeInterval
@@ -940,6 +988,12 @@ struct ThresholdSnapshot: Codable {
             doubleTapWindow: config.doubleTapWindow,
             longPressDuration: config.longPressDuration,
             pinchScaleThreshold: config.pinchScaleThreshold,
+            pinchLenientScaleThreshold: config.pinchLenientScaleThreshold,
+            pinchVelocityThreshold: config.pinchVelocityThreshold,
+            pinchMinDuration: config.pinchMinDuration,
+            pinchIntentLockDuration: config.pinchIntentLockDuration,
+            pinchGraceWindow: config.pinchGraceWindow,
+            pinchGraceScaleThreshold: config.pinchGraceScaleThreshold,
             motionToTouchGracePeriod: config.motionToTouchGracePeriod
         )
     }

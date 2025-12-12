@@ -2,13 +2,88 @@ import Foundation
 
 /// Coordinates gesture detection to prevent conflicting gestures from interfering
 /// Used primarily in Tutorial Mode to suppress incidental motion during expected gestures
+/// Also manages pinch intent locking to give pinch priority over swipe in game modes
 class GestureCoordinator {
     static let shared = GestureCoordinator()
 
     /// The gesture currently expected by the game (Tutorial Mode sets this)
     var expectedGesture: GestureType? = nil
 
+    /// True when strict gesture detection is active (Tutorial mode)
+    /// Use this instead of checking `expectedGesture != nil` for cleaner semantics
+    var isStrictGestureMode: Bool {
+        expectedGesture != nil
+    }
+
+    // MARK: - Pinch Intent Locking (Game Modes Only)
+
+    /// Whether pinch intent is currently locked (suppresses swipe)
+    private var isPinchIntentLocked: Bool = false
+
+    /// When pinch intent lock started (for timeout)
+    private var pinchIntentLockTime: Date? = nil
+
     private init() {}
+
+    // MARK: - Pinch Intent Methods
+
+    /// Called when UIPinchGestureRecognizer enters .began state
+    /// Locks pinch intent to give pinch priority over swipe for a short window
+    func beginPinchIntent() {
+        // Strict mode (Tutorial) uses strict detection - skip locking
+        guard !isStrictGestureMode else { return }
+
+        #if DEBUG || TESTFLIGHT
+        guard DevConfigManager.shared.pinchIntentLockEnabled else { return }
+        #endif
+
+        isPinchIntentLocked = true
+        pinchIntentLockTime = Date()
+        print("[\(Date().logTimestamp)] 🔒 Pinch intent locked")
+    }
+
+    /// Called when pinch gesture ends or triggers successfully
+    func endPinchIntent() {
+        guard isPinchIntentLocked else { return }
+        isPinchIntentLocked = false
+        pinchIntentLockTime = nil
+        print("[\(Date().logTimestamp)] 🔓 Pinch intent released")
+    }
+
+    /// Called by SwipeGestureModifier before triggering swipe
+    /// Returns false if swipe should be suppressed due to pinch intent
+    func shouldAllowSwipeDuringPinch() -> Bool {
+        // CRITICAL: Never block swipe when swipe is the expected gesture
+        // This must come FIRST to ensure swipes always work when expected
+        if let expected = expectedGesture, expected.isSwipeGesture {
+            return true
+        }
+
+        // Strict mode (Tutorial) - allow swipe (strict behavior preserved)
+        guard !isStrictGestureMode else { return true }
+
+        // Not locked - allow swipe
+        guard isPinchIntentLocked else { return true }
+
+        // Check if lock has expired
+        if let lockTime = pinchIntentLockTime {
+            #if DEBUG || TESTFLIGHT
+            let lockDuration = DevConfigManager.shared.pinchIntentLockDuration
+            #else
+            let lockDuration: TimeInterval = 0.15
+            #endif
+
+            let elapsed = Date().timeIntervalSince(lockTime)
+            if elapsed > lockDuration {
+                endPinchIntent()
+                return true
+            }
+        }
+
+        return false  // Suppress swipe while pinch intent is locked
+    }
+
+    // MARK: - Gesture Filtering
 
     /// Determines if a detected gesture should be allowed to trigger
     /// - Parameter detected: The gesture type that was just detected

@@ -12,6 +12,7 @@ struct TutorialView: View {
 
     // Persistence for tutorial completion
     @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
+    @AppStorage("selectedGameMode") private var selectedModeRawValue: String = GameMode.tutorial.rawValue
 
     // Tutorial gesture sequence (fixed order)
     let tutorialGestures: [GestureType] = [
@@ -338,7 +339,12 @@ struct TutorialView: View {
     }
 
     private func completeTutorial() {
-        hasCompletedTutorial = true
+        // Only switch to Classic on FIRST completion (not replays)
+        if !hasCompletedTutorial {
+            hasCompletedTutorial = true
+            selectedModeRawValue = GameMode.classic.rawValue
+        }
+        // Always return to menu
         viewModel.resetToMenu()
     }
 

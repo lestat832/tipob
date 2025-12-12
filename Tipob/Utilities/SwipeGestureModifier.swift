@@ -81,6 +81,25 @@ struct SwipeGestureModifier: ViewModifier {
             return
         }
 
+        // Check pinch intent lock (two-finger priority)
+        guard GestureCoordinator.shared.shouldAllowSwipeDuringPinch() else {
+            print("[\(Date().logTimestamp)] ⏸️ Swipe \(potentialGesture.displayName) suppressed - pinch intent locked")
+            #if DEBUG || TESTFLIGHT
+            // Log pinch lock suppression
+            DevConfigManager.shared.logGestureAttempt(.swipe(
+                direction: potentialGesture,
+                wasAccepted: false,
+                rejectionReason: "pinch_intent_locked",
+                startPosition: start,
+                endPosition: end,
+                distance: distance,
+                velocity: velocity,
+                screenSize: size
+            ))
+            #endif
+            return
+        }
+
         // Check gesture coordinator before triggering
         guard GestureCoordinator.shared.shouldAllowGesture(potentialGesture) else {
             print("[\(Date().logTimestamp)] ⏸️ Swipe \(potentialGesture.displayName) suppressed by coordinator")

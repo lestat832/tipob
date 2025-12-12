@@ -12,6 +12,12 @@ class GameViewModel: ObservableObject {
     @Published var discreetModeEnabled: Bool = false
     @Published var isNewHighScore: Bool = false
 
+    // MARK: - Gesture Buffer (Memory Mode transition)
+    /// Buffer for gestures detected during state transitions
+    private var pendingGesture: GestureType? = nil
+    /// True when gesture buffer is active (during transition from playback to input)
+    private var isGestureBufferEnabled: Bool = false
+
     // MARK: - Analytics timing
     var gameStartTime: Date?
 
@@ -91,6 +97,9 @@ class GameViewModel: ObservableObject {
         }
         isClassicMode = false
         gameModel.reset()
+        // Reset gesture buffer for new game
+        isGestureBufferEnabled = false
+        pendingGesture = nil
 
         #if DEBUG || TESTFLIGHT
         DevConfigManager.shared.clearLogs()
@@ -117,6 +126,12 @@ class GameViewModel: ObservableObject {
                 print("🔄 REPLAY DEBUG: Finished showing all \(gameModel.sequence.count) gestures")
             }
             #endif
+
+            // Enable gesture buffer during transition - gestures detected here will be replayed
+            isGestureBufferEnabled = true
+            pendingGesture = nil
+            print("[\(Date().logTimestamp)] 📦 Gesture buffer enabled during transition")
+
             DispatchQueue.main.asyncAfter(deadline: .now() + GameConfiguration.transitionDelay) {
                 self.transitionToAwaitInput()
             }
@@ -144,6 +159,12 @@ class GameViewModel: ObservableObject {
         gameModel.currentGestureIndex = 0
         timeRemaining = GameConfiguration.perGestureTime
 
+        // Log first expected gesture for analytics
+        if gameModel.currentGestureIndex < gameModel.sequence.count {
+            let expectedGesture = gameModel.sequence[gameModel.currentGestureIndex]
+            AnalyticsManager.shared.logGesturePrompted(gesture: expectedGesture, mode: .memory)
+        }
+
         #if DEBUG || TESTFLIGHT
         // Apply grace period if transitioning from motion to touch gesture
         if gameModel.currentGestureIndex < gameModel.sequence.count {
@@ -160,6 +181,17 @@ class GameViewModel: ObservableObject {
         activateMemoryModeDetector()
 
         startCountdown()
+
+        // Replay buffered gesture if any was detected during transition
+        isGestureBufferEnabled = false
+        if let buffered = pendingGesture {
+            pendingGesture = nil
+            print("[\(Date().logTimestamp)] 🔄 Replaying buffered gesture: \(buffered.displayName)")
+            // Use async to ensure state is fully ready before processing
+            DispatchQueue.main.async {
+                self.handleGesture(buffered)
+            }
+        }
     }
 
     private func startCountdown() {
@@ -173,6 +205,17 @@ class GameViewModel: ObservableObject {
     }
 
     func handleGesture(_ gesture: GestureType) {
+        // Buffer gesture if in transition period (between playback end and awaitInput)
+        if isGestureBufferEnabled && gameState != .awaitInput {
+            if pendingGesture == nil {
+                pendingGesture = gesture
+                print("[\(Date().logTimestamp)] 📦 Gesture buffered: \(gesture.displayName)")
+                // Immediate haptic feedback so player knows input was received
+                HapticManager.shared.impact()
+            }
+            return
+        }
+
         guard gameState == .awaitInput else { return }
 
         #if DEBUG || TESTFLIGHT
@@ -196,6 +239,12 @@ class GameViewModel: ObservableObject {
                 // Move to next gesture - update detector for next expected gesture
                 activateMemoryModeDetector()
                 timeRemaining = GameConfiguration.perGestureTime
+
+                // Log next expected gesture for analytics
+                if gameModel.currentGestureIndex < gameModel.sequence.count {
+                    let expectedGesture = gameModel.sequence[gameModel.currentGestureIndex]
+                    AnalyticsManager.shared.logGesturePrompted(gesture: expectedGesture, mode: .memory)
+                }
 
                 #if DEBUG || TESTFLIGHT
                 // Apply grace period if transitioning from motion to touch gesture
@@ -292,6 +341,9 @@ class GameViewModel: ObservableObject {
         classicModeModel.reset()
         flashColor = .clear
         isNewHighScore = false
+        // Reset gesture buffer
+        isGestureBufferEnabled = false
+        pendingGesture = nil
         MotionGestureManager.shared.deactivateAllDetectors()
     }
 
@@ -324,6 +376,11 @@ class GameViewModel: ObservableObject {
     private func showNextClassicGesture() {
         // Generate gesture
         classicModeModel.generateRandomGesture(discreetMode: discreetModeEnabled)
+
+        // Log gesture prompt for analytics
+        if let gesture = classicModeModel.currentGesture {
+            AnalyticsManager.shared.logGesturePrompted(gesture: gesture, mode: .classic)
+        }
 
         // Activate motion detector if motion gesture expected
         if let currentGesture = classicModeModel.currentGesture,

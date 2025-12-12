@@ -48,96 +48,170 @@ struct PinchGestureView: UIViewRepresentable {
 
     class Coordinator: NSObject, UIGestureRecognizerDelegate {
         let onPinch: () -> Void
-        // let onSpread: () -> Void  // SPREAD: Temporarily disabled
         var hasPinchTriggered = false
 
-        /*  // SPREAD: Temporarily disabled
-        // Distance tracking for spread gesture
-        var spreadInitialDistance: CGFloat?
-        var hasSpreadTriggered = false
-        */
+        // MARK: - Tracking for OR-based Detection (Game Modes)
 
-        init(onPinch: @escaping () -> Void) {  // Removed onSpread parameter
+        /// When gesture started (for duration-based detection)
+        var gestureStartTime: Date?
+
+        /// Whether any inward motion was detected during this gesture
+        var hasInwardMotion = false
+
+        /// Lowest scale reached during this gesture (for grace window)
+        var peakInwardScale: CGFloat = 1.0
+
+        /// Fastest inward velocity during this gesture
+        var peakInwardVelocity: CGFloat = 0
+
+        /// Tracks last logged scale bucket for throttled debug logging
+        var lastLoggedScaleBucket: Int = 100
+
+        init(onPinch: @escaping () -> Void) {
             self.onPinch = onPinch
-            // self.onSpread = onSpread  // SPREAD: Temporarily disabled
         }
 
         @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
             switch gesture.state {
             case .began:
+                // Start tracking for OR-based detection
+                gestureStartTime = Date()
+                hasInwardMotion = false
+                peakInwardScale = gesture.scale
+                peakInwardVelocity = 0
+                hasPinchTriggered = false
+                lastLoggedScaleBucket = 100  // Reset log throttle
+
+                // Lock pinch intent (suppresses swipe in game modes)
+                GestureCoordinator.shared.beginPinchIntent()
+
                 print("[\(Date().logTimestamp)] 🔍 Pinch: Began - scale=\(String(format: "%.2f", gesture.scale))")
 
             case .changed:
-                // Debug logging for scale tracking
-                if gesture.scale < 0.9 {
-                    print("[\(Date().logTimestamp)] 🔍 Pinch: Scale=\(String(format: "%.2f", gesture.scale)) - triggered=\(hasPinchTriggered)")
+                // Track peak values for grace window evaluation
+                if gesture.scale < peakInwardScale {
+                    peakInwardScale = gesture.scale
+                }
+                if gesture.velocity < peakInwardVelocity {
+                    peakInwardVelocity = gesture.velocity
+                }
+                if gesture.velocity < 0 {
+                    hasInwardMotion = true
                 }
 
-                // Detect pinch when scale drops below threshold (default 0.85 = 15% reduction)
-                #if DEBUG
-                let pinchThreshold = DevConfigManager.shared.pinchScaleThreshold
-                #else
-                let pinchThreshold: CGFloat = 0.85
-                #endif
+                // Debug logging - throttled to only log on scale bucket changes
+                let currentBucket = Int(gesture.scale * 100)
+                if currentBucket != lastLoggedScaleBucket && gesture.scale < 0.95 {
+                    print("[\(Date().logTimestamp)] 🔍 Pinch: scale=\(String(format: "%.2f", gesture.scale)) vel=\(String(format: "%.2f", gesture.velocity)) triggered=\(hasPinchTriggered)")
+                    lastLoggedScaleBucket = currentBucket
+                }
 
-                if gesture.scale < pinchThreshold && !hasPinchTriggered {
+                guard !hasPinchTriggered else { return }
+
+                // Check if in strict mode (Tutorial) vs lenient mode (game modes)
+                let inStrictMode = GestureCoordinator.shared.isStrictGestureMode
+
+                let shouldTrigger: Bool
+
+                if inStrictMode {
+                    // STRICT: Original scale-only detection for Tutorial
+                    #if DEBUG || TESTFLIGHT
+                    let threshold = DevConfigManager.shared.pinchScaleThreshold
+                    #else
+                    let threshold: CGFloat = 0.85
+                    #endif
+                    shouldTrigger = gesture.scale < threshold
+
+                } else {
+                    // LENIENT: OR-based detection for game modes
+                    #if DEBUG || TESTFLIGHT
+                    let scaleThreshold = DevConfigManager.shared.pinchLenientScaleThreshold
+                    let velocityThreshold = DevConfigManager.shared.pinchVelocityThreshold
+                    let durationThreshold = DevConfigManager.shared.pinchMinDuration
+                    #else
+                    let scaleThreshold: CGFloat = 0.92
+                    let velocityThreshold: CGFloat = -0.3
+                    let durationThreshold: TimeInterval = 0.08
+                    #endif
+
+                    let scaleQualifies = gesture.scale <= scaleThreshold
+                    // Velocity check: must have inward motion AND magnitude exceeds threshold
+                    let velocityQualifies = hasInwardMotion && abs(gesture.velocity) >= abs(velocityThreshold)
+                    let durationQualifies = gestureStartTime.map {
+                        Date().timeIntervalSince($0) >= durationThreshold && hasInwardMotion
+                    } ?? false
+
+                    shouldTrigger = scaleQualifies || velocityQualifies || durationQualifies
+
+                    #if DEBUG || TESTFLIGHT
+                    if shouldTrigger {
+                        let reasons = [
+                            scaleQualifies ? "scale(\(String(format: "%.2f", gesture.scale)))" : nil,
+                            velocityQualifies ? "velocity(\(String(format: "%.2f", gesture.velocity)))" : nil,
+                            durationQualifies ? "duration" : nil
+                        ].compactMap { $0 }.joined(separator: "+")
+                        print("[\(Date().logTimestamp)] 🎯 Pinch qualified via: \(reasons)")
+                    }
+                    #endif
+                }
+
+                if shouldTrigger {
                     // Check with GestureCoordinator for intelligent filtering
                     guard GestureCoordinator.shared.shouldAllowGesture(.pinch) else {
                         print("[\(Date().logTimestamp)] ⏸️ Pinch suppressed by coordinator")
                         return
                     }
-                    print("[\(Date().logTimestamp)] 🎯 Pinch detected! Scale=\(String(format: "%.2f", gesture.scale))")
+
+                    print("[\(Date().logTimestamp)] ✅ Pinch detected!")
                     hasPinchTriggered = true
+                    // Note: endPinchIntent() is called in .ended case, not here (avoids redundant calls)
                     onPinch()
                 }
 
             case .ended, .cancelled, .failed:
-                print("[\(Date().logTimestamp)] 🔍 Pinch: Ended - final scale=\(String(format: "%.2f", gesture.scale))")
+                let finalScale = gesture.scale
+                print("[\(Date().logTimestamp)] 🔍 Pinch: Ended - final scale=\(String(format: "%.2f", finalScale)) peak=\(String(format: "%.2f", peakInwardScale))")
+
+                // Grace window: Check if nearly qualified (lenient game modes only)
+                if !hasPinchTriggered {
+                    let inStrictMode = GestureCoordinator.shared.isStrictGestureMode
+
+                    if !inStrictMode && hasInwardMotion {
+                        #if DEBUG || TESTFLIGHT
+                        let graceScaleThreshold = DevConfigManager.shared.pinchGraceScaleThreshold
+                        #else
+                        let graceScaleThreshold: CGFloat = 0.94
+                        #endif
+
+                        // Check if peaked close to threshold with inward motion
+                        let peakScaleQualifiesForGrace = peakInwardScale <= graceScaleThreshold
+                        let graceConditionsMet = peakScaleQualifiesForGrace && hasInwardMotion
+
+                        if graceConditionsMet {
+                            // Check with coordinator before grace-triggering
+                            if GestureCoordinator.shared.shouldAllowGesture(.pinch) {
+                                print("[\(Date().logTimestamp)] 🎁 Grace window: Pinch succeeded (peak scale=\(String(format: "%.2f", peakInwardScale)))")
+                                hasPinchTriggered = true
+                                onPinch()
+                            }
+                        }
+                    }
+                }
+
+                // Release intent lock
+                GestureCoordinator.shared.endPinchIntent()
+
                 // Reset for next gesture
+                gestureStartTime = nil
+                hasInwardMotion = false
+                peakInwardScale = 1.0
+                peakInwardVelocity = 0
                 hasPinchTriggered = false
 
             default:
                 break
             }
         }
-
-        /*  // SPREAD: Temporarily disabled - detection issues
-        @objc func handleSpreadPan(_ gesture: UIPanGestureRecognizer) {
-            // Verify exactly 2 touches
-            guard gesture.numberOfTouches == 2 else { return }
-
-            guard let view = gesture.view else { return }
-
-            // Get positions of both touches
-            let touch1 = gesture.location(ofTouch: 0, in: view)
-            let touch2 = gesture.location(ofTouch: 1, in: view)
-            let currentDistance = hypot(touch2.x - touch1.x, touch2.y - touch1.y)
-
-            switch gesture.state {
-            case .began:
-                spreadInitialDistance = currentDistance
-                hasSpreadTriggered = false
-
-            case .changed:
-                guard let initialDist = spreadInitialDistance else { return }
-
-                let ratio = currentDistance / initialDist
-
-                // Trigger spread when distance increases by 30%
-                if !hasSpreadTriggered && ratio >= 1.3 {
-                    hasSpreadTriggered = true
-                    onSpread()
-                }
-
-            case .ended, .cancelled, .failed:
-                spreadInitialDistance = nil
-                hasSpreadTriggered = false
-
-            default:
-                break
-            }
-        }
-        */
 
         // MARK: - UIGestureRecognizerDelegate
 
