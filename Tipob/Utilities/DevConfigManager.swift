@@ -54,7 +54,7 @@ class DevConfigManager: ObservableObject {
 
     // MARK: - Tap Detection
 
-    @Published var doubleTapWindow: TimeInterval = 0.3  // seconds (300ms detection window)
+    @Published var doubleTapWindow: TimeInterval = 0.35  // seconds (350ms detection window)
     @Published var longPressDuration: TimeInterval = 0.7  // seconds (700ms minimum hold)
 
     // MARK: - Pinch Detection
@@ -119,7 +119,7 @@ class DevConfigManager: ObservableObject {
             edgeBuffer: 24.0,
             dragMinimum: 20.0
         ),
-        tap: TapThresholds(doubleTapWindow: 0.3, longPressDuration: 0.7),
+        tap: TapThresholds(doubleTapWindow: 0.35, longPressDuration: 0.7),
         pinch: PinchThresholds(
             scaleThreshold: 0.85,
             lenientScaleThreshold: 0.92,

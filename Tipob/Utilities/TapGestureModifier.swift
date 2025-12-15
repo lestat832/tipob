@@ -2,7 +2,7 @@ import SwiftUI
 
 // Press detection with single tap, double tap, and long press differentiation
 // Tap: single press
-// Double tap: two taps within 300ms
+// Double tap: two taps within 350ms
 // Long press: hold for 700ms
 extension View {
     func detectTaps(onTap: @escaping (GestureType) -> Void) -> some View {
@@ -21,7 +21,7 @@ struct TapDetectionModifier: ViewModifier {
     private var doubleTapWindow: TimeInterval { DevConfigManager.shared.doubleTapWindow }
     private var longPressDuration: TimeInterval { DevConfigManager.shared.longPressDuration }
     #else
-    private let doubleTapWindow: TimeInterval = 0.3 // 300ms
+    private let doubleTapWindow: TimeInterval = 0.35 // 350ms
     private let longPressDuration: TimeInterval = 0.7 // 700ms
     #endif
 
@@ -57,15 +57,26 @@ struct TapDetectionModifier: ViewModifier {
                             #endif
                         }
 
-                        // Reset flag after a delay
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        // Reset flag after a delay (50ms grace window)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                             self.longPressDetected = false
                         }
                     }
             )
             .onTapGesture {
-                // Ignore taps if long press was just detected
-                guard !longPressDetected else { return }
+                // Log and ignore taps if long press was just detected
+                if longPressDetected {
+                    print("[\(Date().logTimestamp)] ⚠️ Tap blocked by longPressDetected flag (tapCount was: \(tapCount))")
+                    #if DEBUG
+                    DevConfigManager.shared.logGestureAttempt(.tap(
+                        type: .tap,
+                        wasAccepted: false,
+                        rejectionReason: "long_press_blocking",
+                        tapCount: tapCount
+                    ))
+                    #endif
+                    return
+                }
 
                 tapCount += 1
                 print("[\(Date().logTimestamp)] 🔍 Tap count: \(tapCount)")
