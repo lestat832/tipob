@@ -65,6 +65,7 @@ struct ClassicModeView: View {
                     .padding(.bottom, 50)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())  // Forces full area to accept gestures (fixes Stroop detection)
             .detectSwipes { gesture in
                 viewModel.handleClassicModeGesture(gesture)
             }
