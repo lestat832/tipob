@@ -249,6 +249,7 @@ struct GameVsPlayerVsPlayerView: View {
                 totalTime: perGestureTime,
                 timeRemaining: $timeRemaining
             )
+            .allowsHitTesting(false)
 
             // Progress indicator
             if currentGestureIndex < sequence.count {
@@ -271,6 +272,7 @@ struct GameVsPlayerVsPlayerView: View {
             .padding(.bottom, 60)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Rectangle())
         .detectSwipes { gesture in
             handleGesture(gesture)
         }
@@ -514,6 +516,9 @@ struct GameVsPlayerVsPlayerView: View {
         gamePhase = .watchSequence
         showingGestureIndex = 0
 
+        // Deactivate motion detector during sequence playback to prevent false failures
+        MotionGestureManager.shared.deactivateAllDetectors()
+
         // Add initial delay so players can read "Watch the Sequence!" message
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.showGesturesRecursively()
@@ -585,7 +590,24 @@ struct GameVsPlayerVsPlayerView: View {
     }
 
     private func handleGesture(_ gesture: GestureType) {
-        guard gamePhase == .playerTurn else { return }
+        #if DEBUG || TESTFLIGHT
+        print("""
+        🎮 GvPvP GESTURE INPUT:
+           gesture: \(gesture.displayName)
+           gamePhase: \(gamePhase)
+           currentPlayer: \(currentPlayer)
+           currentGestureIndex: \(currentGestureIndex)
+           sequence.count: \(sequence.count)
+           expectedGesture: \(currentGestureIndex < sequence.count ? sequence[currentGestureIndex].displayName : "none")
+        """)
+        #endif
+
+        guard gamePhase == .playerTurn else {
+            #if DEBUG || TESTFLIGHT
+            print("❌ REJECTED: gamePhase != .playerTurn")
+            #endif
+            return
+        }
 
         if currentGestureIndex < sequence.count && isGestureCorrect(gesture, expected: sequence[currentGestureIndex]) {
             // Correct gesture
@@ -652,6 +674,9 @@ struct GameVsPlayerVsPlayerView: View {
     }
 
     private func recordPlayerSuccess() {
+        // Guard: Only record success during player turn
+        guard gamePhase == .playerTurn else { return }
+
         stopTimer()
 
         if currentPlayer == 1 {
@@ -682,6 +707,14 @@ struct GameVsPlayerVsPlayerView: View {
     }
 
     private func recordPlayerFailure() {
+        // Guard: Only record failure during player turn (prevents false failures during sequence playback)
+        guard gamePhase == .playerTurn else {
+            #if DEBUG || TESTFLIGHT
+            print("⚠️ recordPlayerFailure() ignored - not in playerTurn phase (current: \(gamePhase))")
+            #endif
+            return
+        }
+
         stopTimer()
 
         if currentPlayer == 1 {
@@ -774,6 +807,8 @@ struct GameVsPlayerVsPlayerView: View {
                     self.handleGesture(expectedGesture)
                 },
                 onWrongGesture: {
+                    // Guard: Only fail if still in player turn (prevents false failures during sequence playback)
+                    guard self.gamePhase == .playerTurn else { return }
                     self.recordPlayerFailure()
                 }
             )

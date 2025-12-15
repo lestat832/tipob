@@ -77,6 +77,20 @@ extension AnalyticsManager {
         ]
         log(.gesturePrompted, parameters: params)
     }
+
+    /// Logs when the player successfully performs the expected gesture.
+    /// - Parameters:
+    ///   - gesture: The gesture that was completed
+    ///   - mode: The game mode (Classic or Memory only)
+    ///   - reactionTimeMs: Time in milliseconds from prompt to completion
+    func logGestureCompleted(gesture: GestureType, mode: GameMode, reactionTimeMs: Int) {
+        let params: [String: Any] = [
+            "gesture": gesture.analyticsValue,
+            "mode": mode.analyticsValue,
+            "reaction_time_ms": reactionTimeMs
+        ]
+        log(.gestureCompleted, parameters: params)
+    }
 }
 
 // MARK: - Private Logging Implementation

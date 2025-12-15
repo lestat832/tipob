@@ -20,6 +20,8 @@ class GameViewModel: ObservableObject {
 
     // MARK: - Analytics timing
     var gameStartTime: Date?
+    /// Timestamp when current gesture was prompted (for reaction time calculation)
+    var gesturePromptTime: Date?
 
     private var timer: Timer?
     var randomNumberGenerator: RandomNumberGenerator = SystemRandomNumberGenerator()
@@ -52,6 +54,7 @@ class GameViewModel: ObservableObject {
 
     func startClassic(isReplay: Bool = false) {
         gameStartTime = Date()
+        gesturePromptTime = nil
         if !isReplay {
             AnalyticsManager.shared.logStartGame(mode: .classic, discreetMode: discreetModeEnabled)
         }
@@ -92,6 +95,7 @@ class GameViewModel: ObservableObject {
 
     func startMemory(isReplay: Bool = false) {
         gameStartTime = Date()
+        gesturePromptTime = nil
         if !isReplay {
             AnalyticsManager.shared.logStartGame(mode: .memory, discreetMode: discreetModeEnabled)
         }
@@ -108,6 +112,9 @@ class GameViewModel: ObservableObject {
 
         // Preload ad for game over screen
         AdManager.shared.preloadIfNeeded()
+
+        // Deactivate motion detector during sequence playback to prevent false failures
+        MotionGestureManager.shared.deactivateAllDetectors()
 
         gameModel.startNewRound(with: &randomNumberGenerator, discreetMode: discreetModeEnabled)
         gameState = .showSequence
@@ -163,6 +170,7 @@ class GameViewModel: ObservableObject {
         if gameModel.currentGestureIndex < gameModel.sequence.count {
             let expectedGesture = gameModel.sequence[gameModel.currentGestureIndex]
             AnalyticsManager.shared.logGesturePrompted(gesture: expectedGesture, mode: .memory)
+            gesturePromptTime = Date()
         }
 
         #if DEBUG || TESTFLIGHT
@@ -228,6 +236,18 @@ class GameViewModel: ObservableObject {
         #endif
 
         if gameModel.isCurrentGestureCorrect(gesture) {
+            // Log gesture completion with reaction time (before advancing to next)
+            let completedGesture = gameModel.sequence[gameModel.currentGestureIndex]
+            if let promptTime = gesturePromptTime {
+                let reactionTimeMs = Int(Date().timeIntervalSince(promptTime) * 1000)
+                AnalyticsManager.shared.logGestureCompleted(
+                    gesture: completedGesture,
+                    mode: .memory,
+                    reactionTimeMs: reactionTimeMs
+                )
+            }
+            gesturePromptTime = nil
+
             gameModel.addUserGesture(gesture)
             gameModel.moveToNextGesture()
             HapticManager.shared.impact()
@@ -244,6 +264,7 @@ class GameViewModel: ObservableObject {
                 if gameModel.currentGestureIndex < gameModel.sequence.count {
                     let expectedGesture = gameModel.sequence[gameModel.currentGestureIndex]
                     AnalyticsManager.shared.logGesturePrompted(gesture: expectedGesture, mode: .memory)
+                    gesturePromptTime = Date()
                 }
 
                 #if DEBUG || TESTFLIGHT
@@ -288,6 +309,9 @@ class GameViewModel: ObservableObject {
         #endif
 
         DispatchQueue.main.asyncAfter(deadline: .now() + GameConfiguration.transitionDelay) {
+            // Deactivate motion detector during sequence playback to prevent false failures
+            MotionGestureManager.shared.deactivateAllDetectors()
+
             self.gameModel.startNewRound(with: &self.randomNumberGenerator, discreetMode: self.discreetModeEnabled)
             self.gameState = .showSequence
             self.showingGestureIndex = 0
@@ -296,6 +320,14 @@ class GameViewModel: ObservableObject {
     }
 
     private func gameOver() {
+        // Guard: Only trigger game over during awaitInput (prevents false failures during sequence playback)
+        guard gameState == .awaitInput else {
+            #if DEBUG || TESTFLIGHT
+            print("⚠️ gameOver() ignored - not in awaitInput state (current: \(gameState))")
+            #endif
+            return
+        }
+
         timer?.invalidate()
 
         #if DEBUG || TESTFLIGHT
@@ -341,9 +373,10 @@ class GameViewModel: ObservableObject {
         classicModeModel.reset()
         flashColor = .clear
         isNewHighScore = false
-        // Reset gesture buffer
+        // Reset gesture buffer and timing
         isGestureBufferEnabled = false
         pendingGesture = nil
+        gesturePromptTime = nil
         MotionGestureManager.shared.deactivateAllDetectors()
     }
 
@@ -362,6 +395,8 @@ class GameViewModel: ObservableObject {
                     self?.handleGesture(expectedGesture)
                 },
                 onWrongGesture: { [weak self] in
+                    // Guard: Only fail if still awaiting input (prevents false failures during sequence playback)
+                    guard self?.gameState == .awaitInput else { return }
                     self?.gameOver()
                 }
             )
@@ -380,6 +415,7 @@ class GameViewModel: ObservableObject {
         // Log gesture prompt for analytics
         if let gesture = classicModeModel.currentGesture {
             AnalyticsManager.shared.logGesturePrompted(gesture: gesture, mode: .classic)
+            gesturePromptTime = Date()
         }
 
         // Activate motion detector if motion gesture expected
@@ -452,6 +488,17 @@ class GameViewModel: ObservableObject {
             if classicModeModel.score % 3 == 0 {
                 AudioManager.shared.playRoundComplete()
             }
+
+            // Log gesture completion with reaction time
+            if let promptTime = gesturePromptTime {
+                let reactionTimeMs = Int(Date().timeIntervalSince(promptTime) * 1000)
+                AnalyticsManager.shared.logGestureCompleted(
+                    gesture: currentGesture,
+                    mode: .classic,
+                    reactionTimeMs: reactionTimeMs
+                )
+            }
+            gesturePromptTime = nil
 
             // Generate next gesture IMMEDIATELY so it's visible right away
             showNextClassicGesture()

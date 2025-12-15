@@ -99,6 +99,7 @@ struct PlayerVsPlayerView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())  // Enable full-screen gesture detection
             .detectSwipes { gesture in
                 handleGesture(gesture)
             }
@@ -127,6 +128,7 @@ struct PlayerVsPlayerView: View {
                     discreetMode: discreetModeEnabled,
                     includeStroop: false
                 )
+                .allowsHitTesting(isDrawerExpanded)  // Only block touches when fully expanded
             }
         }
     }
@@ -563,6 +565,20 @@ struct PlayerVsPlayerView: View {
 
     // Unified gesture handler - routes to appropriate phase handler
     private func handleGesture(_ gesture: GestureType) {
+        #if DEBUG || TESTFLIGHT
+        print("""
+        🎮 [PVP] GESTURE RECEIVED:
+           gesture: \(gesture.displayName)
+           gamePhase: \(gamePhase)
+           currentPlayer: \(currentPlayer)
+           isAddingGesture: \(isAddingGesture)
+           showGestureAnimation: \(showGestureAnimation)
+           currentGestureIndex: \(currentGestureIndex)
+           sequence.count: \(sequence.count)
+           isDrawerExpanded: \(isDrawerExpanded)
+        """)
+        #endif
+
         switch gamePhase {
         case .firstGesture:
             handleFirstGesture(gesture)
@@ -571,6 +587,9 @@ struct PlayerVsPlayerView: View {
         case .addGesture:
             handleAddGesture(gesture)  // Only used for Round 1 Player 1
         default:
+            #if DEBUG || TESTFLIGHT
+            print("❌ [PVP] REJECTED: gamePhase=\(gamePhase) (not accepting gestures)")
+            #endif
             break  // Ignore gestures in nameEntry/results
         }
     }
@@ -595,6 +614,11 @@ struct PlayerVsPlayerView: View {
     }
 
     private func handleFirstGesture(_ gesture: GestureType) {
+        #if DEBUG || TESTFLIGHT
+        let willProcess = gamePhase == .firstGesture && !showGestureAnimation
+        print("🎯 [PVP] handleFirstGesture: willProcess=\(willProcess) (phase=\(gamePhase), animation=\(showGestureAnimation))")
+        #endif
+
         guard gamePhase == .firstGesture && !showGestureAnimation else { return }
 
         // Close drawer when gesture is performed
@@ -623,6 +647,9 @@ struct PlayerVsPlayerView: View {
 
         // Wait for animation, then transition to Player 2's turn
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            // Deactivate motion detector during phase transition
+            MotionGestureManager.shared.deactivateAllDetectors()
+
             showGestureAnimation = false
             animatedGesture = nil
             isDrawerExpanded = false  // Ensure drawer closes before Player 2's turn
@@ -674,6 +701,11 @@ struct PlayerVsPlayerView: View {
     }
 
     private func handleRepeatGesture(_ gesture: GestureType) {
+        #if DEBUG || TESTFLIGHT
+        let willProcess = gamePhase == .repeatPhase
+        print("🎯 [PVP] handleRepeatGesture: willProcess=\(willProcess) (phase=\(gamePhase), isAdding=\(isAddingGesture))")
+        #endif
+
         guard gamePhase == .repeatPhase else { return }
 
         if !isAddingGesture {
@@ -747,6 +779,9 @@ struct PlayerVsPlayerView: View {
     }
 
     private func showSuccessAndTransitionToAdd() {
+        // Deactivate motion detector during phase transition
+        MotionGestureManager.shared.deactivateAllDetectors()
+
         flashColor = .green
         HapticManager.shared.success()
 
@@ -781,6 +816,11 @@ struct PlayerVsPlayerView: View {
     }
 
     private func handleAddGesture(_ gesture: GestureType) {
+        #if DEBUG || TESTFLIGHT
+        let willProcess = gamePhase == .addGesture && !showGestureAnimation
+        print("🎯 [PVP] handleAddGesture: willProcess=\(willProcess) (phase=\(gamePhase), animation=\(showGestureAnimation))")
+        #endif
+
         guard gamePhase == .addGesture && !showGestureAnimation else { return }
 
         // Close drawer when gesture is performed
@@ -822,6 +862,9 @@ struct PlayerVsPlayerView: View {
     }
 
     private func switchToNextPlayer() {
+        // Deactivate motion detector during player transition
+        MotionGestureManager.shared.deactivateAllDetectors()
+
         currentPlayer = currentPlayer == 1 ? 2 : 1
         isDrawerExpanded = false  // Close drawer when switching players
 
@@ -838,6 +881,9 @@ struct PlayerVsPlayerView: View {
     }
 
     private func handleWrongGesture() {
+        // Deactivate motion detector on failure
+        MotionGestureManager.shared.deactivateAllDetectors()
+
         stopTimer()
 
         // Calculate final score (Player vs Player uses sequence length)
@@ -867,6 +913,9 @@ struct PlayerVsPlayerView: View {
     }
 
     private func handleTimeout() {
+        // Deactivate motion detector on timeout
+        MotionGestureManager.shared.deactivateAllDetectors()
+
         stopTimer()
 
         #if DEBUG || TESTFLIGHT
@@ -947,9 +996,13 @@ struct PlayerVsPlayerView: View {
             MotionGestureManager.shared.activateDetector(
                 for: expectedGesture,
                 onDetected: {
+                    // Guard: Only process if still in repeat phase
+                    guard self.gamePhase == .repeatPhase else { return }
                     self.handleGesture(expectedGesture)
                 },
                 onWrongGesture: {
+                    // Guard: Only fail if still in repeat phase (prevents false failures during transitions)
+                    guard self.gamePhase == .repeatPhase else { return }
                     self.handleWrongGesture()
                 }
             )
