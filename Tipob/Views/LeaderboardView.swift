@@ -3,7 +3,6 @@ import SwiftUI
 struct LeaderboardView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMode: GameMode = .classic
-    @State private var showingClearAlert = false
 
     // Only show modes that have leaderboards
     private let leaderboardModes: [GameMode] = [.classic, .memory, .gameVsPlayerVsPlayer, .playerVsPlayer]
@@ -16,13 +15,13 @@ struct LeaderboardView: View {
                 .ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // Mode Selector
-                    Picker("Game Mode", selection: $selectedMode) {
-                        ForEach(leaderboardModes) { mode in
-                            Text(mode.emoji).tag(mode)
-                        }
-                    }
-                    .pickerStyle(.segmented)
+                    // Mode Selector - Expanding pill control
+                    ExpandingSegmentedControl(
+                        selection: $selectedMode,
+                        items: leaderboardModes,
+                        emoji: { $0.emoji },
+                        label: { $0.shortName }
+                    )
                     .padding()
 
                     // Leaderboard Content
@@ -30,29 +29,14 @@ struct LeaderboardView: View {
                         .animation(.easeInOut, value: selectedMode)
                 }
             }
-            .navigationTitle("🏆 Leaderboard")
+            .navigationTitle("🏆 High Scores")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Clear") {
-                        showingClearAlert = true
-                    }
-                    .foregroundColor(.red)
-                }
-
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         dismiss()
                     }
                 }
-            }
-            .alert("Clear Leaderboard?", isPresented: $showingClearAlert) {
-                Button("Cancel", role: .cancel) {}
-                Button("Clear", role: .destructive) {
-                    LeaderboardManager.shared.resetLeaderboard(for: selectedMode)
-                }
-            } message: {
-                Text("This will permanently delete all scores for \(selectedMode.rawValue) mode.")
             }
         }
     }
@@ -66,12 +50,6 @@ struct LeaderboardView: View {
         } else {
             ScrollView {
                 VStack(spacing: 12) {
-                    // Mode description
-                    Text(selectedMode.rawValue)
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                        .padding(.top, 8)
-
                     // Leaderboard entries
                     ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
                         LeaderboardRow(rank: index + 1, entry: entry)

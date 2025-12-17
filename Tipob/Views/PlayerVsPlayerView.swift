@@ -508,7 +508,7 @@ struct PlayerVsPlayerView: View {
                     }) {
                         HStack {
                             Image(systemName: "trophy.fill")
-                            Text("Leaderboard")
+                            Text("High Scores")
                                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                         }
                         .foregroundColor(.white)

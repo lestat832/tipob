@@ -578,7 +578,7 @@ struct DeviceContext {
             "timing": {
                 "latency": 0.045,
                 "duration": 0.320
-            },
+            } a,
             "deviceContext": { ... }
         }
     ]

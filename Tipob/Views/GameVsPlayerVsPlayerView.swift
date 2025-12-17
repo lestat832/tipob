@@ -87,7 +87,7 @@ struct GameVsPlayerVsPlayerView: View {
 
     private var nameEntryView: some View {
         VStack(spacing: 40) {
-            Text("Game vs Player vs Player")
+            Text("Pass & Play")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
@@ -412,7 +412,7 @@ struct GameVsPlayerVsPlayerView: View {
                     }) {
                         HStack {
                             Image(systemName: "trophy.fill")
-                            Text("Leaderboard")
+                            Text("High Scores")
                                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                         }
                         .foregroundColor(.white)

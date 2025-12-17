@@ -40,6 +40,7 @@
 				Assets2.xcassets,
 				Components/ArrowView.swift,
 				Components/CountdownRing.swift,
+				Components/ExpandingSegmentedControl.swift,
 				Components/GestureCellView.swift,
 				Components/GestureDrawerTabView.swift,
 				Components/GestureDrawerView.swift,

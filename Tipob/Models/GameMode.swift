@@ -4,7 +4,7 @@ enum GameMode: String, CaseIterable, Identifiable {
     case tutorial = "Tutorial"
     case classic = "Classic"
     case memory = "Memory"
-    case gameVsPlayerVsPlayer = "Game vs Player vs Player"
+    case gameVsPlayerVsPlayer = "Pass & Play"
     case playerVsPlayer = "Player vs Player"
 
     var id: String { rawValue }
@@ -36,6 +36,17 @@ enum GameMode: String, CaseIterable, Identifiable {
             return "Take turns repeating the growing gesture sequence. One mistake and the other wins!"
         case .playerVsPlayer:
             return "Take turns repeating and expanding a gesture chain. The first to mess up loses!"
+        }
+    }
+
+    /// Short display name for compact UI (segmented controls)
+    var shortName: String {
+        switch self {
+        case .tutorial: return "Tutorial"
+        case .classic: return "Classic"
+        case .memory: return "Memory"
+        case .gameVsPlayerVsPlayer: return "Pass & Play"
+        case .playerVsPlayer: return "PvP"
         }
     }
 
