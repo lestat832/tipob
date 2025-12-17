@@ -889,6 +889,18 @@ struct PlayerVsPlayerView: View {
         // Calculate final score (Player vs Player uses sequence length)
         let finalScore = sequence.count
 
+        // Log end_game BEFORE leaderboard updates
+        let durationSec = Int(Date().timeIntervalSince(viewModel.gameStartTime ?? Date()))
+        AnalyticsManager.shared.logEndGame(
+            mode: .playerVsPlayer,
+            score: finalScore,
+            bestScore: LeaderboardManager.shared.getHighScore(for: .playerVsPlayer),
+            durationSec: durationSec,
+            endedBy: "opponent_win",  // Other player wins due to wrong gesture
+            discreetMode: viewModel.discreetModeEnabled
+        )
+        viewModel.gameStartTime = nil
+
         // Check if new high score and add to leaderboard
         isNewHighScore = LeaderboardManager.shared.isNewHighScore(finalScore, mode: .playerVsPlayer)
         LeaderboardManager.shared.addScore(finalScore, for: .playerVsPlayer)
@@ -928,6 +940,18 @@ struct PlayerVsPlayerView: View {
 
         // Calculate final score (Player vs Player uses sequence length)
         let finalScore = sequence.count
+
+        // Log end_game BEFORE leaderboard updates
+        let durationSec = Int(Date().timeIntervalSince(viewModel.gameStartTime ?? Date()))
+        AnalyticsManager.shared.logEndGame(
+            mode: .playerVsPlayer,
+            score: finalScore,
+            bestScore: LeaderboardManager.shared.getHighScore(for: .playerVsPlayer),
+            durationSec: durationSec,
+            endedBy: "timeout",  // Lost due to timeout
+            discreetMode: viewModel.discreetModeEnabled
+        )
+        viewModel.gameStartTime = nil
 
         // Check if new high score and add to leaderboard
         isNewHighScore = LeaderboardManager.shared.isNewHighScore(finalScore, mode: .playerVsPlayer)

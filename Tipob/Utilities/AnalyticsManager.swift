@@ -91,6 +91,47 @@ extension AnalyticsManager {
         ]
         log(.gestureCompleted, parameters: params)
     }
+
+    /// Logs when the player fails to perform the expected gesture.
+    /// - Parameters:
+    ///   - gesture: The gesture that was expected
+    ///   - mode: The game mode (Classic or Memory only)
+    ///   - reason: "timeout" or "wrong_gesture"
+    func logGestureFailed(gesture: GestureType, mode: GameMode, reason: String) {
+        let params: [String: Any] = [
+            "gesture": gesture.analyticsValue,
+            "mode": mode.analyticsValue,
+            "fail_reason": reason
+        ]
+        log(.gestureFailed, parameters: params)
+    }
+
+    /// Logs when a game session definitively ends.
+    /// - Parameters:
+    ///   - mode: The game mode that ended
+    ///   - score: Final score achieved
+    ///   - bestScore: Best score at time of end (before potential update)
+    ///   - durationSec: Game duration in seconds
+    ///   - endedBy: Reason for ending ("timeout", "wrong_gesture", "opponent_win")
+    ///   - discreetMode: Whether discreet mode was enabled
+    func logEndGame(
+        mode: GameMode,
+        score: Int,
+        bestScore: Int,
+        durationSec: Int,
+        endedBy: String,
+        discreetMode: Bool
+    ) {
+        let params: [String: Any] = [
+            "mode": mode.analyticsValue,
+            "score": score,
+            "best_score": bestScore,
+            "duration_sec": durationSec,
+            "ended_by": endedBy,
+            "discreet_mode": discreetMode
+        ]
+        log(.endGame, parameters: params)
+    }
 }
 
 // MARK: - Private Logging Implementation

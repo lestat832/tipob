@@ -59,7 +59,7 @@ struct LeaderboardView: View {
 
     @ViewBuilder
     private var leaderboardContent: some View {
-        let entries = LeaderboardManager.shared.topScores(for: selectedMode)
+        let entries = LeaderboardManager.shared.topScores(for: selectedMode, limit: 10)
 
         if entries.isEmpty {
             emptyStateView

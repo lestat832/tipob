@@ -22,6 +22,8 @@ class GameViewModel: ObservableObject {
     var gameStartTime: Date?
     /// Timestamp when current gesture was prompted (for reaction time calculation)
     var gesturePromptTime: Date?
+    /// Reason for game ending - set before gameOver() is called
+    private var endedByReason: String = "timeout"
 
     private var timer: Timer?
     var randomNumberGenerator: RandomNumberGenerator = SystemRandomNumberGenerator()
@@ -207,6 +209,14 @@ class GameViewModel: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
             self.timeRemaining -= 0.1
             if self.timeRemaining <= 0 {
+                // Log gesture_failed for timeout
+                self.endedByReason = "timeout"
+                if let _ = self.gesturePromptTime,
+                   self.gameModel.currentGestureIndex < self.gameModel.sequence.count {
+                    let expectedGesture = self.gameModel.sequence[self.gameModel.currentGestureIndex]
+                    AnalyticsManager.shared.logGestureFailed(gesture: expectedGesture, mode: .memory, reason: "timeout")
+                    self.gesturePromptTime = nil
+                }
                 self.gameOver()
             }
         }
@@ -225,6 +235,21 @@ class GameViewModel: ObservableObject {
         }
 
         guard gameState == .awaitInput else { return }
+
+        // Check timeout FIRST - if time already expired, log timeout not wrong_gesture
+        // This fixes race condition where gesture fires at same instant as timeout
+        if timeRemaining <= 0 {
+            timer?.invalidate()
+            endedByReason = "timeout"
+            if let _ = gesturePromptTime,
+               gameModel.currentGestureIndex < gameModel.sequence.count {
+                let expectedGesture = gameModel.sequence[gameModel.currentGestureIndex]
+                AnalyticsManager.shared.logGestureFailed(gesture: expectedGesture, mode: .memory, reason: "timeout")
+                gesturePromptTime = nil
+            }
+            gameOver()
+            return
+        }
 
         #if DEBUG || TESTFLIGHT
         // Log expected vs detected gesture
@@ -280,6 +305,14 @@ class GameViewModel: ObservableObject {
                 #endif
             }
         } else {
+            // Log gesture_failed for wrong gesture
+            endedByReason = "wrong_gesture"
+            if let _ = gesturePromptTime,
+               gameModel.currentGestureIndex < gameModel.sequence.count {
+                let expectedGesture = gameModel.sequence[gameModel.currentGestureIndex]
+                AnalyticsManager.shared.logGestureFailed(gesture: expectedGesture, mode: .memory, reason: "wrong_gesture")
+                gesturePromptTime = nil
+            }
             gameOver()
         }
     }
@@ -348,6 +381,18 @@ class GameViewModel: ObservableObject {
         // Calculate final score (Memory Mode uses round number)
         let finalScore = gameModel.round
 
+        // Log end_game BEFORE state changes
+        let durationSec = Int(Date().timeIntervalSince(gameStartTime ?? Date()))
+        AnalyticsManager.shared.logEndGame(
+            mode: .memory,
+            score: finalScore,
+            bestScore: gameModel.bestStreak,
+            durationSec: durationSec,
+            endedBy: endedByReason,
+            discreetMode: discreetModeEnabled
+        )
+        gameStartTime = nil  // Clear to prevent reuse
+
         // Check if new high score and add to leaderboard
         isNewHighScore = LeaderboardManager.shared.isNewHighScore(finalScore, mode: .memory)
         LeaderboardManager.shared.addScore(finalScore, for: .memory)
@@ -397,6 +442,12 @@ class GameViewModel: ObservableObject {
                 onWrongGesture: { [weak self] in
                     // Guard: Only fail if still awaiting input (prevents false failures during sequence playback)
                     guard self?.gameState == .awaitInput else { return }
+                    // Log gesture_failed for wrong motion gesture
+                    self?.endedByReason = "wrong_gesture"
+                    if let _ = self?.gesturePromptTime {
+                        AnalyticsManager.shared.logGestureFailed(gesture: expectedGesture, mode: .memory, reason: "wrong_gesture")
+                        self?.gesturePromptTime = nil
+                    }
                     self?.gameOver()
                 }
             )
@@ -427,6 +478,12 @@ class GameViewModel: ObservableObject {
                     self?.handleClassicModeGesture(currentGesture)
                 },
                 onWrongGesture: { [weak self] in
+                    // Log gesture_failed for wrong motion gesture
+                    self?.endedByReason = "wrong_gesture"
+                    if let _ = self?.gesturePromptTime {
+                        AnalyticsManager.shared.logGestureFailed(gesture: currentGesture, mode: .classic, reason: "wrong_gesture")
+                        self?.gesturePromptTime = nil
+                    }
                     self?.classicModeGameOver()
                 }
             )
@@ -457,6 +514,13 @@ class GameViewModel: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
             self.timeRemaining -= 0.1
             if self.timeRemaining <= 0 {
+                // Log gesture_failed for timeout
+                self.endedByReason = "timeout"
+                if let _ = self.gesturePromptTime,
+                   let expectedGesture = self.classicModeModel.currentGesture {
+                    AnalyticsManager.shared.logGestureFailed(gesture: expectedGesture, mode: .classic, reason: "timeout")
+                    self.gesturePromptTime = nil
+                }
                 self.classicModeGameOver()
             }
         }
@@ -465,6 +529,19 @@ class GameViewModel: ObservableObject {
     func handleClassicModeGesture(_ gesture: GestureType) {
         guard gameState == .classicMode else { return }
         guard let currentGesture = classicModeModel.currentGesture else { return }
+
+        // Check timeout FIRST - if time already expired, log timeout not wrong_gesture
+        // This fixes race condition where gesture fires at same instant as timeout
+        if timeRemaining <= 0 {
+            timer?.invalidate()
+            endedByReason = "timeout"
+            if let _ = gesturePromptTime {
+                AnalyticsManager.shared.logGestureFailed(gesture: currentGesture, mode: .classic, reason: "timeout")
+                gesturePromptTime = nil
+            }
+            classicModeGameOver()
+            return
+        }
 
         timer?.invalidate()
 
@@ -507,7 +584,12 @@ class GameViewModel: ObservableObject {
                 flashColor = .clear
             }
         } else {
-            // Wrong gesture
+            // Wrong gesture - log failure before game over
+            endedByReason = "wrong_gesture"
+            if let _ = gesturePromptTime {
+                AnalyticsManager.shared.logGestureFailed(gesture: currentGesture, mode: .classic, reason: "wrong_gesture")
+                gesturePromptTime = nil
+            }
             classicModeGameOver()
         }
     }
@@ -548,6 +630,18 @@ class GameViewModel: ObservableObject {
 
         // Calculate final score (Classic Mode uses score)
         let finalScore = classicModeModel.score
+
+        // Log end_game BEFORE state changes
+        let durationSec = Int(Date().timeIntervalSince(gameStartTime ?? Date()))
+        AnalyticsManager.shared.logEndGame(
+            mode: .classic,
+            score: finalScore,
+            bestScore: classicModeModel.bestScore,
+            durationSec: durationSec,
+            endedBy: endedByReason,
+            discreetMode: discreetModeEnabled
+        )
+        gameStartTime = nil  // Clear to prevent reuse
 
         // Check if new high score and add to leaderboard
         isNewHighScore = LeaderboardManager.shared.isNewHighScore(finalScore, mode: .classic)

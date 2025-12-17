@@ -23,6 +23,14 @@ class GestureCoordinator {
     /// When pinch intent lock started (for timeout)
     private var pinchIntentLockTime: Date? = nil
 
+    // MARK: - Hold Intent Locking (Long Press Priority)
+
+    /// Whether hold intent is currently locked (suppresses swipe during potential long press)
+    private var isHoldIntentLocked: Bool = false
+
+    /// When hold intent lock started (for timeout)
+    private var holdIntentLockTime: Date? = nil
+
     private init() {}
 
     // MARK: - Pinch Intent Methods
@@ -48,6 +56,63 @@ class GestureCoordinator {
         isPinchIntentLocked = false
         pinchIntentLockTime = nil
         print("[\(Date().logTimestamp)] 🔓 Pinch intent released")
+    }
+
+    // MARK: - Hold Intent Methods
+
+    /// Called when a touch begins (potential long press)
+    /// Locks hold intent to give long press priority over swipe
+    func beginHoldIntent() {
+        // Strict mode (Tutorial) uses strict detection - skip locking
+        guard !isStrictGestureMode else { return }
+
+        #if DEBUG || TESTFLIGHT
+        guard DevConfigManager.shared.holdIntentLockEnabled else { return }
+        #endif
+
+        isHoldIntentLocked = true
+        holdIntentLockTime = Date()
+        print("[\(Date().logTimestamp)] 🔒 Hold intent locked (long press priority)")
+    }
+
+    /// Called when long press completes or touch ends
+    func endHoldIntent() {
+        guard isHoldIntentLocked else { return }
+        isHoldIntentLocked = false
+        holdIntentLockTime = nil
+        print("[\(Date().logTimestamp)] 🔓 Hold intent released")
+    }
+
+    /// Called by SwipeGestureModifier before triggering swipe
+    /// Returns false if swipe should be suppressed due to hold intent
+    func shouldAllowSwipeDuringHold() -> Bool {
+        // CRITICAL: Never block swipe when swipe is the expected gesture
+        if let expected = expectedGesture, expected.isSwipeGesture {
+            return true
+        }
+
+        // Strict mode (Tutorial) - allow swipe
+        guard !isStrictGestureMode else { return true }
+
+        // Not locked - allow swipe
+        guard isHoldIntentLocked else { return true }
+
+        // Check if lock has expired (matches long press duration)
+        if let lockTime = holdIntentLockTime {
+            #if DEBUG || TESTFLIGHT
+            let lockDuration = DevConfigManager.shared.holdIntentLockDuration
+            #else
+            let lockDuration: TimeInterval = 0.7  // Match long press duration
+            #endif
+
+            let elapsed = Date().timeIntervalSince(lockTime)
+            if elapsed > lockDuration {
+                endHoldIntent()
+                return true
+            }
+        }
+
+        return false  // Suppress swipe while hold intent is locked
     }
 
     /// Called by SwipeGestureModifier before triggering swipe

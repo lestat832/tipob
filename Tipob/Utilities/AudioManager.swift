@@ -1,5 +1,4 @@
 import AVFoundation
-import AudioToolbox
 import SwiftUI
 
 /// Simplified AudioManager - Success and Failure sounds only
@@ -10,14 +9,12 @@ class AudioManager {
 
     static let shared = AudioManager()
 
-    // MARK: - Audio Players (for success and round complete)
+    // MARK: - Audio Players
 
     private var successPlayer: AVAudioPlayer?
     private var roundCompletePlayer: AVAudioPlayer?
-
-    // MARK: - System Sound (for failure)
-
-    private let failureSoundID: SystemSoundID = 1073 // SMS Alert 3
+    private var failurePlayer: AVAudioPlayer?
+    private var failurePlayer2: AVAudioPlayer?  // Second player for rapid double-play
 
     // MARK: - State Tracking
 
@@ -60,7 +57,7 @@ class AudioManager {
     // MARK: - Preload Sound Files
 
     /// Preload sound files on initialization
-    /// Files expected in Bundle: gesture_success_tick.caf, round_complete_chime.caf
+    /// Files expected in Bundle: gesture_success_tick.caf, round_complete_chime.caf, countdown_beep.caf
     private func preloadSoundFiles() {
         // Load success sound
         if let successURL = Bundle.main.url(forResource: "gesture_success_tick", withExtension: "caf") {
@@ -95,6 +92,34 @@ class AudioManager {
             print("AudioManager: round_complete_chime.caf not found in bundle")
             #endif
         }
+
+        // Load failure sound (custom error tone)
+        if let failureURL = Bundle.main.url(forResource: "failure", withExtension: "caf") {
+            do {
+                failurePlayer = try AVAudioPlayer(contentsOf: failureURL)
+                failurePlayer?.prepareToPlay()
+                failurePlayer?.volume = 0.5
+            } catch {
+                #if DEBUG
+                print("AudioManager: Failed to load failure.caf: \(error.localizedDescription)")
+                #endif
+            }
+
+            // Load second player for rapid double-play
+            do {
+                failurePlayer2 = try AVAudioPlayer(contentsOf: failureURL)
+                failurePlayer2?.prepareToPlay()
+                failurePlayer2?.volume = 0.5
+            } catch {
+                #if DEBUG
+                print("AudioManager: Failed to load failure.caf for player2")
+                #endif
+            }
+        } else {
+            #if DEBUG
+            print("AudioManager: failure.caf not found in bundle")
+            #endif
+        }
     }
 
     // MARK: - Public API
@@ -127,12 +152,46 @@ class AudioManager {
     }
 
     /// Play failure sound (wrong gesture or timeout)
-    /// Uses SystemSoundID 1073 (SMS Alert 3)
-    /// Direct system sound - no AVAudioEngine interference
+    /// Plays twice in rapid succession using two players (~1.3s overlapping)
     func playFailure() {
-        guard UserSettings.soundEnabled else { return }
-        // Play system sound directly - clean, no interference
-        AudioServicesPlaySystemSound(failureSoundID)
+        #if DEBUG
+        print("AudioManager: playFailure() called")
+        #endif
+
+        guard isInitialized else {
+            #if DEBUG
+            print("AudioManager: ❌ Not initialized")
+            #endif
+            return
+        }
+
+        guard UserSettings.soundEnabled else {
+            #if DEBUG
+            print("AudioManager: ⏸️ Sound disabled")
+            #endif
+            return
+        }
+
+        guard let player1 = failurePlayer, let player2 = failurePlayer2 else {
+            #if DEBUG
+            print("AudioManager: ❌ failurePlayer is nil")
+            #endif
+            return
+        }
+
+        // Play first immediately
+        player1.currentTime = 0
+        player1.play()
+
+        // Play second with tiny delay (0.08s = distinct but immediate)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+            player2.currentTime = 0
+            player2.play()
+        }
+
+        #if DEBUG
+        print("AudioManager: ✅ Playing failure sound 2x rapid")
+        #endif
     }
 
     /// Enable or disable sound effects
@@ -145,6 +204,8 @@ class AudioManager {
     deinit {
         successPlayer?.stop()
         roundCompletePlayer?.stop()
+        failurePlayer?.stop()
+        failurePlayer2?.stop()
     }
 }
 

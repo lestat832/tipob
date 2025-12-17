@@ -19,8 +19,12 @@ class AdManager: NSObject {
 
     // MARK: - Properties
 
-    /// Google AdMob Interstitial Ad Unit ID (Production)
-    private let interstitialAdUnitID = "ca-app-pub-8372563313053067/2149863647"
+    /// Google AdMob Interstitial Ad Unit ID
+    #if DEBUG
+    private let interstitialAdUnitID = "ca-app-pub-3940256099942544/4411468910"  // Google test ad
+    #else
+    private let interstitialAdUnitID = "ca-app-pub-8372563313053067/2149863647"  // Production
+    #endif
 
     /// Currently loaded interstitial ad
     private var interstitialAd: InterstitialAd?
@@ -55,7 +59,11 @@ class AdManager: NSObject {
         // Preload first ad
         loadInterstitialAd()
 
+        #if DEBUG
+        print("✅ AdManager initialized with TEST ad unit ID")
+        #else
         print("✅ AdManager initialized with production ID")
+        #endif
     }
 
     // MARK: - Public Methods

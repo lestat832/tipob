@@ -38,6 +38,8 @@ struct TapDetectionModifier: ViewModifier {
                         // Check gesture coordinator before triggering
                         if GestureCoordinator.shared.shouldAllowGesture(.longPress) {
                             print("[\(Date().logTimestamp)] 🎯 Long Press detected")
+                            // Clear hold intent - long press succeeded
+                            GestureCoordinator.shared.endHoldIntent()
                             #if DEBUG
                             DevConfigManager.shared.logGestureAttempt(.tap(
                                 type: .longPress,

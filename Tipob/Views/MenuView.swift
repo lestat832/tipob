@@ -31,20 +31,35 @@ struct MenuView: View {
                         HapticManager.shared.impact()
                         showingModeSheet = true
                     }) {
-                        HStack(spacing: 8) {
-                            Text(selectedMode.emoji)
-                                .font(.system(size: 20))
-                            Text(selectedMode.rawValue)
-                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("MODE")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(.white.opacity(0.7))
+
+                            HStack(spacing: 6) {
+                                Text(selectedMode.emoji)
+                                    .font(.system(size: 18))
+                                Text(selectedMode.rawValue)
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
                         }
                         .fixedSize(horizontal: true, vertical: false)
                         .foregroundColor(.white)
                         .padding(.horizontal, 20)
-                        .frame(height: 44)
+                        .frame(height: 50)
                         .background(
                             Capsule()
                                 .fill(Color.white.opacity(0.25))
                         )
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("Game Mode")
+                        .accessibilityValue(selectedMode.rawValue)
+                        .accessibilityHint("Double tap to change game mode")
+                        .accessibilityAddTraits(.isButton)
                     }
 
                     // Compact Discreet Mode Toggle

@@ -1,8 +1,8 @@
 # Out of Pocket Feature Scoping Document
-**Date**: October 10, 2025 (Updated: November 20, 2025)
+**Date**: October 10, 2025 (Updated: December 15, 2025)
 **Project**: Out of Pocket - iOS SwiftUI Bop-It Style Game
 **Purpose**: Comprehensive feature planning and decision framework
-**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (TEST) + Audio System
+**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (PRODUCTION) + Audio System + Gesture Detection Improvements
 
 ---
 
@@ -28,9 +28,9 @@
 | Swipe Down ↓ | DragGesture + angle calculation | Original | ✅ Live |
 | Swipe Left ← | DragGesture + angle calculation | Original | ✅ Live |
 | Swipe Right → | DragGesture + angle calculation | Original | ✅ Live |
-| **Single Tap ⊙** | TapGesture (300ms window) | 2025-10-20 | ✅ Live |
-| **Double Tap ◎** | TapGesture + DispatchWorkItem | 2025-10-20 | ✅ Live |
-| **Long Press ⏺** | LongPressGesture (600ms) | 2025-10-20 | ✅ Live |
+| **Single Tap ⊙** | TapGesture (350ms window) | 2025-10-20 | ✅ Live |
+| **Double Tap ◎** | TapGesture + DispatchWorkItem (350ms) | 2025-10-20 | ✅ Live |
+| **Long Press ⏺** | LongPressGesture (700ms) + Hold Intent Lock | 2025-10-20 | ✅ Live |
 | **Pinch 🤏** | Native UIPinchGestureRecognizer | 2025-10-27 | ✅ Live |
 | **Shake 📳** | CoreMotion accelerometer (2.0G) | 2025-10-28 | ✅ Live |
 | **Tilt Left ◀** | CoreMotion roll detection (~25°) | 2025-10-28 | ✅ Live |
@@ -768,20 +768,81 @@ Rationale: Expert feedback confirms tuning infrastructure is non-negotiable for 
 
 ---
 
+## ⚡ Gesture Detection Improvements (December 15, 2025)
+
+### Overview
+Targeted fixes for gesture detection reliability based on TestFlight user feedback.
+
+### Changes Implemented
+
+**Double Tap Enhancement:**
+- Window increased: 300ms → 350ms (more forgiving detection)
+- Added blocked tap logging for debugging
+- Long press grace window reduced: 100ms → 50ms (faster response)
+
+**Hold Intent Lock System:**
+- New `beginHoldIntent()` / `endHoldIntent()` in GestureCoordinator
+- Gives long press 700ms priority over accidental swipe
+- Critical fix: `endHoldIntent()` called at START of `handleSwipe()` (not after)
+- Prevents all swipes being blocked during the 700ms window
+
+**Stroop Gesture Detection Fix:**
+- Added `.contentShape(Rectangle())` to ClassicModeView
+- Forces entire VStack frame to accept gesture touches
+- Fixes issue where Stroop sub-views were blocking touch propagation
+
+**Pinch Detection Fix:**
+- Moved `.detectPinch()` BEFORE `.contentShape(Rectangle())` in modifier chain
+- UIKit gesture recognizer now receives touches before SwiftUI hit-testing
+- Fixes pinch not detecting after contentShape was added
+
+**Analytics Improvements:**
+- Added `gesture_failed` event with `fail_reason`: "timeout" or "wrong_gesture"
+- Fixed timeout race condition: gestures at exact timer expiration now log correctly
+- Each failure pairs 1:1 with `gesture_prompted` (prevents duplicate logging)
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `TapGestureModifier.swift` | 350ms window, blocked tap logging, 50ms grace |
+| `SwipeGestureModifier.swift` | Hold intent lock integration |
+| `GestureCoordinator.swift` | Hold intent lock methods |
+| `ClassicModeView.swift` | contentShape + pinch order fix |
+| `AnalyticsManager.swift` | logGestureFailed() method |
+| `GameViewModel.swift` | Failure logging + timeout race fix |
+| `DevConfigManager.swift` | Updated defaults (350ms, hold lock config) |
+
+### Verification
+
+All gestures verified working:
+- ✅ Double tap (more reliable)
+- ✅ Long press (detects even with slight finger movement)
+- ✅ Swipes on Stroop prompts (full screen detection)
+- ✅ Pinch (consistent detection)
+- ✅ Analytics logging accurate (timeout vs wrong_gesture)
+
+---
+
 ### Testing Status (Current)
 
 **Completed Testing:**
 - ✅ All 14 gestures functional across 5 modes
 - ✅ Gesture optimization deployed (Nov 9)
+- ✅ Gesture detection improvements deployed (Dec 15)
 - ✅ No compiler errors or warnings
 
 **Known Issues:**
-- **Stroop alignment**: Build cache issue, needs clean build (Cmd+Shift+K)
-- **Double tap false positives**: Collecting more data from user testing
+- **Stroop alignment**: ✅ FIXED - Added .contentShape(Rectangle()) for full-screen detection
+- **Double tap false positives**: ✅ IMPROVED - Window increased to 350ms
+- **Long press not detecting**: ✅ FIXED - Hold intent lock gives priority over swipe
+- **Pinch not detecting**: ✅ FIXED - Moved before contentShape in modifier chain
 
 **TestFlight Readiness:**
 - ✅ Code stable and committed
 - ✅ All modes functional
+- ✅ Gesture detection improvements verified
+- ✅ Analytics tracking gesture failures
 - 📋 Awaiting user decision to deploy beta
 
 ### Expert Feedback & Design Philosophy

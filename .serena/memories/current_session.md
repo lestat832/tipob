@@ -1,30 +1,49 @@
-# Session Summary - 2025-12-14
+# Session Summary - 2025-12-16
 
 ## Completed Tasks
-- Comprehensive diagnosis of double tap recognition failure in Classic Mode
-- Analyzed runtime JSON logs showing 2 failure patterns:
-  - Entry 1: `wrong_detection` - tapCount=1 when doubleTap expected (300ms window too tight)
-  - Entry 2: `not_detected` - timeout with no detection (possible longPressDetected blocking)
-- Updated plan file with log-correlated diagnosis and prioritized fixes
-- Confirmed build matches last TestFlight submission (commit 38062b5, version 1.0, build 1)
+- Implemented leaderboard top 10 limit (LeaderboardView.swift line 62)
+- Created TestFlight Build 6 release notes (compared against Builds 2-5)
+- Reviewed audio system with failure sound double-play implementation
+- Reviewed analytics with end_game event tracking
 
-## In Progress
-- Double tap fix implementation (plan mode completed, awaiting implementation approval)
+## Changes Made This Session
+- LeaderboardView.swift: Added `limit: 10` to `topScores(for:)` call
 
-## Next Session Priority
-1. **IMPLEMENT Fix 1**: Increase double tap window 300ms → 350ms (TapGestureModifier.swift:24)
-2. **IMPLEMENT Fix 2**: Add blocked tap logging for visibility (TapGestureModifier.swift:66-68)
-3. **CONSIDER Fix 3**: Reduce long press grace window 100ms → 50ms (TapGestureModifier.swift:61)
-4. Deploy to TestFlight and validate double tap success rate
+## Uncommitted Changes (ready for Build 6)
+- Leaderboard top 10 limit
+- Failure sound double-play (AudioManager.swift)
+- Silent Mode audio compliance
+- end_game analytics event
+- Mode selector UX improvements
+- Ad lifecycle analytics
+
+## Build 6 Release Notes (Final)
+```
+Build 6 - What's New
+
+AUDIO
+- New failure sound with double-hit effect for clear feedback
+- Silent Mode now works - sounds mute when ringer switch is off
+
+LEADERBOARD
+- Shows top 10 scores per mode (cleaner display)
+
+UI
+- Mode selector now shows "MODE" label with dropdown chevron
+
+GESTURE TUNING
+- Double tap window: 300ms → 350ms based on Build 5 feedback
+
+ANALYTICS
+- end_game event: tracks score, duration, fail reason per session
+- Ad lifecycle: request, load, show, dismiss tracking
+```
+
+## Next Session
+- User creating TestFlight Build 6 upload
+- May need to commit changes before building
+- Future: review tester feedback from Build 6
 
 ## Key Decisions
-- 300ms double tap window confirmed too tight by runtime logs
-- Entry 1 shows `tapCount: 1` - second tap arriving after window closes
-- Entry 2 suggests possible `longPressDetected` guard blocking taps
-- All 3 fixes are in TapGestureModifier.swift - minimal blast radius
-
-## Blockers/Issues
-- None - plan approved, ready for implementation
-
-## Plan File Location
-- `/Users/marcgeraldez/.claude/plans/keen-hugging-rain.md`
+- Leaderboard shows top 10 only (data still stored up to 100)
+- Release notes carefully exclude items from previous builds (2-5)

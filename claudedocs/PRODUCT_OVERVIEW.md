@@ -293,7 +293,7 @@ Gesture Detection Parameters (Optimized November 9, 2025):
 - Minimum Swipe Distance: 50 pixels
 - Minimum Swipe Velocity: 80 pts/sec (optimized from 100)
 - Edge Buffer: 24 pixels
-- Double Tap Window: 300ms
+- Double Tap Window: 350ms
 - Long Press Duration: 600ms
 - Pinch Threshold: 0.85 scale (15% reduction)
 - Shake Threshold: 2.0G (optimized from 2.5G)
@@ -311,6 +311,8 @@ Gesture Coexistence:
 - Touch gestures use .simultaneousGesture() for conflict-free detection
 - Motion gestures use centralized MotionGestureManager
 - GestureCoordinator prevents Tutorial mode conflicts (Up/Down ↔ Tilt, etc.)
+- Hold intent lock: gives long press priority over swipe (700ms window)
+- Pinch intent lock: gives pinch priority over swipe (150ms window)
 
 Haptic Feedback:
 - Success: Success haptic
@@ -595,7 +597,7 @@ Timing Parameters
 - sequenceGapDuration: 0.2 seconds
 - transitionDelay: 0.5 seconds
 - flashAnimationDuration: 0.3 seconds
-- doubleTapWindow: 0.3 seconds
+- doubleTapWindow: 0.35 seconds
 - longPressDuration: 0.6 seconds
 
 Classic Mode Parameters
@@ -868,6 +870,18 @@ Key Files
 Total Swift Files
 23 files across the project
 
+Recent Updates (December 15, 2025):
+- Gesture detection improvements:
+  - Double tap window increased: 300ms → 350ms (more reliable detection)
+  - Long press grace window reduced: 100ms → 50ms (faster response)
+  - Hold intent lock system: gives long press priority over accidental swipes
+  - Stroop gesture fix: added .contentShape(Rectangle()) for full-screen detection
+  - Pinch detection fix: moved before contentShape in modifier chain
+- Analytics improvements:
+  - Added gesture_failed event with fail_reason: "timeout" or "wrong_gesture"
+  - Fixed timeout race condition: gestures at timer expiration now log correctly
+- Blocked tap logging for debugging tap detection issues
+
 Recent Updates (November 30, 2025):
 - AdMob switched from TEST to PRODUCTION credentials
 - Production Ad Unit ID: ca-app-pub-8372563313053067/2149863647
@@ -940,6 +954,7 @@ Version 3.0 | November 10, 2025 | Updated with 14 gestures, Stroop Mode, Discree
 Version 3.1 | November 12, 2025 | Added Google AdMob integration (TEST mode), AdManager, UIViewControllerHelper, Info.plist configuration
 Version 3.2 | November 20, 2025 | Rebranded to "Out of Pocket", new launch animation, simplified audio system (AVAudioPlayer + SystemSoundID)
 Version 3.3 | November 30, 2025 | AdMob production mode: production credentials, race condition fix, preloadIfNeeded() pattern
+Version 3.4 | December 15, 2025 | Gesture detection improvements: double tap window (350ms), hold intent lock, Stroop fix, pinch fix, gesture_failed analytics
 
 ========================================
 

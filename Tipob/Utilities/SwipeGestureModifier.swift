@@ -20,17 +20,23 @@ struct SwipeGestureModifier: ViewModifier {
                             if dragStartLocation == .zero {
                                 dragStartLocation = value.startLocation
                                 dragStartTime = Date()
+                                // BEGIN HOLD INTENT: Touch just started, might be long press
+                                GestureCoordinator.shared.beginHoldIntent()
                             }
                         }
                         .onEnded { value in
                             handleSwipe(from: value.startLocation, to: value.location, in: geometry.size)
                             dragStartLocation = .zero
+                            // Note: endHoldIntent() is now called at start of handleSwipe()
                         }
                 )
         }
     }
 
     private func handleSwipe(from start: CGPoint, to end: CGPoint, in size: CGSize) {
+        // CLEAR HOLD INTENT FIRST - this touch is completing as a swipe, not a long press
+        GestureCoordinator.shared.endHoldIntent()
+
         let deltaX = end.x - start.x
         let deltaY = end.y - start.y
         let distance = sqrt(deltaX * deltaX + deltaY * deltaY)
@@ -71,6 +77,25 @@ struct SwipeGestureModifier: ViewModifier {
                 direction: potentialGesture,
                 wasAccepted: false,
                 rejectionReason: reason,
+                startPosition: start,
+                endPosition: end,
+                distance: distance,
+                velocity: velocity,
+                screenSize: size
+            ))
+            #endif
+            return
+        }
+
+        // Check hold intent lock (long press priority)
+        guard GestureCoordinator.shared.shouldAllowSwipeDuringHold() else {
+            print("[\(Date().logTimestamp)] ⏸️ Swipe \(potentialGesture.displayName) suppressed - hold intent locked")
+            #if DEBUG || TESTFLIGHT
+            // Log hold lock suppression
+            DevConfigManager.shared.logGestureAttempt(.swipe(
+                direction: potentialGesture,
+                wasAccepted: false,
+                rejectionReason: "hold_intent_locked",
                 startPosition: start,
                 endPosition: end,
                 distance: distance,

@@ -66,6 +66,11 @@ class DevConfigManager: ObservableObject {
     @Published var pinchIntentLockDuration: TimeInterval = 0.15  // 150ms - suppress swipe when pinch begins
     @Published var pinchIntentLockEnabled: Bool = true  // Can disable for testing
 
+    // MARK: - Hold Intent Locking (Long Press Priority)
+
+    @Published var holdIntentLockDuration: TimeInterval = 0.7  // 700ms - match long press duration
+    @Published var holdIntentLockEnabled: Bool = true  // Can disable for testing
+
     // MARK: - Lenient Pinch Detection (OR-based, Game Modes Only)
 
     @Published var pinchLenientScaleThreshold: CGFloat = 0.92  // 8% reduction (more lenient than Tutorial)
@@ -129,6 +134,10 @@ class DevConfigManager: ObservableObject {
             graceWindow: 0.1,
             graceScaleThreshold: 0.94
         ),
+        hold: HoldThresholds(
+            intentLockDuration: 0.7,
+            intentLockEnabled: true
+        ),
         timing: TimingThresholds(motionToTouchGracePeriod: 0.5)
     )
 
@@ -172,6 +181,10 @@ class DevConfigManager: ObservableObject {
         pinchIntentLockDuration = defaults.pinch.intentLockDuration
         pinchGraceWindow = defaults.pinch.graceWindow
         pinchGraceScaleThreshold = defaults.pinch.graceScaleThreshold
+
+        // Hold Intent
+        holdIntentLockDuration = defaults.hold.intentLockDuration
+        holdIntentLockEnabled = defaults.hold.intentLockEnabled
 
         // Timing
         motionToTouchGracePeriod = defaults.timing.motionToTouchGracePeriod
@@ -219,6 +232,10 @@ class DevConfigManager: ObservableObject {
                 intentLockDuration: pinchIntentLockDuration,
                 graceWindow: pinchGraceWindow,
                 graceScaleThreshold: pinchGraceScaleThreshold
+            ),
+            hold: HoldThresholds(
+                intentLockDuration: holdIntentLockDuration,
+                intentLockEnabled: holdIntentLockEnabled
             ),
             timing: TimingThresholds(
                 motionToTouchGracePeriod: motionToTouchGracePeriod
@@ -619,6 +636,7 @@ struct GestureThresholds: Codable {
     let swipe: SwipeThresholds
     let tap: TapThresholds
     let pinch: PinchThresholds
+    let hold: HoldThresholds
     let timing: TimingThresholds
 }
 
@@ -663,6 +681,11 @@ struct PinchThresholds: Codable {
     let intentLockDuration: TimeInterval
     let graceWindow: TimeInterval
     let graceScaleThreshold: CGFloat
+}
+
+struct HoldThresholds: Codable {
+    let intentLockDuration: TimeInterval  // Match long press duration (700ms)
+    let intentLockEnabled: Bool
 }
 
 struct TimingThresholds: Codable {

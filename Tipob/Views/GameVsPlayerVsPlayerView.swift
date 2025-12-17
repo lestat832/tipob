@@ -753,6 +753,27 @@ struct GameVsPlayerVsPlayerView: View {
             // Calculate final score (Game vs PvP uses currentRound)
             let finalScore = currentRound
 
+            // Log end_game BEFORE leaderboard updates
+            let durationSec = Int(Date().timeIntervalSince(viewModel.gameStartTime ?? Date()))
+
+            // Determine ended_by based on who failed
+            let endReason: String
+            if player1Result == false && player2Result == false {
+                endReason = "wrong_gesture"  // Both failed (draw)
+            } else {
+                endReason = "opponent_win"  // One player won, one lost
+            }
+
+            AnalyticsManager.shared.logEndGame(
+                mode: .gameVsPlayerVsPlayer,
+                score: finalScore,
+                bestScore: LeaderboardManager.shared.getHighScore(for: .gameVsPlayerVsPlayer),
+                durationSec: durationSec,
+                endedBy: endReason,
+                discreetMode: viewModel.discreetModeEnabled
+            )
+            viewModel.gameStartTime = nil
+
             // Check if new high score and add to leaderboard
             isNewHighScore = LeaderboardManager.shared.isNewHighScore(finalScore, mode: .gameVsPlayerVsPlayer)
             LeaderboardManager.shared.addScore(finalScore, for: .gameVsPlayerVsPlayer)

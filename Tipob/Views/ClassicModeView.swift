@@ -65,6 +65,9 @@ struct ClassicModeView: View {
                     .padding(.bottom, 50)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .detectPinch(
+                onPinch: { viewModel.handleClassicModeGesture(.pinch) }
+            )
             .contentShape(Rectangle())  // Forces full area to accept gestures (fixes Stroop detection)
             .detectSwipes { gesture in
                 viewModel.handleClassicModeGesture(gesture)
@@ -72,9 +75,6 @@ struct ClassicModeView: View {
             .detectTaps { gesture in
                 viewModel.handleClassicModeGesture(gesture)
             }
-            .detectPinch(
-                onPinch: { viewModel.handleClassicModeGesture(.pinch) }
-            )
         }
     }
 }
