@@ -54,15 +54,16 @@ struct GamePlayView: View {
                 .padding(.bottom, 50)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .detectPinch(
+                onPinch: { viewModel.handleGesture(.pinch) }
+            )
+            .contentShape(Rectangle())  // Forces full area to accept gestures
             .detectSwipes { gesture in
                 viewModel.handleGesture(gesture)
             }
             .detectTaps { gesture in
                 viewModel.handleGesture(gesture)
             }
-            .detectPinch(
-                onPinch: { viewModel.handleGesture(.pinch) }
-            )
         }
     }
 }

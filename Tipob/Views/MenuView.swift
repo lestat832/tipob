@@ -19,82 +19,10 @@ struct MenuView: View {
             Color.toyBoxMenuGradient
             .ignoresSafeArea()
 
-            VStack(spacing: 40) {
-                // Title removed - shown on launch screen
-                Spacer()
-                    .frame(height: 80)
-
-                // Combined Game Mode Pill + Discreet Toggle + Leaderboard
-                HStack(spacing: 10) {
-                    // Clickable Game Mode Pill
-                    Button(action: {
-                        HapticManager.shared.impact()
-                        showingModeSheet = true
-                    }) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("MODE")
-                                .font(.system(size: 10, weight: .medium))
-                                .foregroundColor(.white.opacity(0.7))
-
-                            HStack(spacing: 6) {
-                                Text(selectedMode.emoji)
-                                    .font(.system(size: 18))
-                                Text(selectedMode.rawValue)
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-
-                                Image(systemName: "chevron.down")
-                                    .font(.system(size: 10, weight: .medium))
-                                    .foregroundColor(.white.opacity(0.7))
-                            }
-                        }
-                        .fixedSize(horizontal: true, vertical: false)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .frame(height: 50)
-                        .background(
-                            Capsule()
-                                .fill(Color.white.opacity(0.25))
-                        )
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Game Mode")
-                        .accessibilityValue(selectedMode.rawValue)
-                        .accessibilityHint("Double tap to change game mode")
-                        .accessibilityAddTraits(.isButton)
-                    }
-
-                    // Compact Discreet Mode Toggle
-                    if selectedMode != .tutorial {
-                        HStack(spacing: 6) {
-                            Text("🤫")
-                                .font(.system(size: 18))
-                            Toggle("", isOn: $discreetModeEnabled)
-                                .labelsHidden()
-                                .tint(.white)
-
-                            // Info button
-                            Button(action: {
-                                HapticManager.shared.impact()
-                                showingDiscreetInfo = true
-                            }) {
-                                Image(systemName: "info.circle")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.white.opacity(0.8))
-                            }
-                        }
-                        .padding(.horizontal, 12)
-                        .frame(height: 44)
-                        .background(
-                            Capsule()
-                                .fill(Color.white.opacity(0.25))
-                        )
-                        .onChange(of: discreetModeEnabled) { _, newValue in
-                            HapticManager.shared.impact()
-                            viewModel.discreetModeEnabled = newValue
-                            AnalyticsManager.shared.logDiscreetModeToggled(isOn: newValue)
-                        }
-                    }
-
-                    // Leaderboard Icon
+            // Layer 1: Top icon bar (Trophy left, Settings right)
+            VStack {
+                HStack {
+                    // Leaderboard Trophy (top-left)
                     Button(action: {
                         HapticManager.shared.impact()
                         showingLeaderboard = true
@@ -109,9 +37,107 @@ struct MenuView: View {
                                 .font(.system(size: 20))
                         }
                     }
+
+                    Spacer()
+
+                    // Settings button (top-right, stub)
+                    Button(action: {
+                        HapticManager.shared.impact()
+                        // TODO: Navigate to settings
+                    }) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.toyBoxButtonBg)
+                                .frame(width: 44, height: 44)
+                                .shadow(color: .black.opacity(0.2), radius: 3, x: 0, y: 2)
+
+                            Image(systemName: "gearshape.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .accessibilityLabel("Settings")
                 }
                 .padding(.horizontal, 20)
+                .padding(.top, 16)
 
+                Spacer()
+            }
+
+            // Layer 2: Centered content (Mode selector + Start button)
+            VStack(spacing: 40) {
+                // Mode selector + Discreet mode
+                HStack(spacing: 10) {
+                        // Clickable Game Mode Pill
+                        Button(action: {
+                            HapticManager.shared.impact()
+                            showingModeSheet = true
+                        }) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("MODE")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.7))
+
+                                HStack(spacing: 6) {
+                                    Text(selectedMode.emoji)
+                                        .font(.system(size: 18))
+                                    Text(selectedMode.rawValue)
+                                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+
+                                    Image(systemName: "chevron.down")
+                                        .font(.system(size: 10, weight: .medium))
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
+                            }
+                            .fixedSize(horizontal: true, vertical: false)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .frame(height: 50)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white.opacity(0.25))
+                            )
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("Game Mode")
+                            .accessibilityValue(selectedMode.rawValue)
+                            .accessibilityHint("Double tap to change game mode")
+                            .accessibilityAddTraits(.isButton)
+                        }
+
+                        // Compact Discreet Mode Toggle
+                        if selectedMode != .tutorial {
+                            HStack(spacing: 6) {
+                                Text("🤫")
+                                    .font(.system(size: 18))
+                                Toggle("", isOn: $discreetModeEnabled)
+                                    .labelsHidden()
+                                    .tint(.white)
+
+                                // Info button
+                                Button(action: {
+                                    HapticManager.shared.impact()
+                                    showingDiscreetInfo = true
+                                }) {
+                                    Image(systemName: "info.circle")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.white.opacity(0.8))
+                                }
+                            }
+                            .padding(.horizontal, 12)
+                            .frame(height: 44)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white.opacity(0.25))
+                            )
+                            .onChange(of: discreetModeEnabled) { _, newValue in
+                                HapticManager.shared.impact()
+                                viewModel.discreetModeEnabled = newValue
+                                AnalyticsManager.shared.logDiscreetModeToggled(isOn: newValue)
+                            }
+                        }
+                    }
+
+                // Start Playing button
                 Button(action: {
                     HapticManager.shared.impact()
                     // Route based on selected mode

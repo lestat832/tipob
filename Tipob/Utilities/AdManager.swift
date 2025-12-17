@@ -13,6 +13,43 @@ import GoogleMobileAds
 /// Manages interstitial ad loading and presentation
 class AdManager: NSObject {
 
+    // MARK: - Environment Detection
+
+    /// Detects runtime environment: Debug, TestFlight, or App Store
+    /// Used to determine which ad unit ID to use
+    private enum AppEnvironment {
+        case debug
+        case testFlight
+        case appStore
+
+        static var current: AppEnvironment {
+            #if DEBUG
+            // Local development builds compiled with DEBUG flag
+            return .debug
+            #else
+            // Check for TestFlight by examining receipt URL
+            // TestFlight receipts contain "sandboxReceipt" in the path
+            // App Store receipts have a different path structure
+            if let receiptURL = Bundle.main.appStoreReceiptURL,
+               receiptURL.lastPathComponent == "sandboxReceipt" {
+                return .testFlight
+            }
+            // Default to App Store for production release builds
+            return .appStore
+            #endif
+        }
+
+        /// Returns true for environments that should use test ads
+        var isTestEnvironment: Bool {
+            switch self {
+            case .debug, .testFlight:
+                return true
+            case .appStore:
+                return false
+            }
+        }
+    }
+
     // MARK: - Singleton
 
     static let shared = AdManager()
@@ -20,11 +57,18 @@ class AdManager: NSObject {
     // MARK: - Properties
 
     /// Google AdMob Interstitial Ad Unit ID
-    #if DEBUG
-    private let interstitialAdUnitID = "ca-app-pub-3940256099942544/4411468910"  // Google test ad
-    #else
-    private let interstitialAdUnitID = "ca-app-pub-8372563313053067/2149863647"  // Production
-    #endif
+    /// Uses test ad for Debug and TestFlight, production ad for App Store only
+    /// Test ad units are universal - they work with any App ID and always have fill
+    private var interstitialAdUnitID: String {
+        if AppEnvironment.current.isTestEnvironment {
+            // Google's universal test interstitial ad unit
+            // Guaranteed to always have ad fill for testing
+            return "ca-app-pub-3940256099942544/4411468910"
+        } else {
+            // Production ad unit - only used in App Store releases
+            return "ca-app-pub-8372563313053067/2149863647"
+        }
+    }
 
     /// Currently loaded interstitial ad
     private var interstitialAd: InterstitialAd?
@@ -59,11 +103,16 @@ class AdManager: NSObject {
         // Preload first ad
         loadInterstitialAd()
 
-        #if DEBUG
-        print("✅ AdManager initialized with TEST ad unit ID")
-        #else
-        print("✅ AdManager initialized with production ID")
-        #endif
+        // Log which environment was detected
+        let env = AppEnvironment.current
+        switch env {
+        case .debug:
+            print("✅ AdManager: DEBUG mode - using test ads")
+        case .testFlight:
+            print("✅ AdManager: TESTFLIGHT mode - using test ads")
+        case .appStore:
+            print("✅ AdManager: APP STORE mode - using production ads")
+        }
     }
 
     // MARK: - Public Methods

@@ -83,6 +83,19 @@ class GestureCoordinator {
         print("[\(Date().logTimestamp)] 🔓 Hold intent released")
     }
 
+    // MARK: - Reset All Intents
+
+    /// Resets all intent locks - call on mode/phase transitions
+    /// Prevents stale locks from blocking gestures after navigation
+    func resetAllIntents() {
+        isHoldIntentLocked = false
+        holdIntentLockTime = nil
+        isPinchIntentLocked = false
+        pinchIntentLockTime = nil
+        expectedGesture = nil
+        print("[\(Date().logTimestamp)] 🔄 GestureCoordinator: All intents reset")
+    }
+
     /// Called by SwipeGestureModifier before triggering swipe
     /// Returns false if swipe should be suppressed due to hold intent
     func shouldAllowSwipeDuringHold() -> Bool {
