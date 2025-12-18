@@ -39,6 +39,7 @@
 			membershipExceptions = (
 				Assets2.xcassets,
 				Components/ArrowView.swift,
+				Components/CountdownOverlayView.swift,
 				Components/CountdownRing.swift,
 				Components/ExpandingSegmentedControl.swift,
 				Components/GestureCellView.swift,

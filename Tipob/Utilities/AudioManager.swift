@@ -15,6 +15,7 @@ class AudioManager {
     private var roundCompletePlayer: AVAudioPlayer?
     private var failurePlayer: AVAudioPlayer?
     private var failurePlayer2: AVAudioPlayer?  // Second player for rapid double-play
+    private var countdownPlayer: AVAudioPlayer?  // Countdown beep for 3, 2, 1, START
 
     // MARK: - State Tracking
 
@@ -120,6 +121,23 @@ class AudioManager {
             print("AudioManager: failure.caf not found in bundle")
             #endif
         }
+
+        // Load countdown beep sound
+        if let countdownURL = Bundle.main.url(forResource: "countdown_beep", withExtension: "caf") {
+            do {
+                countdownPlayer = try AVAudioPlayer(contentsOf: countdownURL)
+                countdownPlayer?.prepareToPlay()
+                countdownPlayer?.volume = 0.5
+            } catch {
+                #if DEBUG
+                print("AudioManager: Failed to load countdown_beep.caf: \(error.localizedDescription)")
+                #endif
+            }
+        } else {
+            #if DEBUG
+            print("AudioManager: countdown_beep.caf not found in bundle")
+            #endif
+        }
     }
 
     // MARK: - Public API
@@ -194,6 +212,34 @@ class AudioManager {
         #endif
     }
 
+    /// Play countdown tick sound (for 3, 2, 1)
+    func playCountdownTick() {
+        guard isInitialized else { return }
+        guard UserSettings.soundEnabled else { return }
+        guard let player = countdownPlayer else { return }
+
+        if player.isPlaying {
+            player.stop()
+        }
+
+        player.currentTime = 0
+        player.play()
+    }
+
+    /// Play countdown start sound (for "START")
+    func playCountdownStart() {
+        guard isInitialized else { return }
+        guard UserSettings.soundEnabled else { return }
+        guard let player = countdownPlayer else { return }
+
+        if player.isPlaying {
+            player.stop()
+        }
+
+        player.currentTime = 0
+        player.play()
+    }
+
     /// Enable or disable sound effects
     func setSoundEnabled(_ enabled: Bool) {
         UserSettings.soundEnabled = enabled
@@ -206,6 +252,7 @@ class AudioManager {
         roundCompletePlayer?.stop()
         failurePlayer?.stop()
         failurePlayer2?.stop()
+        countdownPlayer?.stop()
     }
 }
 

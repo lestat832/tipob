@@ -350,11 +350,13 @@ struct GameVsPlayerVsPlayerView: View {
                         // Get top view controller and show ad
                         if let viewController = UIApplication.topViewController() {
                             AdManager.shared.showInterstitialAd(from: viewController) {
-                                // After ad dismisses, start new game
-                                playAgain()
+                                // After ad dismisses, show countdown then start new game
+                                viewModel.startCountdown {
+                                    playAgain()
+                                }
                             }
                         } else {
-                            // No view controller - start game immediately
+                            // No view controller - start game immediately (no ad shown)
                             playAgain()
                         }
                     } else {

@@ -12,4 +12,5 @@ enum GameState {
     case judge
     case gameOver
     case leaderboard
+    case countdownToStart  // Post-ad countdown (3, 2, 1, START) - blocks all input
 }

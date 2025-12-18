@@ -90,15 +90,17 @@ struct GameOverView: View {
                             // Get top view controller and show ad
                             if let viewController = UIApplication.topViewController() {
                                 AdManager.shared.showInterstitialAd(from: viewController) {
-                                    // After ad dismisses, start new game
-                                    if viewModel.isClassicMode {
-                                        viewModel.startClassic(isReplay: true)
-                                    } else {
-                                        viewModel.startMemory(isReplay: true)
+                                    // After ad dismisses, show countdown then start new game
+                                    viewModel.startCountdown {
+                                        if viewModel.isClassicMode {
+                                            viewModel.startClassic(isReplay: true)
+                                        } else {
+                                            viewModel.startMemory(isReplay: true)
+                                        }
                                     }
                                 }
                             } else {
-                                // No view controller - start game immediately
+                                // No view controller - start game immediately (no ad shown)
                                 if viewModel.isClassicMode {
                                     viewModel.startClassic(isReplay: true)
                                 } else {

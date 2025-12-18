@@ -12,6 +12,12 @@ class GameViewModel: ObservableObject {
     @Published var discreetModeEnabled: Bool = false
     @Published var isNewHighScore: Bool = false
 
+    // MARK: - Post-Ad Countdown State
+    /// Current countdown value: nil = not counting, 3/2/1 = counting, 0 = "START"
+    @Published var countdownValue: Int? = nil
+    /// True when countdown overlay should be displayed
+    @Published var isCountdownActive: Bool = false
+
     // MARK: - Gesture Buffer (Memory Mode transition)
     /// Buffer for gestures detected during state transitions
     private var pendingGesture: GestureType? = nil
@@ -46,6 +52,48 @@ class GameViewModel: ObservableObject {
 
     func transitionToMenu() {
         gameState = .menu
+    }
+
+    // MARK: - Post-Ad Countdown
+
+    /// Start countdown (3, 2, 1, START) after ad dismisses, then execute completion
+    /// - Parameter completion: Called after countdown completes to start the actual game
+    func startCountdown(then completion: @escaping () -> Void) {
+        gameState = .countdownToStart
+        isCountdownActive = true
+        countdownValue = 3
+
+        // Play tick for "3"
+        AudioManager.shared.playCountdownTick()
+        HapticManager.shared.impact()
+
+        // Schedule "2"
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.countdownValue = 2
+            AudioManager.shared.playCountdownTick()
+            HapticManager.shared.impact()
+        }
+
+        // Schedule "1"
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            self?.countdownValue = 1
+            AudioManager.shared.playCountdownTick()
+            HapticManager.shared.impact()
+        }
+
+        // Schedule "START"
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+            self?.countdownValue = 0  // 0 represents "START"
+            AudioManager.shared.playCountdownStart()
+            HapticManager.shared.success()
+        }
+
+        // After START flashes (~250ms), trigger completion
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.25) { [weak self] in
+            self?.isCountdownActive = false
+            self?.countdownValue = nil
+            completion()
+        }
     }
 
     func startTutorial() {

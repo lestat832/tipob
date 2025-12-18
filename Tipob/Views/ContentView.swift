@@ -57,6 +57,10 @@ struct ContentView: View {
             case .leaderboard:
                 LeaderboardView()
                     .transition(.opacity)
+
+            case .countdownToStart:
+                CountdownOverlayView(countdownValue: viewModel.countdownValue)
+                    .transition(.opacity)
             }
         }
         .animation(.easeInOut(duration: 0.6), value: viewModel.gameState)
