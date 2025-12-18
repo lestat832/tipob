@@ -81,6 +81,13 @@ struct GameVsPlayerVsPlayerView: View {
                 }
             }
         }
+        .onAppear {
+            // Auto-start game if coming from "Play Again" countdown
+            if viewModel.shouldAutoStartGameVsPvP {
+                viewModel.shouldAutoStartGameVsPvP = false
+                startGame()  // Bypass name entry, go straight to gameplay
+            }
+        }
     }
 
     // MARK: - Name Entry View
@@ -349,10 +356,15 @@ struct GameVsPlayerVsPlayerView: View {
                     if AdManager.shared.shouldShowEndOfGameAd() {
                         // Get top view controller and show ad
                         if let viewController = UIApplication.topViewController() {
+                            // Prepare countdown BEFORE showing ad (hides Game Over screen immediately)
+                            viewModel.prepareForCountdown()
+
                             AdManager.shared.showInterstitialAd(from: viewController) {
-                                // After ad dismisses, show countdown then start new game
-                                viewModel.startCountdown {
-                                    playAgain()
+                                // After ad dismisses, begin countdown then start new game
+                                viewModel.beginCountdown {
+                                    viewModel.shouldAutoStartGameVsPvP = true  // Flag for auto-start on view appear
+                                    viewModel.startGameVsPlayerVsPlayer(isReplay: true)
+                                    // Note: startGame() is called via .onAppear since view gets recreated
                                 }
                             }
                         } else {

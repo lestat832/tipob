@@ -18,6 +18,12 @@ class GameViewModel: ObservableObject {
     /// True when countdown overlay should be displayed
     @Published var isCountdownActive: Bool = false
 
+    // MARK: - PvP Auto-Start Flags
+    /// Set to true before countdown ends to auto-start Game vs PvP on view appear
+    @Published var shouldAutoStartGameVsPvP: Bool = false
+    /// Set to true before countdown ends to auto-start PvP on view appear
+    @Published var shouldAutoStartPvP: Bool = false
+
     // MARK: - Gesture Buffer (Memory Mode transition)
     /// Buffer for gestures detected during state transitions
     private var pendingGesture: GestureType? = nil
@@ -56,11 +62,17 @@ class GameViewModel: ObservableObject {
 
     // MARK: - Post-Ad Countdown
 
-    /// Start countdown (3, 2, 1, START) after ad dismisses, then execute completion
-    /// - Parameter completion: Called after countdown completes to start the actual game
-    func startCountdown(then completion: @escaping () -> Void) {
+    /// Prepare countdown state (shows black overlay) - call BEFORE showing ad
+    /// This immediately hides the Game Over screen with a black overlay
+    func prepareForCountdown() {
         gameState = .countdownToStart
         isCountdownActive = true
+        countdownValue = nil  // Black overlay, no numbers yet
+    }
+
+    /// Begin the actual countdown sequence (3, 2, 1, START) - call AFTER ad dismisses
+    /// - Parameter completion: Called after countdown completes to start the actual game
+    func beginCountdown(then completion: @escaping () -> Void) {
         countdownValue = 3
 
         // Play tick for "3"

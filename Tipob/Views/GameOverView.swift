@@ -89,9 +89,12 @@ struct GameOverView: View {
                         if AdManager.shared.shouldShowEndOfGameAd() {
                             // Get top view controller and show ad
                             if let viewController = UIApplication.topViewController() {
+                                // Prepare countdown BEFORE showing ad (hides Game Over screen immediately)
+                                viewModel.prepareForCountdown()
+
                                 AdManager.shared.showInterstitialAd(from: viewController) {
-                                    // After ad dismisses, show countdown then start new game
-                                    viewModel.startCountdown {
+                                    // After ad dismisses, begin countdown then start new game
+                                    viewModel.beginCountdown {
                                         if viewModel.isClassicMode {
                                             viewModel.startClassic(isReplay: true)
                                         } else {
