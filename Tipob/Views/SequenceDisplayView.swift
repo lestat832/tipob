@@ -30,13 +30,15 @@ struct SequenceDisplayView: View {
                             downColor: downColor,
                             leftColor: leftColor,
                             rightColor: rightColor,
-                            isAnimating: true
+                            isAnimating: true,
+                            showHelperText: UserSettings.showGestureNames
                         )
                         .id(viewModel.showingGestureIndex)
                     } else {
                         ArrowView(
                             gesture: currentGesture,
-                            isAnimating: true
+                            isAnimating: true,
+                            showHelperText: UserSettings.showGestureNames
                         )
                         .id(viewModel.showingGestureIndex)
                     }

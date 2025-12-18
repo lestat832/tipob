@@ -10,6 +10,7 @@ struct StroopPromptView: View {
     let leftColor: ColorType
     let rightColor: ColorType
     let isAnimating: Bool
+    var showHelperText: Bool = false
 
     @State private var scale: CGFloat = 1.0
     @State private var opacity: Double = 0.0
@@ -164,7 +165,16 @@ struct StroopPromptView: View {
                     .fixedSize()
                     .frame(minWidth: 80)
             }
-            .padding(.bottom, 40)
+            .padding(.bottom, 20)
+
+            // Stroop helper text
+            Text("Swipe toward the TEXT color (not the word)")
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+                .opacity(showHelperText ? 1 : 0)
+                .padding(.bottom, 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -215,7 +225,8 @@ extension View {
         leftColor: ColorType,
         rightColor: ColorType,
         showSuccess: Bool = false,
-        showError: Bool = false
+        showError: Bool = false,
+        showHelperText: Bool = false
     ) -> some View {
         ZStack {
             StroopPromptView(
@@ -225,7 +236,8 @@ extension View {
                 downColor: downColor,
                 leftColor: leftColor,
                 rightColor: rightColor,
-                isAnimating: false
+                isAnimating: false,
+                showHelperText: showHelperText
             )
             .modifier(StroopFeedbackModifier(showSuccess: showSuccess, showError: showError))
         }

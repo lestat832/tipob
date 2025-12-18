@@ -3,6 +3,7 @@ import SwiftUI
 struct ArrowView: View {
     let gesture: GestureType
     let isAnimating: Bool
+    var showHelperText: Bool = false
     @State private var scale: CGFloat = 1.0
     @State private var opacity: Double = 0.0
     @State private var glowRadius: CGFloat = 0
@@ -10,37 +11,40 @@ struct ArrowView: View {
     @State private var rotationAngle: Double = 0.0
 
     var body: some View {
-        ZStack {
-            // White stroke (background layer)
-            Text(gesture.symbol)
-                .font(.system(size: 120, weight: .bold))
-                .foregroundColor(.white)
-                .offset(x: -2, y: -2)
-            Text(gesture.symbol)
-                .font(.system(size: 120, weight: .bold))
-                .foregroundColor(.white)
-                .offset(x: 2, y: -2)
-            Text(gesture.symbol)
-                .font(.system(size: 120, weight: .bold))
-                .foregroundColor(.white)
-                .offset(x: -2, y: 2)
-            Text(gesture.symbol)
-                .font(.system(size: 120, weight: .bold))
-                .foregroundColor(.white)
-                .offset(x: 2, y: 2)
+        VStack(spacing: 8) {
+            ZStack {
+                // White stroke (background layer)
+                Text(gesture.symbol)
+                    .font(.system(size: 120, weight: .bold))
+                    .foregroundColor(.white)
+                    .offset(x: -2, y: -2)
+                Text(gesture.symbol)
+                    .font(.system(size: 120, weight: .bold))
+                    .foregroundColor(.white)
+                    .offset(x: 2, y: -2)
+                Text(gesture.symbol)
+                    .font(.system(size: 120, weight: .bold))
+                    .foregroundColor(.white)
+                    .offset(x: -2, y: 2)
+                Text(gesture.symbol)
+                    .font(.system(size: 120, weight: .bold))
+                    .foregroundColor(.white)
+                    .offset(x: 2, y: 2)
 
-            // Main colored symbol (foreground layer)
-            Text(gesture.symbol)
-                .font(.system(size: 120, weight: .bold))
-                .foregroundColor(gesture.color)
-                .shadow(color: gesture.color.opacity(0.6), radius: glowRadius)
+                // Main colored symbol (foreground layer)
+                Text(gesture.symbol)
+                    .font(.system(size: 120, weight: .bold))
+                    .foregroundColor(gesture.color)
+                    .shadow(color: gesture.color.opacity(0.6), radius: glowRadius)
+            }
+
+            // Helper text showing gesture name
+            Text(gesture.displayName)
+                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .foregroundColor(.white)
+                .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+                .opacity(showHelperText ? 1 : 0)
         }
-        // TODO: Wire "Show Gesture Names" feature here when implementing
-        // if UserSettings.showGestureNames {
-        //     Text(gesture.displayName)
-        //         .font(.system(size: 24, weight: .semibold, design: .rounded))
-        //         .foregroundColor(.white)
-        // }
         .scaleEffect(scale)
         .opacity(opacity)
         .offset(offset)

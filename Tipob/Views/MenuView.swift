@@ -107,28 +107,12 @@ struct MenuView: View {
 
                         // Compact Discreet Mode Toggle
                         if selectedMode != .tutorial {
-                            HStack(spacing: 6) {
-                                Text("🤫")
-                                    .font(.system(size: 18))
-                                Toggle("", isOn: $discreetModeEnabled)
-                                    .labelsHidden()
-                                    .tint(.white)
-
-                                // Info button
-                                Button(action: {
+                            DiscreetModeCompactToggle(
+                                isOn: $discreetModeEnabled,
+                                onInfoTapped: {
                                     HapticManager.shared.impact()
                                     showingDiscreetInfo = true
-                                }) {
-                                    Image(systemName: "info.circle")
-                                        .font(.system(size: 16))
-                                        .foregroundColor(.white.opacity(0.8))
                                 }
-                            }
-                            .padding(.horizontal, 12)
-                            .frame(height: 44)
-                            .background(
-                                Capsule()
-                                    .fill(Color.white.opacity(0.25))
                             )
                             .onChange(of: discreetModeEnabled) { _, newValue in
                                 HapticManager.shared.impact()

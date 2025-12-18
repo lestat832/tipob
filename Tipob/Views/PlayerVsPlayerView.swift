@@ -234,7 +234,7 @@ struct PlayerVsPlayerView: View {
 
             // Show gesture animation if performed, otherwise show instruction
             if showGestureAnimation, let gesture = animatedGesture {
-                ArrowView(gesture: gesture, isAnimating: true)
+                ArrowView(gesture: gesture, isAnimating: true, showHelperText: false)
                     .transition(.scale.combined(with: .opacity))
             } else {
                 VStack(spacing: 20) {
@@ -324,7 +324,7 @@ struct PlayerVsPlayerView: View {
 
             // Show gesture animation if just added, otherwise show instruction
             if showGestureAnimation, let gesture = animatedGesture {
-                ArrowView(gesture: gesture, isAnimating: true)
+                ArrowView(gesture: gesture, isAnimating: true, showHelperText: false)
                     .transition(.scale.combined(with: .opacity))
             } else {
                 VStack(spacing: 20) {

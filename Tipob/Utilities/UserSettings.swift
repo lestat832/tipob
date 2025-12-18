@@ -48,13 +48,13 @@ class UserSettings {
 
     // MARK: - Show Gesture Names Settings
 
-    /// Whether gesture names are displayed during gameplay
-    /// Default: false (OFF) - Feature coming soon
+    /// Whether gesture helper text is displayed during gameplay
+    /// Default: true (ON) - Shows gesture names below icons
     static var showGestureNames: Bool {
         get {
-            // If key doesn't exist yet, return default value (false)
+            // If key doesn't exist yet, return default value (true - enabled by default)
             if UserDefaults.standard.object(forKey: Keys.showGestureNames) == nil {
-                return false
+                return true
             }
             return UserDefaults.standard.bool(forKey: Keys.showGestureNames)
         }

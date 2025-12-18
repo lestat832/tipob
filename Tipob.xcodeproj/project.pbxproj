@@ -44,6 +44,7 @@
 				Components/GestureCellView.swift,
 				Components/GestureDrawerTabView.swift,
 				Components/GestureDrawerView.swift,
+				Components/SettingToggleRow.swift,
 				Components/StroopPromptView.swift,
 				"Extensions/Color+ToyBox.swift",
 				"GoogleService-Info.plist",
@@ -97,6 +98,7 @@
 				Views/MenuView.swift,
 				Views/PlayerVsPlayerView.swift,
 				Views/SequenceDisplayView.swift,
+				Views/SettingsView.swift,
 				Views/TutorialCompletionView.swift,
 				Views/TutorialView.swift,
 			);

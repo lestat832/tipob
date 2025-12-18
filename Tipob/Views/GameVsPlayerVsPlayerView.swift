@@ -200,13 +200,15 @@ struct GameVsPlayerVsPlayerView: View {
                         downColor: downColor,
                         leftColor: leftColor,
                         rightColor: rightColor,
-                        isAnimating: true
+                        isAnimating: true,
+                        showHelperText: UserSettings.showGestureNames
                     )
                     .id(showingGestureIndex)
                 } else {
                     ArrowView(
                         gesture: currentGesture,
-                        isAnimating: true
+                        isAnimating: true,
+                        showHelperText: UserSettings.showGestureNames
                     )
                     .id(showingGestureIndex)
                 }

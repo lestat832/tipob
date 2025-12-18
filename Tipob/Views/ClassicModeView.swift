@@ -33,11 +33,12 @@ struct ClassicModeView: View {
                             downColor: downColor,
                             leftColor: leftColor,
                             rightColor: rightColor,
-                            isAnimating: false
+                            isAnimating: false,
+                            showHelperText: UserSettings.showGestureNames
                         )
                         .transition(.scale)
                     } else {
-                        ArrowView(gesture: currentGesture, isAnimating: false)
+                        ArrowView(gesture: currentGesture, isAnimating: false, showHelperText: UserSettings.showGestureNames)
                             .transition(.scale)
                     }
                 }

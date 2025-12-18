@@ -25,29 +25,29 @@ struct SettingsView: View {
                         .foregroundColor(.white)
                         .padding(.top, 30)
 
-                    VStack(spacing: 15) {
-                        // Show Gesture Names (disabled - Coming soon)
-                        SettingsRow(
-                            title: "Show Gesture Names",
-                            description: "Coming soon",
+                    VStack(spacing: 12) {
+                        // Show Gesture Names
+                        SettingToggleRow(
                             isOn: $showGestureNames,
-                            isDisabled: true
+                            title: "Gesture Names",
+                            subtitle: "Show helper text below icons",
+                            emoji: "💬"
                         )
 
                         // Sound Effects
-                        SettingsRow(
-                            title: "Sound Effects",
-                            description: "Play sounds during gameplay",
+                        SettingToggleRow(
                             isOn: $soundEnabled,
-                            isDisabled: false
+                            title: "Sound Effects",
+                            subtitle: "Play sounds during gameplay",
+                            emoji: "🔊"
                         )
 
                         // Haptics
-                        SettingsRow(
-                            title: "Haptics",
-                            description: "Vibration feedback for gestures",
+                        SettingToggleRow(
                             isOn: $hapticsEnabled,
-                            isDisabled: false
+                            title: "Haptics",
+                            subtitle: "Vibration feedback for gestures",
+                            emoji: "📳"
                         )
                     }
                     .padding(.horizontal, 20)
@@ -80,41 +80,6 @@ struct SettingsView: View {
                 HapticManager.shared.impact()
             }
         }
-    }
-}
-
-struct SettingsRow: View {
-    let title: String
-    let description: String
-    @Binding var isOn: Bool
-    let isDisabled: Bool
-
-    var body: some View {
-        HStack(spacing: 15) {
-            VStack(alignment: .leading, spacing: 5) {
-                Text(title)
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(isDisabled ? .primary.opacity(0.5) : .primary)
-
-                Text(description)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(isDisabled ? .secondary.opacity(0.5) : .secondary)
-            }
-
-            Spacer()
-
-            Toggle("", isOn: $isOn)
-                .labelsHidden()
-                .tint(.blue)
-                .disabled(isDisabled)
-                .opacity(isDisabled ? 0.5 : 1.0)
-        }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
-        )
     }
 }
 

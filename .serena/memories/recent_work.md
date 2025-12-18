@@ -1,23 +1,21 @@
 # Recent Work - December 2025
 
-## Double Tap Diagnosis (Dec 14)
-- Diagnosed double tap recognition failure using structured 4-step framework
-- Runtime logs confirmed 300ms window is too tight
-- Fixes identified in TapGestureModifier.swift
+## Gesture Helper Text Feature
+Implemented comprehensive helper text system showing gesture names below icons:
+- `gesture.displayName` used for all regular gestures
+- Special Stroop instruction: "Swipe toward the TEXT color (not the word)"
+- Controlled via `UserSettings.showGestureNames` (default: true)
+- PvP mode exempted (competitive fairness)
 
-## Key Files for Double Tap
-- `Tipob/Utilities/TapGestureModifier.swift` - Detection logic, timing windows
-- `Tipob/Utilities/GestureCoordinator.swift` - Gesture filtering/suppression
-- `Tipob/ViewModels/GameViewModel.swift` - State gating, gesture handling
+## Reusable Toggle Components
+Created frosted glass toggle UI system:
+- `SettingToggleRow` for full-width setting rows
+- `FrostedToggle` with cyan neon accent when ON
+- `DiscreetModeCompactToggle` with dynamic emoji (🤫/🤪)
+- Uses `.ultraThinMaterial` for frosted glass effect
+- Spring animations on toggle state changes
 
-## Patterns Learned
-- Double tap uses DispatchWorkItem with 300ms delay for disambiguation
-- `longPressDetected` flag blocks taps for 100ms after long press fires
-- GestureCoordinator.shouldAllowGesture() returns true in game modes (expectedGesture=nil)
-- State gating: Classic Mode uses `gameState == .classicMode`, Memory uses `.awaitInput`
-
-## Previous Session (Dec 13-14)
-- PvP gesture detection improvements
-- Motion detector lifecycle fixes
-- Memory Mode gesture buffer implementation
-- Analytics/logging infrastructure for gesture debugging
+## Pattern Learned
+- Files created via CLI need manual Xcode project target addition
+- Parameter defaults (`var showHelperText: Bool = false`) allow backward compatibility
+- Opacity-based hiding (vs conditional rendering) prevents layout shifts

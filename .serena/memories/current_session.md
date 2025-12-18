@@ -1,32 +1,49 @@
-# Session Summary - 2025-12-17
+# Session Summary - 2025-12-18
 
 ## Completed Tasks
-- ✅ **Settings Screen MVP** - Created full settings screen with 3 toggles
-  - Show Gesture Names (placeholder, disabled with "Coming soon")
-  - Sound Effects (toggles UserSettings.soundEnabled)
-  - Haptics (toggles UserSettings.hapticsEnabled)
-- ✅ **UserSettings.swift** - Added `showGestureNames` property (default: OFF)
-- ✅ **HapticManager.swift** - Added `guard UserSettings.hapticsEnabled` to 14 methods
-- ✅ **MenuView.swift** - Wired settings button to open SettingsView sheet
-- ✅ **ArrowView.swift** - Added TODO comment for future gesture names feature
+- ✅ Implemented Gesture Helper Text feature across all game modes
+  - Added `showHelperText` parameter to ArrowView and StroopPromptView
+  - UserSettings.showGestureNames default changed to `true`
+  - SettingsView toggle enabled
+  - ClassicMode, MemoryMode, Pass&Play show helper text
+  - PvP mode explicitly passes `false` (never shows)
+  - Stroop shows special instruction: "Swipe toward the TEXT color (not the word)"
 
-## Key Technical Patterns
-- **Haptics gating pattern**: `guard UserSettings.hapticsEnabled else { return }` at start of each method
-- **AudioManager already gated**: No changes needed (already checks UserSettings.soundEnabled)
-- **Settings UI pattern**: NavigationView with gradient background, SettingsRow cards with RoundedRectangle
+- ✅ Created reusable toggle UI components
+  - `SettingToggleRow` - Full-width settings rows with frosted glass styling
+  - `FrostedToggle` - Custom toggle with neon accent
+  - `DiscreetModeCompactToggle` - Compact pill for menu bar
+  - `CompactFrostedToggle` - Smaller toggle variant
+  - Dynamic emoji support (🤫/🤪 for Discreet Mode)
 
-## Files Modified This Session
-- `Tipob/Utilities/UserSettings.swift` - Added showGestureNames key and property
-- `Tipob/Utilities/HapticManager.swift` - Added guard statements to 14 methods
-- `Tipob/Views/SettingsView.swift` - NEW: Settings screen with 3 toggles
-- `Tipob/Views/MenuView.swift` - Added showingSettings state and sheet presentation
-- `Tipob/Components/ArrowView.swift` - Added TODO comment for gesture names display
+- ✅ Updated SettingsView.swift with new toggle components
+- ✅ Updated MenuView.swift with DiscreetModeCompactToggle
+
+## Files Created
+- `Tipob/Components/SettingToggleRow.swift` (needs Xcode project target addition)
+
+## Files Modified
+- `Tipob/Utilities/UserSettings.swift` - default to true
+- `Tipob/Views/SettingsView.swift` - new toggle UI
+- `Tipob/Views/MenuView.swift` - DiscreetModeCompactToggle
+- `Tipob/Components/ArrowView.swift` - showHelperText parameter
+- `Tipob/Components/StroopPromptView.swift` - showHelperText + special instruction
+- `Tipob/Views/ClassicModeView.swift` - passes showHelperText
+- `Tipob/Views/SequenceDisplayView.swift` - passes showHelperText
+- `Tipob/Views/GameVsPlayerVsPlayerView.swift` - passes showHelperText
+- `Tipob/Views/PlayerVsPlayerView.swift` - explicitly false
 
 ## Next Session
-- Test Settings screen on device
-- Verify haptics toggle works correctly
-- Verify sound toggle works correctly
-- Consider implementing "Show Gesture Names" feature
+- Add `SettingToggleRow.swift` to Xcode project target
+- Test toggle UI in Settings and Menu
+- Verify helper text displays correctly in all modes
+- Test PvP mode confirms helper text never shows
 
-## Git Status
-- Changes ready to commit and push
+## Key Decisions
+- Helper text enabled by default for new users
+- PvP mode NEVER shows helper text (hardcoded false)
+- Stroop has special instruction text instead of gesture name
+- Opacity-based hiding prevents layout jumps
+
+## Blockers/Issues
+- New file `SettingToggleRow.swift` created via CLI needs manual addition to Xcode project
