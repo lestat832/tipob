@@ -35,6 +35,12 @@ struct ArrowView: View {
                 .foregroundColor(gesture.color)
                 .shadow(color: gesture.color.opacity(0.6), radius: glowRadius)
         }
+        // TODO: Wire "Show Gesture Names" feature here when implementing
+        // if UserSettings.showGestureNames {
+        //     Text(gesture.displayName)
+        //         .font(.system(size: 24, weight: .semibold, design: .rounded))
+        //         .foregroundColor(.white)
+        // }
         .scaleEffect(scale)
         .opacity(opacity)
         .offset(offset)

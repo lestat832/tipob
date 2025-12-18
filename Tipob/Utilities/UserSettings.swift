@@ -9,6 +9,7 @@ class UserSettings {
     private enum Keys {
         static let soundEnabled = "soundEnabled"
         static let hapticsEnabled = "hapticsEnabled"
+        static let showGestureNames = "showGestureNames"
     }
 
     // MARK: - Sound Settings
@@ -42,6 +43,23 @@ class UserSettings {
         }
         set {
             UserDefaults.standard.set(newValue, forKey: Keys.hapticsEnabled)
+        }
+    }
+
+    // MARK: - Show Gesture Names Settings
+
+    /// Whether gesture names are displayed during gameplay
+    /// Default: false (OFF) - Feature coming soon
+    static var showGestureNames: Bool {
+        get {
+            // If key doesn't exist yet, return default value (false)
+            if UserDefaults.standard.object(forKey: Keys.showGestureNames) == nil {
+                return false
+            }
+            return UserDefaults.standard.bool(forKey: Keys.showGestureNames)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.showGestureNames)
         }
     }
 }

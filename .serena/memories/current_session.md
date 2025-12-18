@@ -1,26 +1,32 @@
 # Session Summary - 2025-12-17
 
 ## Completed Tasks
-- ✅ TestFlight Test Ads: Added runtime `AppEnvironment` detection using sandbox receipt check (AdManager.swift)
-- ✅ Gesture Detection Fix: Added `.contentShape(Rectangle())` to GamePlayView with correct modifier order
-- ✅ GestureCoordinator: Added `resetAllIntents()` method for phase transitions
-- ✅ Menu Header Refactor: Restructured to ZStack with Trophy/Settings pinned to top corners
+- ✅ **Settings Screen MVP** - Created full settings screen with 3 toggles
+  - Show Gesture Names (placeholder, disabled with "Coming soon")
+  - Sound Effects (toggles UserSettings.soundEnabled)
+  - Haptics (toggles UserSettings.hapticsEnabled)
+- ✅ **UserSettings.swift** - Added `showGestureNames` property (default: OFF)
+- ✅ **HapticManager.swift** - Added `guard UserSettings.hapticsEnabled` to 14 methods
+- ✅ **MenuView.swift** - Wired settings button to open SettingsView sheet
+- ✅ **ArrowView.swift** - Added TODO comment for future gesture names feature
 
-## Key Technical Learnings
-- **SwiftUI modifier order matters**: `.detectPinch()` must come BEFORE `.contentShape(Rectangle())` for UIKit-based pinch detection to work
-- **TestFlight detection**: Use `Bundle.main.appStoreReceiptURL.lastPathComponent == "sandboxReceipt"` for runtime environment detection
-- **ZStack layering for pinned elements**: Use separate VStacks with `Spacer()` to pin elements to edges
+## Key Technical Patterns
+- **Haptics gating pattern**: `guard UserSettings.hapticsEnabled else { return }` at start of each method
+- **AudioManager already gated**: No changes needed (already checks UserSettings.soundEnabled)
+- **Settings UI pattern**: NavigationView with gradient background, SettingsRow cards with RoundedRectangle
 
 ## Files Modified This Session
-- `Tipob/Utilities/AdManager.swift` - Runtime environment detection for test ads
-- `Tipob/Utilities/GestureCoordinator.swift` - resetAllIntents() method
-- `Tipob/Views/GamePlayView.swift` - contentShape with correct modifier order
-- `Tipob/Views/MenuView.swift` - Two-layer ZStack for top-pinned icons
+- `Tipob/Utilities/UserSettings.swift` - Added showGestureNames key and property
+- `Tipob/Utilities/HapticManager.swift` - Added guard statements to 14 methods
+- `Tipob/Views/SettingsView.swift` - NEW: Settings screen with 3 toggles
+- `Tipob/Views/MenuView.swift` - Added showingSettings state and sheet presentation
+- `Tipob/Components/ArrowView.swift` - Added TODO comment for gesture names display
 
 ## Next Session
-- User to verify Trophy/Settings positioning at top corners
-- Test gesture detection in Memory mode (one-handed, lower screen)
-- Test pinch gesture in all modes
+- Test Settings screen on device
+- Verify haptics toggle works correctly
+- Verify sound toggle works correctly
+- Consider implementing "Show Gesture Names" feature
 
 ## Git Status
-- All changes uncommitted, ready for commit and push
+- Changes ready to commit and push

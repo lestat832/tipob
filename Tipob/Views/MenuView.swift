@@ -7,6 +7,7 @@ struct MenuView: View {
     @State private var showingModeSheet = false
     @State private var showingLeaderboard = false
     @State private var showingDiscreetInfo = false
+    @State private var showingSettings = false
     @AppStorage("selectedGameMode") private var selectedModeRawValue: String = GameMode.tutorial.rawValue
     @AppStorage("discreetModeEnabled") private var discreetModeEnabled = false
 
@@ -40,10 +41,10 @@ struct MenuView: View {
 
                     Spacer()
 
-                    // Settings button (top-right, stub)
+                    // Settings button (top-right)
                     Button(action: {
                         HapticManager.shared.impact()
-                        // TODO: Navigate to settings
+                        showingSettings = true
                     }) {
                         ZStack {
                             Circle()
@@ -182,6 +183,9 @@ struct MenuView: View {
         }
         .sheet(isPresented: $showingLeaderboard) {
             LeaderboardView()
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
         }
         .alert("Discreet Mode", isPresented: $showingDiscreetInfo) {
             Button("Got it!", role: .cancel) {}
