@@ -38,6 +38,7 @@ struct DevPanelView: View {
     @State private var isReplayExpanded = false
     @State private var isGestureTestExpanded = false
     @State private var isThresholdTuningExpanded = false
+    @State private var isVisualSettingsExpanded = false
 
     var body: some View {
         NavigationView {
@@ -85,6 +86,26 @@ struct DevPanelView: View {
                             tapSection
                             pinchSection
                             timingSection
+                        }
+                    }
+
+                    // Visual Settings
+                    CollapsibleSection(
+                        title: "🎨 Visual Settings",
+                        isExpanded: $isVisualSettingsExpanded
+                    ) {
+                        VStack(spacing: 12) {
+                            Toggle(isOn: $config.useV1GestureFallback) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Use V1 Symbol Fallback")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                    Text("Switch to original Unicode symbols (↑ ↓ ⊙ etc.) instead of V2 images")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            .toggleStyle(SwitchToggleStyle(tint: .orange))
                         }
                     }
 

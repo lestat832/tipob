@@ -74,6 +74,7 @@
 				Utilities/FailureFeedbackManager.swift,
 				Utilities/GestureCoordinator.swift,
 				Utilities/GesturePoolManager.swift,
+				Utilities/GestureVisualProvider.swift,
 				Utilities/HapticManager.swift,
 				Utilities/LeaderboardManager.swift,
 				Utilities/MotionGestureManager.swift,

@@ -1,0 +1,35 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blobGradient1" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#a855f7"/>
+      <stop offset="100%" style="stop-color:#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="blobGradient2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f472b6"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+  </defs>
+  <!-- Converging arrows -->
+  <path d="M20 60 L35 52 L35 57 L48 57 L48 63 L35 63 L35 68 Z" fill="#22d3ee" stroke="#0e7490" stroke-width="1.5"/>
+  <path d="M100 60 L85 52 L85 57 L72 57 L72 63 L85 63 L85 68 Z" fill="#22d3ee" stroke="#0e7490" stroke-width="1.5"/>
+  <!-- Left blob -->
+  <ellipse cx="42" cy="60" rx="16" ry="18" fill="url(#blobGradient1)"/>
+  <circle cx="38" cy="57" r="3" fill="white"/>
+  <circle cx="46" cy="57" r="3" fill="white"/>
+  <circle cx="39" cy="57" r="1.2" fill="#1a1a2e"/>
+  <circle cx="47" cy="57" r="1.2" fill="#1a1a2e"/>
+  <path d="M38 64 Q42 67 46 64" stroke="#1a1a2e" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Right blob -->
+  <ellipse cx="78" cy="60" rx="16" ry="18" fill="url(#blobGradient2)"/>
+  <circle cx="74" cy="57" r="3" fill="white"/>
+  <circle cx="82" cy="57" r="3" fill="white"/>
+  <circle cx="73" cy="57" r="1.2" fill="#1a1a2e"/>
+  <circle cx="81" cy="57" r="1.2" fill="#1a1a2e"/>
+  <path d="M74 64 Q78 67 82 64" stroke="#1a1a2e" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Sparkles at merge point -->
+  <path d="M60 45 L61 40 L62 45 L67 46 L62 47 L61 52 L60 47 L55 46 Z" fill="#fbbf24"/>
+  <path d="M60 75 L61 70 L62 75 L67 76 L62 77 L61 82 L60 77 L55 76 Z" fill="#fbbf24"/>
+  <!-- Motion lines -->
+  <line x1="25" y1="40" x2="35" y2="45" stroke="#a855f7" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="95" y1="40" x2="85" y2="45" stroke="#a855f7" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+</svg>

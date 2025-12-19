@@ -12,31 +12,9 @@ struct ArrowView: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            ZStack {
-                // White stroke (background layer)
-                Text(gesture.symbol)
-                    .font(.system(size: 120, weight: .bold))
-                    .foregroundColor(.white)
-                    .offset(x: -2, y: -2)
-                Text(gesture.symbol)
-                    .font(.system(size: 120, weight: .bold))
-                    .foregroundColor(.white)
-                    .offset(x: 2, y: -2)
-                Text(gesture.symbol)
-                    .font(.system(size: 120, weight: .bold))
-                    .foregroundColor(.white)
-                    .offset(x: -2, y: 2)
-                Text(gesture.symbol)
-                    .font(.system(size: 120, weight: .bold))
-                    .foregroundColor(.white)
-                    .offset(x: 2, y: 2)
-
-                // Main colored symbol (foreground layer)
-                Text(gesture.symbol)
-                    .font(.system(size: 120, weight: .bold))
-                    .foregroundColor(gesture.color)
-                    .shadow(color: gesture.color.opacity(0.6), radius: glowRadius)
-            }
+            // Gesture visual (V1 symbol or V2 image)
+            gestureVisual
+                .shadow(color: gesture.color.opacity(0.6), radius: glowRadius)
 
             // Helper text showing gesture name
             Text(gesture.displayName)
@@ -55,6 +33,46 @@ struct ArrowView: View {
             } else {
                 scale = 1.0
                 opacity = 1.0
+            }
+        }
+    }
+
+    // MARK: - Gesture Visual
+
+    @ViewBuilder
+    private var gestureVisual: some View {
+        if GestureVisualProvider.useV2Images,
+           let assetName = GestureVisualProvider.v2AssetName(for: gesture) {
+            // V2: Image from Assets2.xcassets
+            Image(assetName)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 120, height: 120)
+        } else {
+            // V1: Symbol with white stroke
+            ZStack {
+                // White stroke (4 offset copies)
+                Text(gesture.symbol)
+                    .font(.system(size: 120, weight: .bold))
+                    .foregroundColor(.white)
+                    .offset(x: -2, y: -2)
+                Text(gesture.symbol)
+                    .font(.system(size: 120, weight: .bold))
+                    .foregroundColor(.white)
+                    .offset(x: 2, y: -2)
+                Text(gesture.symbol)
+                    .font(.system(size: 120, weight: .bold))
+                    .foregroundColor(.white)
+                    .offset(x: -2, y: 2)
+                Text(gesture.symbol)
+                    .font(.system(size: 120, weight: .bold))
+                    .foregroundColor(.white)
+                    .offset(x: 2, y: 2)
+
+                // Main colored symbol
+                Text(gesture.symbol)
+                    .font(.system(size: 120, weight: .bold))
+                    .foregroundColor(gesture.color)
             }
         }
     }

@@ -1,0 +1,27 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blobGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#a855f7"/>
+      <stop offset="100%" style="stop-color:#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <!-- Sparkle bursts -->
+  <path d="M25 35 L27 28 L29 35 L36 37 L29 39 L27 46 L25 39 L18 37 Z" fill="#fbbf24"/>
+  <path d="M95 35 L97 28 L99 35 L106 37 L99 39 L97 46 L95 39 L88 37 Z" fill="#fbbf24"/>
+  <path d="M60 15 L62 8 L64 15 L71 17 L64 19 L62 26 L60 19 L53 17 Z" fill="#22d3ee"/>
+  <!-- Impact rings -->
+  <circle cx="60" cy="60" r="45" stroke="#22d3ee" stroke-width="2" fill="none" opacity="0.3"/>
+  <circle cx="60" cy="60" r="38" stroke="#a855f7" stroke-width="2" fill="none" opacity="0.5"/>
+  <!-- Main blob body -->
+  <ellipse cx="60" cy="60" rx="26" ry="26" fill="url(#blobGradient)"/>
+  <!-- Happy excited eyes -->
+  <ellipse cx="50" cy="55" rx="5" ry="6" fill="white"/>
+  <ellipse cx="70" cy="55" rx="5" ry="6" fill="white"/>
+  <circle cx="51" cy="54" r="2.5" fill="#1a1a2e"/>
+  <circle cx="71" cy="54" r="2.5" fill="#1a1a2e"/>
+  <!-- Big happy smile -->
+  <path d="M48 68 Q60 80 72 68" stroke="#1a1a2e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Rosy cheeks -->
+  <ellipse cx="40" cy="62" rx="4" ry="3" fill="#f472b6" opacity="0.5"/>
+  <ellipse cx="80" cy="62" rx="4" ry="3" fill="#f472b6" opacity="0.5"/>
+</svg>

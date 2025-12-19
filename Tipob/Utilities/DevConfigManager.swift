@@ -86,6 +86,11 @@ class DevConfigManager: ObservableObject {
 
     @Published var motionToTouchGracePeriod: TimeInterval = 0.5  // seconds (grace period for motion→touch transitions)
 
+    // MARK: - Visual Settings
+
+    /// Enable V1 symbol fallback (for debugging only, V2 images are default)
+    @Published var useV1GestureFallback: Bool = false
+
     // MARK: - Gameplay Logging
 
     @Published var gameplayLogs: [GameplayLogEntry] = []

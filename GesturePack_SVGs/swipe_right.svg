@@ -1,0 +1,24 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blobGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a855f7"/>
+      <stop offset="100%" style="stop-color:#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <!-- Main blob body -->
+  <ellipse cx="50" cy="60" rx="26" ry="26" fill="url(#blobGradient)"/>
+  <!-- Winking eyes -->
+  <circle cx="42" cy="55" r="5" fill="white"/>
+  <circle cx="42" cy="55" r="2" fill="#1a1a2e"/>
+  <!-- Wink eye (closed) -->
+  <path d="M54 55 Q58 52 62 55" stroke="#1a1a2e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Playful smile -->
+  <path d="M38 68 Q48 75 58 68" stroke="#1a1a2e" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Arrow pointing right -->
+  <path d="M100 60 L85 48 L85 55 L70 55 L70 65 L85 65 L85 72 Z" fill="#22d3ee" stroke="#0e7490" stroke-width="2"/>
+  <!-- Motion lines -->
+  <line x1="65" y1="40" x2="75" y2="40" stroke="#a855f7" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <line x1="65" y1="80" x2="75" y2="80" stroke="#a855f7" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <!-- Sparkle -->
+  <path d="M95 30 L97 25 L99 30 L104 32 L99 34 L97 39 L95 34 L90 32 Z" fill="#fbbf24"/>
+</svg>

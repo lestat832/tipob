@@ -1,0 +1,25 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blobGradient" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#a855f7"/>
+      <stop offset="100%" style="stop-color:#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <!-- Main blob body -->
+  <ellipse cx="70" cy="60" rx="26" ry="26" fill="url(#blobGradient)"/>
+  <!-- Determined eyes -->
+  <circle cx="62" cy="55" r="5" fill="white"/>
+  <circle cx="78" cy="55" r="5" fill="white"/>
+  <circle cx="60" cy="55" r="2" fill="#1a1a2e"/>
+  <circle cx="76" cy="55" r="2" fill="#1a1a2e"/>
+  <!-- Determined eyebrows -->
+  <line x1="58" y1="48" x2="66" y2="50" stroke="#1a1a2e" stroke-width="2" stroke-linecap="round"/>
+  <line x1="74" y1="50" x2="82" y2="48" stroke="#1a1a2e" stroke-width="2" stroke-linecap="round"/>
+  <!-- Small grin -->
+  <path d="M64 68 Q70 72 76 68" stroke="#1a1a2e" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Arrow pointing left -->
+  <path d="M20 60 L35 48 L35 55 L50 55 L50 65 L35 65 L35 72 Z" fill="#22d3ee" stroke="#0e7490" stroke-width="2"/>
+  <!-- Motion lines -->
+  <line x1="55" y1="40" x2="45" y2="40" stroke="#a855f7" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <line x1="55" y1="80" x2="45" y2="80" stroke="#a855f7" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+</svg>

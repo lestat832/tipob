@@ -13,9 +13,8 @@ struct GestureCellView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            // Gesture symbol with vibrant styling
-            Text(gesture.symbol)
-                .font(.system(size: size * 0.45))
+            // Gesture visual with vibrant styling
+            gestureVisual
                 .frame(width: size, height: size * 0.75)
                 .background(
                     RoundedRectangle(cornerRadius: 14)
@@ -45,6 +44,25 @@ struct GestureCellView: View {
                 .minimumScaleFactor(0.7)
         }
         .frame(width: size + 10)
+    }
+
+    // MARK: - Gesture Visual
+
+    @ViewBuilder
+    private var gestureVisual: some View {
+        let displaySize = size * 0.45
+        if GestureVisualProvider.useV2Images,
+           let assetName = GestureVisualProvider.v2AssetName(for: gesture) {
+            // V2: Image from Assets2.xcassets
+            Image(assetName)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: displaySize, height: displaySize)
+        } else {
+            // V1: Symbol
+            Text(gesture.symbol)
+                .font(.system(size: displaySize))
+        }
     }
 }
 

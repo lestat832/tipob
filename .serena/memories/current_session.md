@@ -1,49 +1,35 @@
-# Session Summary - 2025-12-18
+# Session Summary - 2025-12-19
 
 ## Completed Tasks
-- ✅ Implemented Gesture Helper Text feature across all game modes
-  - Added `showHelperText` parameter to ArrowView and StroopPromptView
-  - UserSettings.showGestureNames default changed to `true`
-  - SettingsView toggle enabled
-  - ClassicMode, MemoryMode, Pass&Play show helper text
-  - PvP mode explicitly passes `false` (never shows)
-  - Stroop shows special instruction: "Swipe toward the TEXT color (not the word)"
+- **Gesture Pack V2 Implementation** - V2 images now default, V1 as fallback
+  - Created `GestureVisualProvider.swift` - centralized V1/V2 switching logic
+  - Added `useV1GestureFallback` flag to `DevConfigManager.swift`
+  - Modified `ArrowView.swift` to use provider for gesture visuals
+  - Modified `GestureCellView.swift` to use provider for gesture visuals
+  - Added "Visual Settings" section to `DevPanelView.swift` with V1 fallback toggle
 
-- ✅ Created reusable toggle UI components
-  - `SettingToggleRow` - Full-width settings rows with frosted glass styling
-  - `FrostedToggle` - Custom toggle with neon accent
-  - `DiscreetModeCompactToggle` - Compact pill for menu bar
-  - `CompactFrostedToggle` - Smaller toggle variant
-  - Dynamic emoji support (🤫/🤪 for Discreet Mode)
+## Key Behavior
+- **Release builds**: Always use V2 images (no toggle available)
+- **Debug/TestFlight**: V2 by default, can toggle to V1 via DevPanel → Visual Settings
 
-- ✅ Updated SettingsView.swift with new toggle components
-- ✅ Updated MenuView.swift with DiscreetModeCompactToggle
+## Files Changed This Session
+- `Tipob/Utilities/GestureVisualProvider.swift` (NEW)
+- `Tipob/Utilities/DevConfigManager.swift` (added useV1GestureFallback flag)
+- `Tipob/Components/ArrowView.swift` (V1/V2 switching)
+- `Tipob/Components/GestureCellView.swift` (V1/V2 switching)
+- `Tipob/Views/DevPanelView.swift` (Visual Settings section)
 
-## Files Created
-- `Tipob/Components/SettingToggleRow.swift` (needs Xcode project target addition)
-
-## Files Modified
-- `Tipob/Utilities/UserSettings.swift` - default to true
-- `Tipob/Views/SettingsView.swift` - new toggle UI
-- `Tipob/Views/MenuView.swift` - DiscreetModeCompactToggle
-- `Tipob/Components/ArrowView.swift` - showHelperText parameter
-- `Tipob/Components/StroopPromptView.swift` - showHelperText + special instruction
-- `Tipob/Views/ClassicModeView.swift` - passes showHelperText
-- `Tipob/Views/SequenceDisplayView.swift` - passes showHelperText
-- `Tipob/Views/GameVsPlayerVsPlayerView.swift` - passes showHelperText
-- `Tipob/Views/PlayerVsPlayerView.swift` - explicitly false
+## Previous Work (Verified, Not Committed)
+- Post-ad countdown timer (3, 2, 1, START)
+- PvP auto-start bypass name entry on replay
+- Settings screen with Sound/Haptics toggles
 
 ## Next Session
-- Add `SettingToggleRow.swift` to Xcode project target
-- Test toggle UI in Settings and Menu
-- Verify helper text displays correctly in all modes
-- Test PvP mode confirms helper text never shows
+- Test V2 gesture visuals in all game modes
+- Verify V1 fallback toggle works in DevPanel
+- Consider Build 8 TestFlight with V2 gesture pack
 
 ## Key Decisions
-- Helper text enabled by default for new users
-- PvP mode NEVER shows helper text (hardcoded false)
-- Stroop has special instruction text instead of gesture name
-- Opacity-based hiding prevents layout jumps
-
-## Blockers/Issues
-- New file `SettingToggleRow.swift` created via CLI needs manual addition to Xcode project
+- V2 is the production default (user's explicit request)
+- V1 retained as debugging fallback only
+- No color tinting on V2 images (displayed as-is from PDF assets)
