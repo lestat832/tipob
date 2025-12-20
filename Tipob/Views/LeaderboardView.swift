@@ -29,9 +29,18 @@ struct LeaderboardView: View {
                         .animation(.easeInOut, value: selectedMode)
                 }
             }
-            .navigationTitle("🏆 High Scores")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 8) {
+                        Image("icon_trophy_default")
+                            .resizable()
+                            .renderingMode(.original)
+                            .frame(width: 56, height: 56)
+                        Text("High Scores")
+                            .font(.headline)
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         dismiss()
@@ -120,9 +129,10 @@ struct LeaderboardRow: View {
 
             // Trophy for top 3
             if rank <= 3 {
-                Image(systemName: "trophy.fill")
-                    .font(.title2)
-                    .foregroundColor(trophyColor)
+                Image("icon_trophy_default")
+                    .resizable()
+                    .renderingMode(.original)
+                    .frame(width: 56, height: 56)
             }
         }
         .padding()

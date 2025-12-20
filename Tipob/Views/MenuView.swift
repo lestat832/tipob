@@ -28,15 +28,11 @@ struct MenuView: View {
                         HapticManager.shared.impact()
                         showingLeaderboard = true
                     }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.toyBoxButtonBg)
-                                .frame(width: 44, height: 44)
-                                .shadow(color: .black.opacity(0.2), radius: 3, x: 0, y: 2)
-
-                            Text("🏆")
-                                .font(.system(size: 20))
-                        }
+                        Image("icon_trophy_default")
+                            .resizable()
+                            .renderingMode(.original)
+                            .frame(width: 56, height: 56)
+                            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
 
                     Spacer()
@@ -46,16 +42,11 @@ struct MenuView: View {
                         HapticManager.shared.impact()
                         showingSettings = true
                     }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.toyBoxButtonBg)
-                                .frame(width: 44, height: 44)
-                                .shadow(color: .black.opacity(0.2), radius: 3, x: 0, y: 2)
-
-                            Image(systemName: "gearshape.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white)
-                        }
+                        Image("icon_settings_default")
+                            .resizable()
+                            .renderingMode(.original)
+                            .frame(width: 56, height: 56)
+                            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
                     .accessibilityLabel("Settings")
                 }

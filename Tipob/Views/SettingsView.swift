@@ -31,7 +31,7 @@ struct SettingsView: View {
                             isOn: $showGestureNames,
                             title: "Gesture Names",
                             subtitle: "Show helper text below icons",
-                            emoji: "💬"
+                            iconName: "icon_chat_default"
                         )
 
                         // Sound Effects
@@ -39,7 +39,7 @@ struct SettingsView: View {
                             isOn: $soundEnabled,
                             title: "Sound Effects",
                             subtitle: "Play sounds during gameplay",
-                            emoji: "🔊"
+                            iconName: "icon_sound_default"
                         )
 
                         // Haptics
@@ -47,7 +47,7 @@ struct SettingsView: View {
                             isOn: $hapticsEnabled,
                             title: "Haptics",
                             subtitle: "Vibration feedback for gestures",
-                            emoji: "📳"
+                            iconName: "gesture_shake_default"
                         )
                     }
                     .padding(.horizontal, 20)

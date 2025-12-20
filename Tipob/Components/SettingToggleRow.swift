@@ -7,12 +7,19 @@ struct SettingToggleRow: View {
     let title: String
     var subtitle: String? = nil
     var emoji: String? = nil
+    var iconName: String? = nil
     var isDisabled: Bool = false
 
     var body: some View {
         HStack(spacing: 12) {
-            // Leading emoji (decorative, hidden from VoiceOver)
-            if let emoji = emoji {
+            // Leading icon (decorative, hidden from VoiceOver)
+            if let iconName = iconName {
+                Image(iconName)
+                    .resizable()
+                    .renderingMode(.original)
+                    .frame(width: 56, height: 56)
+                    .accessibilityHidden(true)
+            } else if let emoji = emoji {
                 Text(emoji)
                     .font(.system(size: 24))
                     .accessibilityHidden(true)

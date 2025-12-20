@@ -20,8 +20,10 @@ struct GameOverView: View {
                 // High Score Banner (if new high score)
                 if viewModel.isNewHighScore {
                     VStack(spacing: 8) {
-                        Text("🏆")
-                            .font(.system(size: 60))
+                        Image("icon_trophy_default")
+                            .resizable()
+                            .renderingMode(.original)
+                            .frame(width: 56, height: 56)
 
                         Text("NEW HIGH SCORE!")
                             .font(.system(size: 28, weight: .black, design: .rounded))
@@ -173,7 +175,10 @@ struct GameOverView: View {
                             showingLeaderboard = true
                         }) {
                             HStack {
-                                Image(systemName: "trophy.fill")
+                                Image("icon_trophy_default")
+                                    .resizable()
+                                    .renderingMode(.original)
+                                    .frame(width: 56, height: 56)
                                 Text("High Scores")
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                             }
@@ -198,14 +203,11 @@ struct GameOverView: View {
                 HapticManager.shared.impact()
                 showDevPanel = true
             }) {
-                Image(systemName: "gearshape.fill")
-                    .font(.title)
-                    .foregroundColor(.white)
-                    .padding(12)
-                    .background(
-                        Circle()
-                            .fill(Color.black.opacity(0.3))
-                    )
+                Image("icon_settings_default")
+                    .resizable()
+                    .renderingMode(.original)
+                    .frame(width: 56, height: 56)
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     .padding(8)
             }
             #endif
