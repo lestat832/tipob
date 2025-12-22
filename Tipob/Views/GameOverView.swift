@@ -16,8 +16,8 @@ struct GameOverView: View {
             Color.toyBoxGameOverGradient
             .ignoresSafeArea()
 
-            VStack(spacing: 30) {
-                // High Score Banner (if new high score)
+            VStack(spacing: 0) {
+                // High Score Banner (if new high score) - NOT a header
                 if viewModel.isNewHighScore {
                     VStack(spacing: 8) {
                         Image("icon_trophy_default")
@@ -26,54 +26,49 @@ struct GameOverView: View {
                             .frame(width: 56, height: 56)
 
                         Text("NEW HIGH SCORE!")
-                            .font(.system(size: 28, weight: .black, design: .rounded))
-                            .foregroundColor(.toyBoxTap)
-                            .shadow(color: .orange, radius: 10)
+                            .font(.system(size: 24, weight: .black, design: .rounded))
+                            .foregroundColor(.yellow)
+                            .shadow(color: .orange, radius: 8)
                     }
                     .scaleEffect(textScale)
                     .opacity(opacity)
-                    .padding(.bottom, 10)
+                    .padding(.top, 60)
                 }
 
-                Text("GAME OVER")
-                    .font(.system(size: 48, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
-                    .scaleEffect(textScale)
-                    .opacity(opacity)
+                Spacer()
 
-                VStack(spacing: 15) {
+                // HERO - Score or Round (no "GAME OVER" header)
+                VStack(spacing: 20) {
                     if viewModel.isClassicMode {
-                        // Classic Mode - show Score
-                        HStack {
-                            Text("Score:")
-                                .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                .foregroundColor(.white.opacity(0.8))
-                            Text("\(viewModel.classicModeModel.score)")
-                                .font(.system(size: 36, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
+                        // Classic Mode - Score as hero
+                        Text("Score: \(viewModel.classicModeModel.score)")
+                            .font(.system(size: 48, weight: .black, design: .rounded))
+                            .foregroundColor(.white)
+                            .scaleEffect(textScale)
+                            .opacity(opacity)
+
+                        // Stat line: Best score (if exists)
+                        if viewModel.classicModeModel.bestScore > 0 {
+                            Text("Best: \(viewModel.classicModeModel.bestScore)")
+                                .font(.system(size: 24, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white.opacity(0.9))
+                                .opacity(opacity)
                         }
                     } else {
-                        // Memory Mode - show Round
-                        HStack {
-                            Text("Round:")
-                                .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                .foregroundColor(.white.opacity(0.8))
-                            Text("\(viewModel.gameModel.round)")
-                                .font(.system(size: 36, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                        }
+                        // Memory Mode - Round as hero
+                        Text("Round: \(viewModel.gameModel.round)")
+                            .font(.system(size: 48, weight: .black, design: .rounded))
+                            .foregroundColor(.white)
+                            .scaleEffect(textScale)
+                            .opacity(opacity)
 
-                        HStack {
-                            Text("Best Streak:")
-                                .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                .foregroundColor(.white.opacity(0.8))
-                            Text("\(viewModel.gameModel.bestStreak)")
-                                .font(.system(size: 36, weight: .bold, design: .rounded))
-                                .foregroundColor(.toyBoxTap)
-                        }
+                        // Stat line: Best streak
+                        Text("Best: \(viewModel.gameModel.bestStreak)")
+                            .font(.system(size: 24, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white.opacity(0.9))
+                            .opacity(opacity)
                     }
                 }
-                .opacity(opacity)
 
                 Spacer()
 
@@ -137,6 +132,7 @@ struct GameOverView: View {
                         )
                     }
 
+                    // Secondary CTAs (equal width)
                     HStack(spacing: 15) {
                         // Home Button
                         Button(action: {
@@ -157,12 +153,14 @@ struct GameOverView: View {
                         }) {
                             HStack {
                                 Image(systemName: "house.fill")
+                                    .font(.system(size: 16))
                                 Text("Home")
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 30)
-                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 15)
+                            .padding(.vertical, 15)
                             .background(
                                 Capsule()
                                     .fill(Color.white.opacity(0.3))
@@ -178,24 +176,26 @@ struct GameOverView: View {
                                 Image("icon_trophy_default")
                                     .resizable()
                                     .renderingMode(.original)
-                                    .frame(width: 56, height: 56)
+                                    .frame(width: 40, height: 40)
+                                    .padding(.vertical, -12)
                                 Text("High Scores")
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 30)
-                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 15)
+                            .padding(.vertical, 15)
                             .background(
                                 Capsule()
-                                    .fill(Color.toyBoxTap.opacity(0.4))
+                                    .fill(Color.white.opacity(0.3))
                             )
                         }
                     }
+                    .padding(.horizontal, 20)
                 }
                 .opacity(opacity)
-                .padding(.bottom, 50)
+                .padding(.bottom, 40)
             }
-            .padding(.top, 100)
         }
         .overlay(alignment: .topTrailing) {
             #if DEBUG || TESTFLIGHT

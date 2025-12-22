@@ -1,38 +1,32 @@
-# Session Summary - 2025-12-19
+# Session Summary - 2025-12-22
 
 ## Completed Tasks
-- Standardized ALL trophy icons (`icon_trophy_default`) to 56x56 across the app:
-  - MenuView (home nav button)
-  - LeaderboardView (toolbar + rank rows)
-  - GameOverView (banner + High Scores button)
-  - GameVsPlayerVsPlayerView (banner + High Scores button)
-  - PlayerVsPlayerView (banner + High Scores button)
-
-- Standardized ALL settings icons (`icon_settings_default`) to 56x56:
-  - MenuView (settings button)
-  - GameOverView (DevPanel)
-  - GameVsPlayerVsPlayerView (DevPanel)
-  - PlayerVsPlayerView (DevPanel)
-
-- Updated Settings screen with new image assets at 56x56:
-  - Added `iconName` parameter to `SettingToggleRow` component
-  - Gesture Names → `icon_chat_default`
-  - Sound Effects → `icon_sound_default`
-  - Haptics → `gesture_shake_default`
+- ✅ Unified End Card System across all game modes (Classic, Memory, Pass & Play, PvP, Tutorial)
+- ✅ Removed all headers ("GAME OVER!", "Game Over!", "Tutorial Complete!") - hero outcome is now first element
+- ✅ Simplified stats to max 2 lines per mode
+- ✅ Fixed equal-width secondary CTAs (Home / High Scores)
+- ✅ Trophy icon in High Scores button: 40x40 with `.padding(.vertical, -12)` to maintain button height
+- ✅ Reduced horizontal padding from 25pt to 15pt to prevent text wrapping
+- ✅ Fixed brace mismatch build error in PlayerVsPlayerView
+- ✅ Added Settings icons (56x56) to SettingsView with custom assets
 
 ## Key Files Modified
-- `SettingToggleRow.swift` - Added iconName support
-- `SettingsView.swift` - Using new icon assets
-- `LeaderboardView.swift` - Trophy 56x56
-- `GameOverView.swift` - Trophy/Settings 56x56
-- `GameVsPlayerVsPlayerView.swift` - Trophy/Settings 56x56
-- `PlayerVsPlayerView.swift` - Trophy/Settings 56x56
-- `MenuView.swift` - Trophy/Settings 56x56
-
-## Next Session
-- Test all icon changes visually
-- Consider if 56x56 in toolbar/list rows needs adjustment
+- `Tipob/Views/GameOverView.swift` - Classic/Memory end screen
+- `Tipob/Views/PlayerVsPlayerView.swift` - Pass & Play end screen
+- `Tipob/Views/GameVsPlayerVsPlayerView.swift` - PvP end screen
+- `Tipob/Views/TutorialCompletionView.swift` - Tutorial completion screen
+- `Tipob/Views/SettingsView.swift` - Settings icons
+- `Tipob/Components/SettingToggleRow.swift` - Icon support
 
 ## Key Decisions
-- All icons standardized to 56x56 for visual consistency
-- SettingToggleRow keeps backward compatibility (emoji still works)
+- Trophy icon: 40x40 with negative vertical padding (-12pt) to show detail without expanding button
+- Secondary button padding: 15pt horizontal (reduced from 25pt) to prevent text wrapping
+- Hero-first layout: No header text, score/winner is the first and largest element
+
+## Next Session
+- QA testing across all end screens on device
+- Verify button sizing consistency on different screen sizes
+- Consider extracting reusable EndScreenConfig pattern if more modes added
+
+## Blockers/Issues
+- None - all issues resolved

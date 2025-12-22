@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TutorialCompletionView: View {
     @ObservedObject var viewModel: GameViewModel
+    let onPlayNow: () -> Void
     let onKeepPracticing: () -> Void
     let onComplete: () -> Void
 
@@ -11,94 +12,104 @@ struct TutorialCompletionView: View {
 
     var body: some View {
         ZStack {
-            // Semi-transparent background
-            Color.black.opacity(0.4)
+            // Full-screen gradient background
+            Color.toyBoxMenuGradient
                 .ignoresSafeArea()
 
-            // Completion card
-            VStack(spacing: 35) {
-                // Celebration emoji
-                Text("🎓✨")
-                    .font(.system(size: 80))
-                    .scaleEffect(textScale)
-                    .opacity(opacity)
+            VStack(spacing: 0) {
+                Spacer()
 
-                // Main title
-                Text("You've Mastered\nthe Basics!")
-                    .font(.system(size: 42, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
+                // HERO (no header - hero is first element)
+                Text("You've Mastered the Basics!")
+                    .font(.system(size: 48, weight: .black, design: .rounded))
+                    .foregroundColor(.yellow)
                     .multilineTextAlignment(.center)
                     .scaleEffect(textScale)
                     .opacity(opacity)
 
-                // Subtitle
-                Text("Great job! You completed 2 rounds")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                // STAT LINE
+                Text("Gestures: 14 / 14")
+                    .font(.system(size: 24, weight: .semibold, design: .rounded))
                     .foregroundColor(.white.opacity(0.9))
                     .opacity(opacity)
+                    .padding(.top, 20)
 
                 Spacer()
-                    .frame(height: 20)
 
-                // Buttons
-                VStack(spacing: 15) {
-                    // Keep Practicing button (primary)
+                // BOTTOM: Buttons
+                VStack(spacing: 20) {
+                    // Primary CTA - Play Now
                     Button(action: {
-                        AnalyticsManager.shared.logTutorialContinue()
                         HapticManager.shared.impact()
-                        onKeepPracticing()
+                        onPlayNow()
                     }) {
-                        HStack(spacing: 10) {
-                            Text("Keep Practicing")
-                                .font(.system(size: 22, weight: .bold, design: .rounded))
-                            Text("🔄")
+                        HStack {
+                            Image(systemName: "play.fill")
                                 .font(.system(size: 20))
+                            Text("Play Now")
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
                         }
-                        .foregroundColor(Color.toyBoxButtonText)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(Color.toyBoxButtonBg)
-                        .cornerRadius(15)
-                        .shadow(color: Color.toyBoxButtonBg.opacity(0.4), radius: 10, x: 0, y: 5)
-                    }
-
-                    // I'm Done button (secondary)
-                    Button(action: {
-                        HapticManager.shared.success()
-                        onComplete()
-                    }) {
-                        HStack(spacing: 10) {
-                            Text("I'm Done")
-                                .font(.system(size: 22, weight: .bold, design: .rounded))
-                            Text("✓")
-                                .font(.system(size: 20))
-                        }
-                        .foregroundColor(Color.toyBoxButtonBg)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
+                        .padding(.vertical, 20)
                         .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: [.white, .white.opacity(0.9)]),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
+                            RoundedRectangle(cornerRadius: 15)
+                                .fill(Color.green)
                         )
-                        .cornerRadius(15)
-                        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
                     }
+                    .padding(.horizontal, 30)
+                    .scaleEffect(buttonScale)
+                    .opacity(opacity)
+
+                    // Secondary CTAs (HStack)
+                    HStack(spacing: 15) {
+                        // Home button
+                        Button(action: {
+                            HapticManager.shared.impact()
+                            onComplete()
+                        }) {
+                            HStack {
+                                Image(systemName: "house.fill")
+                                    .font(.system(size: 16))
+                                Text("Home")
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 25)
+                            .padding(.vertical, 15)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white.opacity(0.3))
+                            )
+                        }
+
+                        // Practice More button
+                        Button(action: {
+                            AnalyticsManager.shared.logTutorialContinue()
+                            HapticManager.shared.impact()
+                            onKeepPracticing()
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 16))
+                                Text("Practice More")
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 25)
+                            .padding(.vertical, 15)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white.opacity(0.3))
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .scaleEffect(buttonScale)
+                    .opacity(opacity)
                 }
-                .padding(.horizontal, 30)
-                .scaleEffect(buttonScale)
-                .opacity(opacity)
+                .padding(.bottom, 40)
             }
-            .padding(.vertical, 60)
-            .padding(.horizontal, 30)
-            .background(
-                RoundedRectangle(cornerRadius: 25)
-                    .fill(Color.toyBoxMenuGradient)
-                    .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
-            )
-            .padding(.horizontal, 40)
         }
         .onAppear {
             // Animate entrance

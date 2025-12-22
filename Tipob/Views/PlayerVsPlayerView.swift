@@ -359,9 +359,8 @@ struct PlayerVsPlayerView: View {
     // MARK: - Results View
 
     private var resultsView: some View {
-        ScrollView {
-            VStack(spacing: 40) {
-            // High Score Banner (if new high score)
+        VStack(spacing: 0) {
+            // High Score Banner (if new high score) - NOT a header
             if isNewHighScore {
                 VStack(spacing: 8) {
                     Image("icon_trophy_default")
@@ -374,70 +373,28 @@ struct PlayerVsPlayerView: View {
                         .foregroundColor(.yellow)
                         .shadow(color: .orange, radius: 8)
                 }
-                .padding(.top, 40)
+                .padding(.top, 60)
             }
-
-            Text("Game Over!")
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .padding(.top, isNewHighScore ? 0 : 60)
 
             Spacer()
 
-            // Winner announcement
+            // HERO - Winner announcement (no "Game Over!" header)
             VStack(spacing: 20) {
                 if let winner = winner {
-                    Text("\(winner)")
+                    Text("\(winner) Wins!")
                         .font(.system(size: 48, weight: .black, design: .rounded))
                         .foregroundColor(.yellow)
-
-                    Text("Wins!")
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
                 } else {
                     Text("Draw!")
                         .font(.system(size: 48, weight: .black, design: .rounded))
                         .foregroundColor(.orange)
                 }
 
+                // Stat line: Round
                 Text("Round: \(currentRound)")
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
                     .foregroundColor(.white.opacity(0.9))
-                    .padding(.top, 10)
-
-                Text("Chain Length: \(sequence.count)")
-                    .font(.system(size: 20, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.8))
-            }
-
-            Spacer()
-
-            // Stats
-            VStack(spacing: 15) {
-                Text("Session Best: \(longestSequence)")
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.9))
-
-                HStack(spacing: 30) {
-                    VStack(spacing: 5) {
-                        Text("\(player1Name)")
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(.white.opacity(0.8))
-                        Text("\(player1Wins) Wins")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(.white.opacity(0.7))
-                    }
-
-                    VStack(spacing: 5) {
-                        Text("\(player2Name)")
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(.white.opacity(0.8))
-                        Text("\(player2Wins) Wins")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(.white.opacity(0.7))
-                    }
-                }
-                .padding(.top, 10)
             }
 
             Spacer()
@@ -488,8 +445,9 @@ struct PlayerVsPlayerView: View {
                 }
                 .padding(.horizontal, 30)
 
+                // Secondary CTAs (equal width)
                 HStack(spacing: 15) {
-                    // Back to Menu button
+                    // Home button
                     Button(action: {
                         // Show ad if available, then go home
                         if AdManager.shared.shouldShowEndOfGameAd() {
@@ -506,11 +464,13 @@ struct PlayerVsPlayerView: View {
                     }) {
                         HStack {
                             Image(systemName: "house.fill")
+                                .font(.system(size: 16))
                             Text("Home")
                                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                         }
                         .foregroundColor(.white)
-                        .padding(.horizontal, 25)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 15)
                         .padding(.vertical, 15)
                         .background(
                             Capsule()
@@ -518,7 +478,7 @@ struct PlayerVsPlayerView: View {
                         )
                     }
 
-                    // Leaderboard button
+                    // High Scores button
                     Button(action: {
                         showingLeaderboard = true
                     }) {
@@ -526,23 +486,24 @@ struct PlayerVsPlayerView: View {
                             Image("icon_trophy_default")
                                 .resizable()
                                 .renderingMode(.original)
-                                .frame(width: 56, height: 56)
+                                .frame(width: 40, height: 40)
+                                .padding(.vertical, -12)
                             Text("High Scores")
                                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                         }
                         .foregroundColor(.white)
-                        .padding(.horizontal, 25)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 15)
                         .padding(.vertical, 15)
                         .background(
                             Capsule()
-                                .fill(Color.yellow.opacity(0.4))
+                                .fill(Color.white.opacity(0.3))
                         )
                     }
                 }
                 .padding(.horizontal, 20)
             }
             .padding(.bottom, 40)
-            }
         }
         .sheet(isPresented: $showingLeaderboard) {
             LeaderboardView()

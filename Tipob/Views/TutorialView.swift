@@ -203,6 +203,9 @@ struct TutorialView: View {
             if showCompletionSheet {
                 TutorialCompletionView(
                     viewModel: viewModel,
+                    onPlayNow: {
+                        playNowAfterTutorial()
+                    },
                     onKeepPracticing: {
                         restartTutorial()
                     },
@@ -346,6 +349,14 @@ struct TutorialView: View {
         }
         // Always return to menu
         viewModel.resetToMenu()
+    }
+
+    private func playNowAfterTutorial() {
+        // Mark tutorial as complete
+        hasCompletedTutorial = true
+        selectedModeRawValue = GameMode.classic.rawValue
+        // Start Classic Mode directly
+        viewModel.startClassic()
     }
 
     // MARK: - Helper Functions
