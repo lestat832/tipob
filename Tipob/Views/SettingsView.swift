@@ -7,6 +7,7 @@ struct SettingsView: View {
     @State private var showGestureNames: Bool = UserSettings.showGestureNames
     @State private var soundEnabled: Bool = UserSettings.soundEnabled
     @State private var hapticsEnabled: Bool = UserSettings.hapticsEnabled
+    @State private var showingShareSheet = false
 
     var body: some View {
         NavigationView {
@@ -52,6 +53,22 @@ struct SettingsView: View {
                     }
                     .padding(.horizontal, 20)
 
+                    // Share section (visual separation)
+                    VStack(spacing: 12) {
+                        Button {
+                            HapticManager.shared.impact()
+                            showingShareSheet = true
+                        } label: {
+                            SettingActionRow(
+                                title: "Share Out of Pocket",
+                                iconName: "icon_share_default"
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+
                     Spacer()
                 }
             }
@@ -79,6 +96,9 @@ struct SettingsView: View {
             if newValue {
                 HapticManager.shared.impact()
             }
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            ShareSheet(activityItems: [ShareContent.defaultMessage])
         }
     }
 }

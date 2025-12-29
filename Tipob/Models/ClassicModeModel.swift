@@ -8,7 +8,7 @@ struct ClassicModeModel {
     var gesturesSinceSpeedUp: Int = 0
 
     static let initialReactionTime: TimeInterval = 3.0
-    static let minimumReactionTime: TimeInterval = 1.0
+    static let minimumReactionTime: TimeInterval = 1.5
     static let speedUpInterval: Int = 3
     static let speedUpAmount: TimeInterval = 0.2
 

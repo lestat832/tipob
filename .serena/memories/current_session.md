@@ -1,32 +1,37 @@
-# Session Summary - 2025-12-22
+# Session Summary - 2025-12-28
 
 ## Completed Tasks
-- ✅ Unified End Card System across all game modes (Classic, Memory, Pass & Play, PvP, Tutorial)
-- ✅ Removed all headers ("GAME OVER!", "Game Over!", "Tutorial Complete!") - hero outcome is now first element
-- ✅ Simplified stats to max 2 lines per mode
-- ✅ Fixed equal-width secondary CTAs (Home / High Scores)
-- ✅ Trophy icon in High Scores button: 40x40 with `.padding(.vertical, -12)` to maintain button height
-- ✅ Reduced horizontal padding from 25pt to 15pt to prevent text wrapping
-- ✅ Fixed brace mismatch build error in PlayerVsPlayerView
-- ✅ Added Settings icons (56x56) to SettingsView with custom assets
+- ✅ Long Press timing fix: raised minimumReactionTime from 1.0s to 1.5s in Classic Mode
+- ✅ Share Out of Pocket CTA: added share button to Settings screen
+- ✅ Custom icons: replaced SF Symbols with icon_home_default and icon_share_default
+- ✅ ShareSheet utility: extracted from DevPanelView to shared Utilities
+- ✅ SettingActionRow component: created reusable tappable row for Settings
+- ✅ Documentation update: comprehensive PRODUCT_OVERVIEW.md and feature-scoping-document.md updates
+- ✅ Build 9 release notes: prepared for TestFlight submission
 
-## Key Files Modified
-- `Tipob/Views/GameOverView.swift` - Classic/Memory end screen
-- `Tipob/Views/PlayerVsPlayerView.swift` - Pass & Play end screen
-- `Tipob/Views/GameVsPlayerVsPlayerView.swift` - PvP end screen
-- `Tipob/Views/TutorialCompletionView.swift` - Tutorial completion screen
-- `Tipob/Views/SettingsView.swift` - Settings icons
-- `Tipob/Components/SettingToggleRow.swift` - Icon support
+## Files Changed (Uncommitted)
+- Tipob/Models/ClassicModeModel.swift (timing fix)
+- Tipob/Views/SettingsView.swift (share CTA)
+- Tipob/Views/GameOverView.swift (home icon)
+- Tipob/Views/TutorialCompletionView.swift (home icon)
+- Tipob/Views/PlayerVsPlayerView.swift (home icon)
+- Tipob/Views/GameVsPlayerVsPlayerView.swift (home icon)
+- Tipob/Views/DevPanelView.swift (removed duplicate ShareSheet)
+- Tipob/Components/SettingActionRow.swift (NEW)
+- Tipob/Utilities/ShareSheet.swift (NEW)
+- Assets: icon_home_default, icon_share_default
+
+## Build 9 Changes Summary
+- Share Out of Pocket feature in Settings
+- Custom Home and Share icons throughout app
+- Long Press timing fix (1.0s → 1.5s minimum)
 
 ## Key Decisions
-- Trophy icon: 40x40 with negative vertical padding (-12pt) to show detail without expanding button
-- Secondary button padding: 15pt horizontal (reduced from 25pt) to prevent text wrapping
-- Hero-first layout: No header text, score/winner is the first and largest element
+- DevPanelView keeps SF Symbol for export (internal dev tool)
+- Icons sized at 40x40 with -12 padding to match trophy pattern
+- ShareSheet moved to shared Utilities for reuse
 
 ## Next Session
-- QA testing across all end screens on device
-- Verify button sizing consistency on different screen sizes
-- Consider extracting reusable EndScreenConfig pattern if more modes added
-
-## Blockers/Issues
-- None - all issues resolved
+- Commit and create TestFlight Build 9
+- Test share functionality on device
+- Verify Long Press timing improvement in gameplay

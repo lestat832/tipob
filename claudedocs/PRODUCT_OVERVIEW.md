@@ -1,8 +1,8 @@
 OUT OF POCKET - PRODUCT OVERVIEW
 
-Last Updated: November 30, 2025
-Version: 3.3
-Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Production + Audio System
+Last Updated: December 28, 2025
+Version: 3.7
+Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Production + Audio System + Firebase Analytics + Settings Screen + Unified End Cards
 
 ========================================
 
@@ -50,7 +50,7 @@ Progression System:
 - Starting Speed: 3.0 seconds per gesture
 - Speed Increase: Every 3 successful gestures
 - Speed Reduction: -0.2 seconds per increase
-- Minimum Speed: 1.0 second (hard cap)
+- Minimum Speed: 1.5 seconds (hard cap, allows Long Press completion)
 
 Scoring:
 - Points awarded: 1 point per successful gesture
@@ -92,6 +92,13 @@ Timing:
 - 3.0 seconds per gesture to input
 - Timer resets after each correct gesture in sequence
 
+Gesture Buffer (Implemented December 2025):
+- Prevents missed inputs during sequence→input transition
+- Captures gestures during 0.3-0.5s transition delay
+- Immediate haptic feedback when gesture is buffered
+- Buffered gesture replays automatically when entering awaitInput state
+- Implementation: pendingGesture tracking in GameViewModel
+
 Visual Design:
 - Purple/blue gradient background
 - Animated gesture display during sequence showing
@@ -102,10 +109,10 @@ Visual Design:
 
 ========================================
 
-Game vs Player vs Player Mode
+Game vs Player vs Player Mode (Pass & Play)
 Genre: Competitive Pass-and-Play
 Icon: Two people 👥
-Status: Complete (Implemented October 20, 2025)
+Status: Complete (Implemented October 20, 2025, Enhanced December 2025)
 
 Gameplay:
 - 2-player competitive mode
@@ -120,6 +127,21 @@ Features:
 - Winner determined by highest score
 - Player indicators: "Player 1's Turn" / "Player 2's Turn"
 
+Gesture Drawer System (Implemented December 2025):
+- Slide-up drawer for gesture selection in PvP modes
+- Category-grouped gestures (Touch, Motion, Cognitive)
+- Respects Discreet Mode filtering
+- Randomized playful header titles ("Pick Your Poison", "Your Move", etc.)
+- 50% screen height with swipe-to-dismiss
+- Pulsing animation on tab for first 2 appearances
+- Files: GestureDrawerView.swift, GestureDrawerTabView.swift
+
+Auto-Start Bypass (Implemented December 2025):
+- Skips name entry on "Play Again" replay
+- shouldAutoStartGameVsPvP and shouldAutoStartPvP flags in GameViewModel
+- Enables seamless rapid rematches without re-entering player names
+- Countdown timer (3, 2, 1, START) leads directly into gameplay
+
 Scoring:
 - Points awarded per successful gesture
 - Scores tracked separately for each player
@@ -130,6 +152,7 @@ Visual Design:
 - Individual score displays
 - Same visual polish as other modes
 - Winner celebration screen
+- Unified End Card with trophy banner for new high scores
 
 ========================================
 
@@ -252,6 +275,230 @@ Files:
 
 Integration:
 Accessible from menu via trophy icon (top-right)
+
+========================================
+
+SETTINGS SCREEN
+
+Status: Complete (Implemented December 2025)
+
+Features:
+- Gesture Names Toggle: Show/hide helper text below gesture icons (default: ON)
+- Sound Effects Toggle: Enable/disable game sounds (default: ON)
+- Haptics Toggle: Enable/disable vibration feedback (default: ON)
+
+Implementation:
+- SettingsView.swift - SwiftUI settings UI with gradient background
+- UserSettings.swift - Persistence layer using UserDefaults
+- Real-time toggle updates without restart required
+
+Visual Design:
+- Gradient background matching GameModeSheet aesthetic
+- SettingToggleRow component for consistent toggle styling
+- Icon assets: icon_settings, icon_chat_default, icon_sound_default
+
+Integration:
+Accessible from menu via gear icon (top-left)
+
+========================================
+
+FIREBASE ANALYTICS
+
+Status: Complete (Implemented December 2025)
+
+Overview:
+Comprehensive event tracking using Firebase Analytics SDK
+
+Events Tracked:
+
+Game Events:
+- start_game: Game session begins (includes mode, discreet_mode flag)
+- end_game: Game session ends (includes mode, score, duration, endedBy reason)
+- replay_game: Player taps "Play Again" button
+- tutorial_continue: Player progresses through tutorial
+
+Gesture Events:
+- gesture_prompted: Gesture shown to player (includes gesture type)
+- gesture_completed: Correct gesture performed (includes reaction_time_ms)
+- gesture_failed: Incorrect/timeout (includes fail_reason: "timeout" or "wrong_gesture")
+
+Ad Events:
+- ad_requested: Interstitial ad load initiated
+- ad_loaded: Ad successfully loaded
+- ad_failed_to_load: Ad load failed
+- ad_shown: Ad displayed to user
+- ad_dismissed: User closed ad
+
+Settings Events:
+- discreet_mode_toggled: Discreet mode changed (includes new state)
+
+Implementation:
+- File: Tipob/Utilities/AnalyticsManager.swift
+- Type-safe event logging with Swift enums
+- Mode-specific analytics values (classic, memory, gvpvp, pvp)
+
+========================================
+
+GESTURE VISUAL SYSTEM
+
+Status: Complete (Gesture Pack V2 - December 2025)
+
+Gesture Pack V2 (Image-Based):
+- 14 gesture image assets at standardized 56x56 resolution
+- Provider: GestureVisualProvider.swift
+- Asset location: Tipob/Assets2.xcassets/
+
+Asset List:
+- gesture_swipe_up_default, gesture_swipe_down_default
+- gesture_swipe_left_default, gesture_swipe_right_default
+- gesture_tap_default, gesture_double_tap_default, gesture_long_press_default
+- gesture_pinch_default, gesture_shake_default
+- gesture_tilt_left_default, gesture_tilt_right_default
+- gesture_raise_phone_default, gesture_lower_phone_default
+
+Additional Icon Assets (56x56):
+- icon_trophy (leaderboard access)
+- icon_settings (settings screen access)
+- icon_chat_default (gesture names helper)
+- icon_sound_default (sound settings)
+
+Debug Features:
+- V1/V2 toggle available in Dev Panel (DEBUG/TESTFLIGHT only)
+- V2 enforced in production App Store builds
+
+========================================
+
+POST-AD COUNTDOWN TIMER
+
+Status: Complete (Implemented December 2025)
+
+Purpose:
+Provides smooth transition after interstitial ads with "3, 2, 1, START" countdown
+
+Visual Design:
+- Full-screen semi-transparent black overlay
+- Large centered numbers (120pt) with cyan glow
+- "START" text (72pt) with green glow
+- Scale and opacity transitions between numbers
+
+Timing:
+- Each number displays for 1.0 second
+- "START" displays for 0.25 seconds
+- Total duration: ~3.25 seconds
+
+Audio/Haptic Integration:
+- Tick sound plays on each number (3, 2, 1)
+- Impact haptic on each number
+- Start sound plays on "START"
+- Success haptic on "START"
+
+Implementation:
+- CountdownOverlayView.swift - SwiftUI component
+- GameViewModel.countdownValue - Current countdown state
+- GameViewModel.isCountdownActive - Overlay visibility flag
+- Blocks all touch interaction during countdown
+
+Integration Flow:
+1. User taps "Play Again" on Game Over screen
+2. Ad displays (if available)
+3. After ad dismisses: prepareForCountdown() activates black overlay
+4. beginCountdown() executes 3, 2, 1, START sequence
+5. Auto-start flags set, game begins immediately
+
+========================================
+
+DEV PANEL (DEBUG/TESTFLIGHT ONLY)
+
+Status: Complete (Enhanced December 2025)
+
+Purpose:
+Advanced debugging and tuning interface for gesture detection optimization
+
+Availability:
+- DEBUG builds: Full access
+- TESTFLIGHT builds: Full access (#if DEBUG || TESTFLIGHT)
+- App Store builds: Hidden
+
+Features:
+
+Gameplay Logs:
+- Records all gesture attempts with timestamps
+- Selection/filtering (select all, select failures, clear, invert)
+- Issue classification: not_detected, wrong_detection, success
+
+Sequence Replay:
+- Stores last Memory/Classic mode sequences
+- Replay sequences for debugging and reproduction
+
+Export Functions:
+- Export selected issues as JSON
+- Auto-generate XCTest code from failed gestures
+- Share via iOS share sheet
+
+Per-Gesture Testers (GestureTestView.swift):
+- Individual gesture test modes with 3-second timeout
+- Full sensor capture during test (accelerometer, gyroscope, device motion, touch)
+- Records motion/touch data for issue reproduction
+
+Live Threshold Tuning (DevConfigManager.swift):
+Adjustable parameters without rebuild:
+- Shake: threshold (2.0G), cooldown (0.5s), update interval (50Hz)
+- Tilt: angle threshold (0.44 rad/~25°), duration (0.3s), update interval (60Hz)
+- Raise/Lower: threshold (0.3G), spike threshold (0.8G), sustained duration (0.1s)
+- Swipe: min distance (50px), min velocity (80px/s), edge buffer (24px)
+- Tap: double-tap window (350ms), long press (700ms)
+- Pinch: strict (0.85), lenient (0.92), velocity threshold (-0.3)
+- Intent Locking: Pinch suppresses swipe (150ms), Hold suppresses swipe (700ms)
+- One-click reset to production values
+
+Sensor Capture (SensorCaptureBuffer.swift):
+- Circular buffer keeping last 30 samples at 60Hz (~500ms)
+- Captures: acceleration, gyroscope, device motion, touch phases
+- Device context: model, OS version, orientation, battery level, low power mode
+- Threshold snapshots at gesture time
+
+Files:
+- DevPanelView.swift - Main dev panel UI
+- DevConfigManager.swift - Threshold configuration (~200 lines)
+- GestureTestView.swift - Per-gesture testers
+- SensorCaptureBuffer.swift - Sensor data logging
+- DevPanelGestureRecognizer.swift - Dev panel access gesture
+
+========================================
+
+UNIFIED END CARD SYSTEM
+
+Status: Complete (Implemented December 2025)
+
+Purpose:
+Consistent game over screen layout across all game modes
+
+Layout Structure:
+
+Top Section (New High Score Banner):
+- Trophy icon (56x56) - only if isNewHighScore
+- "NEW HIGH SCORE!" text with yellow color and orange shadow
+
+Hero Section (Centered, No "GAME OVER" Header):
+- Mode-specific primary display:
+  - Classic Mode: "Score: X"
+  - Memory Mode: "Round: X"
+  - PvP Modes: "PlayerName Wins!" or "Draw!"
+- Secondary display: "Best: X" or "Round: X"
+- Large 48pt bold text with white color
+
+Action Buttons (Bottom, Equal Width):
+- Primary: "Play Again" (green capsule with icon)
+- Secondary Row: "Home" + "High Scores" (semi-transparent)
+
+Animations:
+- Scale and opacity on view appear
+- Spring animation (dampingFraction: 0.6)
+
+Files Modified:
+- GameOverView.swift (Classic & Memory modes)
+- GameVsPlayerVsPlayerView.swift (Game vs PvP)
+- PlayerVsPlayerView.swift (PvP)
 
 ========================================
 
@@ -469,20 +716,31 @@ Views - UI screens
 - ClassicModeView.swift - Classic mode gameplay
 - SequenceDisplayView.swift - Memory mode sequence display
 - GamePlayView.swift - Memory mode gameplay
-- GameOverView.swift - Game over screen
+- GameOverView.swift - Game over screen (unified end card)
 - TutorialView.swift - Tutorial screens
 - TutorialCompletionView.swift - Tutorial completion
+- SettingsView.swift - Settings screen with toggles
+- DevPanelView.swift - Developer panel (DEBUG/TESTFLIGHT only)
+- GestureTestView.swift - Per-gesture test interface
+- LeaderboardView.swift - High scores display
 
 Components - Reusable UI components
 - ArrowView.swift - Animated gesture arrows
 - CountdownRing.swift - Circular countdown timer
+- CountdownOverlayView.swift - Post-ad 3,2,1,START overlay
 - StroopPromptView.swift - Stroop display (~350 lines)
 - PinchGestureView.swift - Native pinch wrapper (~200 lines)
+- GestureDrawerView.swift - PvP gesture selection drawer
+- GestureDrawerTabView.swift - Drawer tab with pulsing animation
+- SettingToggleRow.swift - Settings toggle component
+- ExpandingSegmentedControl.swift - Custom mode selector
+- GestureCellView.swift - Gesture list cell
 
 Utilities - Helper classes
 - MotionGestureManager.swift - Centralized motion detection (~650 lines)
 - GestureCoordinator.swift - Conflict prevention (~80 lines)
 - GesturePoolManager.swift - Discreet/Unhinged mode pools (~90 lines)
+- GestureVisualProvider.swift - Gesture Pack V2 image provider
 - HapticManager.swift - Haptic feedback
 - FailureFeedbackManager.swift - Unified failure feedback
 - AudioManager.swift - Simplified audio system (~150 lines, AVAudioPlayer + SystemSoundID)
@@ -493,6 +751,11 @@ Utilities - Helper classes
 - PinchGestureModifier.swift - Pinch detection wrapper
 - AdManager.swift - Google AdMob singleton manager (~150 lines)
 - UIViewControllerHelper.swift - SwiftUI/UIKit presentation bridge (~80 lines)
+- AnalyticsManager.swift - Firebase Analytics event tracking
+- UserSettings.swift - User preferences persistence
+- DevConfigManager.swift - Debug threshold configuration (~200 lines)
+- SensorCaptureBuffer.swift - Motion sensor data logging (DEBUG only)
+- ErrorLogger.swift - Error tracking and logging
 
 State Machine
 Flow: Launch → Menu → [Tutorial/Classic/Memory/PvP] → Game Over → Menu
@@ -602,7 +865,7 @@ Timing Parameters
 
 Classic Mode Parameters
 - initialReactionTime: 3.0 seconds
-- minimumReactionTime: 1.0 seconds
+- minimumReactionTime: 1.5 seconds (raised from 1.0s to ensure Long Press detection)
 - speedUpInterval: 3 gestures
 - speedUpAmount: 0.2 seconds
 
@@ -870,6 +1133,23 @@ Key Files
 Total Swift Files
 23 files across the project
 
+Recent Updates (December 28, 2025):
+- Long Press timing fix: raised Classic Mode minimumReactionTime from 1.0s to 1.5s
+- Comprehensive documentation update with all December features
+
+Recent Updates (December 22, 2025):
+- Unified End Card System: consistent layout across all game modes
+- Removed "GAME OVER" headers, added trophy + "NEW HIGH SCORE!" banners
+- Equal-width CTAs with Settings icons
+- Gesture Pack V2 with standardized 56x56 image-based visuals
+
+Recent Updates (December 20, 2025):
+- PvP auto-start bypass: skip name entry on replay
+- Post-ad countdown timer: 3, 2, 1, START sequence
+- Gesture helper text toggle in Settings
+- Settings screen with Sound/Haptics toggles
+- Reusable SettingToggleRow component
+
 Recent Updates (December 15, 2025):
 - Gesture detection improvements:
   - Double tap window increased: 300ms → 350ms (more reliable detection)
@@ -877,9 +1157,17 @@ Recent Updates (December 15, 2025):
   - Hold intent lock system: gives long press priority over accidental swipes
   - Stroop gesture fix: added .contentShape(Rectangle()) for full-screen detection
   - Pinch detection fix: moved before contentShape in modifier chain
-- Analytics improvements:
+- Firebase Analytics integration complete:
+  - AnalyticsManager.swift for type-safe event logging
+  - Game events: start_game, end_game, replay_game
+  - Gesture events: gesture_prompted, gesture_completed, gesture_failed
+  - Ad events: ad_requested, ad_loaded, ad_shown, ad_dismissed
   - Added gesture_failed event with fail_reason: "timeout" or "wrong_gesture"
   - Fixed timeout race condition: gestures at timer expiration now log correctly
+- Dev Panel enhancements:
+  - Per-gesture test buttons with sensor capture
+  - XCTest code generation from failed gestures
+  - Enabled for TestFlight builds
 - Blocked tap logging for debugging tap detection issues
 
 Recent Updates (November 30, 2025):
@@ -954,7 +1242,10 @@ Version 3.0 | November 10, 2025 | Updated with 14 gestures, Stroop Mode, Discree
 Version 3.1 | November 12, 2025 | Added Google AdMob integration (TEST mode), AdManager, UIViewControllerHelper, Info.plist configuration
 Version 3.2 | November 20, 2025 | Rebranded to "Out of Pocket", new launch animation, simplified audio system (AVAudioPlayer + SystemSoundID)
 Version 3.3 | November 30, 2025 | AdMob production mode: production credentials, race condition fix, preloadIfNeeded() pattern
-Version 3.4 | December 15, 2025 | Gesture detection improvements: double tap window (350ms), hold intent lock, Stroop fix, pinch fix, gesture_failed analytics
+Version 3.4 | December 15, 2025 | Gesture detection improvements: double tap window (350ms), hold intent lock, Stroop fix, pinch fix; Firebase Analytics integration; Dev Panel enhancements with per-gesture testers
+Version 3.5 | December 20, 2025 | Settings screen with Sound/Haptics/Gesture Names toggles; Post-ad countdown timer (3,2,1,START); PvP auto-start bypass on replay; Gesture helper text feature
+Version 3.6 | December 22, 2025 | Unified End Card System across all modes; Gesture Pack V2 with 56x56 image-based visuals; standardized icons; removed GAME OVER headers
+Version 3.7 | December 28, 2025 | Long Press timing fix (minimumReactionTime 1.0s→1.5s); Comprehensive documentation update covering all December features
 
 ========================================
 

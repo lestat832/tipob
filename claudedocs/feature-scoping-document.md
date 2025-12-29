@@ -1,8 +1,8 @@
 # Out of Pocket Feature Scoping Document
-**Date**: October 10, 2025 (Updated: December 15, 2025)
+**Date**: October 10, 2025 (Updated: December 28, 2025)
 **Project**: Out of Pocket - iOS SwiftUI Bop-It Style Game
 **Purpose**: Comprehensive feature planning and decision framework
-**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (PRODUCTION) + Audio System + Gesture Detection Improvements
+**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (PRODUCTION) + Audio System + Firebase Analytics + Settings + Unified End Cards
 
 ---
 
@@ -1833,6 +1833,337 @@ enum GameMode {
 
 ---
 
+## 📊 Firebase Analytics (Implemented December 2025)
+
+### Overview
+Comprehensive event tracking using Firebase Analytics SDK for user behavior insights.
+
+**Status**: ✅ Complete
+
+### Events Tracked
+
+**Game Events:**
+| Event | Description | Parameters |
+|-------|-------------|------------|
+| start_game | Game session begins | mode, discreet_mode |
+| end_game | Game session ends | mode, score, duration, endedBy |
+| replay_game | Player taps "Play Again" | mode |
+| tutorial_continue | Tutorial progression | step |
+
+**Gesture Events:**
+| Event | Description | Parameters |
+|-------|-------------|------------|
+| gesture_prompted | Gesture shown to player | gesture_type |
+| gesture_completed | Correct gesture performed | gesture_type, reaction_time_ms |
+| gesture_failed | Incorrect/timeout gesture | gesture_type, fail_reason |
+
+**Ad Events:**
+| Event | Description | Parameters |
+|-------|-------------|------------|
+| ad_requested | Interstitial load initiated | - |
+| ad_loaded | Ad successfully loaded | - |
+| ad_failed_to_load | Ad load failed | error |
+| ad_shown | Ad displayed to user | - |
+| ad_dismissed | User closed ad | - |
+
+**Settings Events:**
+| Event | Description | Parameters |
+|-------|-------------|------------|
+| discreet_mode_toggled | Mode setting changed | enabled |
+
+### Implementation
+- **File**: `Tipob/Utilities/AnalyticsManager.swift`
+- Type-safe event logging with Swift enums
+- Mode-specific analytics values (classic, memory, gvpvp, pvp)
+- Reaction time tracking in milliseconds
+
+---
+
+## ⚙️ Settings Screen (Implemented December 2025)
+
+### Overview
+User-configurable settings for audio, haptics, and visual preferences.
+
+**Status**: ✅ Complete
+
+### Available Settings
+
+| Setting | Description | Default | Key |
+|---------|-------------|---------|-----|
+| Gesture Names | Show/hide helper text below gesture icons | ON | showGestureNames |
+| Sound Effects | Enable/disable game sounds | ON | soundEnabled |
+| Haptics | Enable/disable vibration feedback | ON | hapticsEnabled |
+
+### Implementation
+- **UI**: `SettingsView.swift` - SwiftUI settings interface
+- **Persistence**: `UserSettings.swift` - UserDefaults wrapper
+- **Component**: `SettingToggleRow.swift` - Reusable toggle row
+
+### Visual Design
+- Gradient background matching GameModeSheet aesthetic
+- Gear icon access from menu (top-left)
+- Real-time toggle updates without restart
+
+---
+
+## 🎨 Gesture Pack V2 (Implemented December 2025)
+
+### Overview
+Image-based gesture visuals replacing programmatic SF Symbols for consistent cross-platform appearance.
+
+**Status**: ✅ Complete
+
+### Asset Specifications
+- **Resolution**: 56x56 pixels (standardized)
+- **Format**: PNG with transparency
+- **Location**: `Tipob/Assets2.xcassets/`
+- **Provider**: `GestureVisualProvider.swift`
+
+### Gesture Assets (14 total)
+| Category | Assets |
+|----------|--------|
+| Swipes | gesture_swipe_up/down/left/right_default |
+| Touch | gesture_tap/double_tap/long_press_default |
+| Multi-touch | gesture_pinch_default |
+| Motion | gesture_shake_default, gesture_tilt_left/right_default |
+| Device | gesture_raise_phone/lower_phone_default |
+
+### Additional Icons (56x56)
+| Icon | Purpose |
+|------|---------|
+| icon_trophy | Leaderboard access |
+| icon_settings | Settings screen access |
+| icon_chat_default | Gesture names helper |
+| icon_sound_default | Sound settings |
+
+### Debug Features
+- V1/V2 toggle available in Dev Panel (DEBUG/TESTFLIGHT)
+- V2 enforced in production App Store builds
+
+---
+
+## ⏱️ Post-Ad Countdown Timer (Implemented December 2025)
+
+### Overview
+Smooth transition after interstitial ads with "3, 2, 1, START" countdown.
+
+**Status**: ✅ Complete
+
+### Visual Design
+- Full-screen semi-transparent black overlay
+- Large centered numbers (120pt) with cyan glow shadow
+- "START" text (72pt) with green glow shadow
+- Scale and opacity transitions between numbers
+
+### Timing Sequence
+| Phase | Duration | Display |
+|-------|----------|---------|
+| 1 | 1.0s | "3" |
+| 2 | 1.0s | "2" |
+| 3 | 1.0s | "1" |
+| 4 | 0.25s | "START" |
+
+### Audio/Haptic Integration
+- Tick sound on each number (3, 2, 1)
+- Impact haptic on each number
+- Start sound on "START"
+- Success haptic on "START"
+
+### Implementation
+- **Component**: `CountdownOverlayView.swift`
+- **State**: `GameViewModel.countdownValue`, `GameViewModel.isCountdownActive`
+- Blocks all touch interaction during countdown
+
+### Integration Flow
+1. User taps "Play Again" on Game Over
+2. Ad displays (if available)
+3. After ad: `prepareForCountdown()` activates overlay
+4. `beginCountdown()` executes sequence
+5. Auto-start flags set, game begins
+
+---
+
+## 🎯 Unified End Card System (Implemented December 2025)
+
+### Overview
+Consistent game over screen layout across all game modes.
+
+**Status**: ✅ Complete
+
+### Layout Structure
+
+**Top Section (New High Score Banner):**
+- Trophy icon (56x56) - only displays if isNewHighScore
+- "NEW HIGH SCORE!" text with yellow color and orange shadow
+
+**Hero Section (Centered):**
+- Removed "GAME OVER" header
+- Mode-specific primary display:
+  - Classic Mode: "Score: X"
+  - Memory Mode: "Round: X"
+  - PvP Modes: "PlayerName Wins!" or "Draw!"
+- Secondary display: "Best: X" or "Round: X"
+- 48pt bold white text
+
+**Action Buttons (Bottom, Equal Width):**
+- Primary: "Play Again" (green capsule with icon)
+- Secondary Row: "Home" + "High Scores" (semi-transparent)
+
+### Animation
+- Scale and opacity on view appear
+- Spring animation (dampingFraction: 0.6)
+
+### Files Modified
+- `GameOverView.swift` (Classic & Memory)
+- `GameVsPlayerVsPlayerView.swift` (Game vs PvP)
+- `PlayerVsPlayerView.swift` (PvP)
+
+---
+
+## 🎮 PvP Mode Enhancements (December 2025)
+
+### Gesture Drawer System
+
+**Status**: ✅ Complete
+
+**Purpose**: Slide-up drawer for gesture selection in PvP modes.
+
+**Features:**
+- Category-grouped gestures (Touch, Motion, Cognitive)
+- Respects Discreet Mode filtering
+- Randomized playful header titles ("Pick Your Poison", "Your Move", etc.)
+- 50% screen height with swipe-to-dismiss
+- Pulsing animation on tab for first 2 appearances
+
+**Implementation:**
+- `GestureDrawerView.swift` - Main drawer component
+- `GestureDrawerTabView.swift` - Bottom tab with animation
+
+### Auto-Start Bypass
+
+**Status**: ✅ Complete
+
+**Purpose**: Skip name entry on "Play Again" replay for rapid rematches.
+
+**Implementation:**
+- `shouldAutoStartGameVsPvP` flag in GameViewModel
+- `shouldAutoStartPvP` flag in GameViewModel
+- Countdown timer leads directly into gameplay
+- Names retained from previous game
+
+---
+
+## 🧠 Memory Mode Gesture Buffer (Implemented December 2025)
+
+### Overview
+Prevents missed inputs during sequence→input transition.
+
+**Status**: ✅ Complete
+
+### Problem Solved
+Players accidentally gesturing during the 0.3-0.5s transition delay after sequence display would lose their input.
+
+### Solution
+- Capture gestures during transition delay
+- Immediate haptic feedback when gesture is buffered
+- Replay buffered gesture automatically when entering awaitInput state
+
+### Implementation
+- `pendingGesture: GestureType?` in GameViewModel
+- `isGestureBufferEnabled: Bool` flag
+- Buffer activates after sequence finishes displaying
+- Replay occurs on state transition to `.awaitInput`
+
+---
+
+## 🛠️ Dev Panel Enhancements (December 2025)
+
+### Overview
+Advanced debugging and tuning interface for gesture detection optimization.
+
+**Status**: ✅ Complete
+
+### Availability
+- DEBUG builds: Full access
+- TESTFLIGHT builds: Full access (`#if DEBUG || TESTFLIGHT`)
+- App Store builds: Hidden
+
+### New Features
+
+**Per-Gesture Testers (GestureTestView.swift):**
+- Individual gesture test modes with 3-second timeout
+- Full sensor capture (accelerometer, gyroscope, device motion, touch)
+- Records data for issue reproduction
+
+**Export Functions:**
+- Export selected issues as JSON
+- Auto-generate XCTest code from failed gestures
+- Share via iOS share sheet
+
+**Sensor Capture (SensorCaptureBuffer.swift):**
+- Circular buffer: 30 samples at 60Hz (~500ms)
+- Captures: acceleration, gyroscope, device motion, touch phases
+- Device context: model, OS version, orientation, battery, low power mode
+
+### Files
+| File | Purpose |
+|------|---------|
+| DevPanelView.swift | Main dev panel UI |
+| DevConfigManager.swift | Threshold configuration |
+| GestureTestView.swift | Per-gesture testers |
+| SensorCaptureBuffer.swift | Sensor data logging |
+
+---
+
+## 🚀 TestFlight Preparation (December 2025)
+
+### Overview
+App Store Connect configuration and TestFlight deployment preparation.
+
+**Status**: ✅ Complete
+
+### Changes Made
+
+**Target Configuration:**
+- New "OutofPocket" target for App Store builds
+- Separate DEBUG vs TESTFLIGHT vs RELEASE configurations
+- Test ads in DEBUG/TESTFLIGHT, production ads in App Store
+
+**Bundle Identifier:**
+- Updated for production deployment
+
+**Build Configurations:**
+- `#if DEBUG` - Development builds
+- `#if TESTFLIGHT` - TestFlight beta builds
+- Neither - App Store production builds
+
+### Ad Behavior by Environment
+| Environment | Ad Type | Dev Panel |
+|-------------|---------|-----------|
+| DEBUG | Test Ads | ✅ Visible |
+| TESTFLIGHT | Test Ads | ✅ Visible |
+| App Store | Production Ads | ❌ Hidden |
+
+---
+
+## 🔒 Security Updates (December 2025)
+
+### Firebase Configuration Security
+
+**Change**: Removed `GoogleService-Info.plist` from git tracking
+
+**Rationale:**
+- Contains sensitive Firebase project credentials
+- Should not be exposed in public repositories
+- Added to `.gitignore`
+
+**Setup Instructions:**
+- New developers must obtain `GoogleService-Info.plist` from Firebase Console
+- Place in `Tipob/` directory
+- Not committed to version control
+
+---
+
 ## 💰 Monetization Strategy
 
 ### Revenue Streams - Priority Ranked
@@ -2595,13 +2926,19 @@ Priority Score = (User Value × 2) + (Business Impact × 1.5) + (Ease × 1) + (A
 | 3.0 | 2025-10-27 | Updated to 8 gestures (added Pinch 🤏 via native UIKit), Phase 1 MVP complete, added gesture roadmap with priorities | Claude Code |
 | 4.0 | 2025-11-10 | Added 7 new gestures (shake, tilt L/R, raise, lower, Stroop), implemented Discreet Mode, Leaderboard System, MotionGestureManager, completed gesture optimization (Option 1), documented Options 2 & 3 | Claude Code |
 | 4.1 | 2025-11-12 | Added Google AdMob integration (TEST mode), AdManager singleton, UIViewControllerHelper, Info.plist configuration, 49 SKAdNetwork identifiers, aggressive testing mode (ads on every tap), updated monetization roadmap | Claude Code |
+| 4.2 | 2025-11-20 | App rebranded to "Out of Pocket", new launch animation (spring scale), simplified audio system (AVAudioPlayer + SystemSoundID), removed AVAudioEngine complexity | Claude Code |
+| 4.3 | 2025-11-30 | AdMob production mode: production credentials, race condition fix, preloadIfNeeded() pattern, isLoading flag to prevent duplicate requests | Claude Code |
+| 4.4 | 2025-12-15 | Gesture detection improvements: double tap 350ms, hold intent lock, Stroop fix, pinch fix; Firebase Analytics integration; Dev Panel enhancements with per-gesture testers | Claude Code |
+| 4.5 | 2025-12-20 | Settings screen (Sound/Haptics/Gesture Names); Post-ad countdown timer (3,2,1,START); PvP auto-start bypass; Gesture helper text toggle | Claude Code |
+| 4.6 | 2025-12-22 | Unified End Card System across all modes; Gesture Pack V2 with 56x56 image-based visuals; standardized icons; removed GAME OVER headers | Claude Code |
+| 4.7 | 2025-12-28 | Long Press timing fix (minimumReactionTime 1.0s→1.5s); Memory Mode gesture buffer; Comprehensive documentation update covering all December features | Claude Code |
 
 ---
 
-**Document Status**: ✅ Phase 1 Complete with Performance Optimization + Monetization (TEST)
-**Document Version**: 4.1
-**Last Updated**: 2025-11-12
-**Next Review Date**: Before production Ad ID transition
+**Document Status**: ✅ Phase 1 Complete with Performance Optimization + Monetization (PRODUCTION) + Firebase Analytics + Settings + Unified End Cards + Long Press Fix
+**Document Version**: 4.7
+**Last Updated**: 2025-12-28
+**Next Review Date**: TBD
 **Owner**: Marc Geraldez
 
 ---

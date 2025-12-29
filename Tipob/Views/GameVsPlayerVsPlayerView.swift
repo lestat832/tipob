@@ -400,8 +400,11 @@ struct GameVsPlayerVsPlayerView: View {
                         }
                     }) {
                         HStack {
-                            Image(systemName: "house.fill")
-                                .font(.system(size: 16))
+                            Image("icon_home_default")
+                                .resizable()
+                                .renderingMode(.original)
+                                .frame(width: 40, height: 40)
+                                .padding(.vertical, -12)
                             Text("Home")
                                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                         }
