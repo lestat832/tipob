@@ -82,8 +82,8 @@ struct GameOverView: View {
 
                         HapticManager.shared.impact()
 
-                        // Check if we should show an ad
-                        if AdManager.shared.shouldShowEndOfGameAd() {
+                        // Check if we should show an ad (Play Again trigger)
+                        if AdManager.shared.shouldShowInterstitial(trigger: .playAgain, runDuration: viewModel.lastRunDuration) {
                             // Get top view controller and show ad
                             if let viewController = UIApplication.topViewController() {
                                 // Prepare countdown BEFORE showing ad (hides Game Over screen immediately)
@@ -117,8 +117,11 @@ struct GameOverView: View {
                         }
                     }) {
                         HStack {
-                            Image(systemName: "arrow.clockwise.circle.fill")
-                                .font(.title2)
+                            Image("icon_repeat_default")
+                                .resizable()
+                                .renderingMode(.original)
+                                .frame(width: 40, height: 40)
+                                .padding(.vertical, -12)
                             Text("Play Again")
                                 .font(.system(size: 22, weight: .bold, design: .rounded))
                         }
@@ -138,8 +141,8 @@ struct GameOverView: View {
                         Button(action: {
                             HapticManager.shared.impact()
 
-                            // Show ad if available, then go home
-                            if AdManager.shared.shouldShowEndOfGameAd() {
+                            // Show ad if available, then go home (Home trigger)
+                            if AdManager.shared.shouldShowInterstitial(trigger: .home, runDuration: 0) {
                                 if let viewController = UIApplication.topViewController() {
                                     AdManager.shared.showInterstitialAd(from: viewController) {
                                         viewModel.resetToMenu()

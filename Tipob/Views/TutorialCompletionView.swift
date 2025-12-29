@@ -93,8 +93,11 @@ struct TutorialCompletionView: View {
                             onKeepPracticing()
                         }) {
                             HStack {
-                                Image(systemName: "arrow.clockwise")
-                                    .font(.system(size: 16))
+                                Image("icon_repeat_default")
+                                    .resizable()
+                                    .renderingMode(.original)
+                                    .frame(width: 40, height: 40)
+                                    .padding(.vertical, -12)
                                 Text("Practice More")
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                             }

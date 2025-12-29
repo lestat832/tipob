@@ -32,6 +32,8 @@ class GameViewModel: ObservableObject {
 
     // MARK: - Analytics timing
     var gameStartTime: Date?
+    /// Duration of the last completed run (for ad gating)
+    var lastRunDuration: TimeInterval = 0
     /// Timestamp when current gesture was prompted (for reaction time calculation)
     var gesturePromptTime: Date?
     /// Reason for game ending - set before gameOver() is called
@@ -451,6 +453,9 @@ class GameViewModel: ObservableObject {
             endedBy: endedByReason,
             discreetMode: discreetModeEnabled
         )
+
+        // Save run duration for ad gating before clearing
+        lastRunDuration = Date().timeIntervalSince(gameStartTime ?? Date())
         gameStartTime = nil  // Clear to prevent reuse
 
         // Check if new high score and add to leaderboard
@@ -701,6 +706,9 @@ class GameViewModel: ObservableObject {
             endedBy: endedByReason,
             discreetMode: discreetModeEnabled
         )
+
+        // Save run duration for ad gating before clearing
+        lastRunDuration = Date().timeIntervalSince(gameStartTime ?? Date())
         gameStartTime = nil  // Clear to prevent reuse
 
         // Check if new high score and add to leaderboard

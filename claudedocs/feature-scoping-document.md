@@ -1,8 +1,8 @@
 # Out of Pocket Feature Scoping Document
-**Date**: October 10, 2025 (Updated: December 28, 2025)
+**Date**: October 10, 2025 (Updated: December 29, 2025)
 **Project**: Out of Pocket - iOS SwiftUI Bop-It Style Game
 **Purpose**: Comprehensive feature planning and decision framework
-**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (PRODUCTION) + Audio System + Firebase Analytics + Settings + Unified End Cards
+**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (PRODUCTION) + Audio System + Firebase Analytics + Settings + Unified End Cards + Ad Gating
 
 ---
 
@@ -2222,21 +2222,28 @@ App Store Connect configuration and TestFlight deployment preparation.
 
 #### Integration Points
 
-**Ad Trigger Logic:**
+**Ad Trigger Logic (Updated December 29, 2025):**
 - **Home Button**: All game over screens (GameOverView, PlayerVsPlayerView, GameVsPlayerVsPlayerView)
 - **Play Again Button**: All game over screens
-- **Frequency**: Shows on EVERY button tap if ad is loaded (testing mode)
+- **Trigger Types**: `AdTrigger` enum with `.home` and `.playAgain` cases
+- **Session Grace Period**: 30 seconds (no ads during first 30s after app launch)
+- **Cooldown**: 60 seconds between any ads (unified for all triggers)
+- **Method**: `shouldShowInterstitial(trigger:runDuration:)` checks gating before showing
+
+**Previous Logic (Nov 12):**
+- All cooldowns removed for testing purposes
+- Ad shown on EVERY button tap if loaded
 
 **Original Logic (Nov 11):**
 - 30-second cooldown between ads
 - Every 2 games minimum
 - 30-second launch protection (no ads in first 30s)
 
-**Simplified Logic (Nov 12):**
-- **All cooldowns removed** for testing purposes
-- Ad shows immediately if loaded
-- `incrementGameCount()` became no-op
-- `shouldShowEndOfGameAd()` only checks if ad is loaded
+**Current Simplified Logic (Dec 29):**
+- Removed: games count requirement, run duration minimum, trigger-specific cooldowns
+- Single unified gating: session grace (30s) + ad cooldown (60s)
+- `shouldShowInterstitial()` returns false if gating not met
+- AdManager tracks `lastAdShownTime` and `appLaunchTime` for calculations
 
 #### Info.plist Configuration
 
@@ -2298,12 +2305,12 @@ App Store Connect configuration and TestFlight deployment preparation.
 - SwiftUI views don't have direct UIViewController access
 - Helper finds topmost view controller in window hierarchy
 
-**Why Aggressive Testing Mode:**
+**Why Aggressive Testing Mode (Nov 12):**
 - User requested "show ads on EVERY tap" for validation
 - Easier to test ad integration and UX flow
-- Can dial back frequency before production launch
+- Dialed back to proper gating in Dec 29, 2025 update
 
-#### Production Transition (Completed November 30, 2025)
+#### Production Transition (Updated December 29, 2025)
 
 **Completed Steps:**
 - [x] Replace TEST Ad Unit IDs with production IDs ✅
@@ -2311,25 +2318,29 @@ App Store Connect configuration and TestFlight deployment preparation.
 - [x] Update AdManager comments to reflect production status ✅
 - [x] Fix race condition preventing ad reload ✅
 - [x] Add `preloadIfNeeded()` for reliable ad availability ✅
+- [x] Implement ad gating with `AdTrigger` enum ✅
+- [x] Simplify gating to 30s session + 60s cooldown ✅
 
 **Pending Steps:**
-- [ ] Verify ads serving after 24-48 hour ad fill period
-- [ ] Re-enable cooldown restrictions (recommended: 30s + every 2 games)
-- [ ] Test fill rates with real production ads
-- [ ] Monitor analytics for ad performance
+- [ ] Monitor ad fill rates and user experience feedback
+- [ ] Tune gating parameters based on analytics data
 
-**Recommended Production Logic (for later):**
+**Implemented Production Logic (December 29, 2025):**
 ```swift
-// Restore these constants when ready:
-private let minimumTimeBetweenAds: TimeInterval = 30.0
-private let gamesPerAd: Int = 2
-private let minimumTimeSinceLaunch: TimeInterval = 30.0
+// Current ad gating constants:
+private static let sessionMinAge: TimeInterval = 30        // 30s grace period after launch
+private static let adCooldown: TimeInterval = 60           // 60s between any ads
 
-// Restore full shouldShowEndOfGameAd() checks:
-- Time since app launch
-- Time since last ad
-- Games completed frequency
-- Ad loaded and ready
+// AdTrigger enum for type-safe trigger handling:
+enum AdTrigger {
+    case home
+    case playAgain
+}
+
+// shouldShowInterstitial() checks:
+// - Ad loaded and ready
+// - Session age >= 30s (grace period)
+// - Time since last ad >= 60s (cooldown)
 ```
 
 #### File References

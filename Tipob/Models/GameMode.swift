@@ -26,16 +26,16 @@ enum GameMode: String, CaseIterable, Identifiable {
 
     var description: String {
         switch self {
-        case .classic:
-            return "React fast! Copy gestures before time runs out — it gets faster every few rounds."
-        case .memory:
-            return "Watch and repeat the growing sequence — how long can you remember?"
         case .tutorial:
-            return "Learn the gestures"
+            return "Learn the basics"
+        case .classic:
+            return "React fast! Speed increases every round."
+        case .memory:
+            return "Memorize and repeat. How far can you go?"
         case .gameVsPlayerVsPlayer:
-            return "Take turns repeating the growing gesture sequence. One mistake and the other wins!"
+            return "Copy what the game shows. Miss one and your friend wins!"
         case .playerVsPlayer:
-            return "Take turns repeating and expanding a gesture chain. The first to mess up loses!"
+            return "Head-to-head. One mistake ends it all."
         }
     }
 

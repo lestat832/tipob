@@ -1,37 +1,32 @@
-# Session Summary - 2025-12-28
+# Session Summary - December 29, 2025
 
 ## Completed Tasks
-- ✅ Long Press timing fix: raised minimumReactionTime from 1.0s to 1.5s in Classic Mode
-- ✅ Share Out of Pocket CTA: added share button to Settings screen
-- ✅ Custom icons: replaced SF Symbols with icon_home_default and icon_share_default
-- ✅ ShareSheet utility: extracted from DevPanelView to shared Utilities
-- ✅ SettingActionRow component: created reusable tappable row for Settings
-- ✅ Documentation update: comprehensive PRODUCT_OVERVIEW.md and feature-scoping-document.md updates
-- ✅ Build 9 release notes: prepared for TestFlight submission
+- ✅ Ad gating simplification: 30s session + 60s cooldown (replaced complex multi-condition logic)
+- ✅ AdTrigger enum with .home and .playAgain cases
+- ✅ Custom icon_repeat_default asset for Play Again buttons (4 files updated)
+- ✅ UI text updates: Discreet Mode popup + game mode descriptions
+- ✅ lastRunDuration access level fix (private(set) → var)
+- ✅ Documentation updates: PRODUCT_OVERVIEW.md (v3.8) + feature-scoping-document.md
+- ✅ FUTURE_TASKS.md: Added rewarded ad continue feature spec
+- ✅ TestFlight Build 10 release notes drafted
 
-## Files Changed (Uncommitted)
-- Tipob/Models/ClassicModeModel.swift (timing fix)
-- Tipob/Views/SettingsView.swift (share CTA)
-- Tipob/Views/GameOverView.swift (home icon)
-- Tipob/Views/TutorialCompletionView.swift (home icon)
-- Tipob/Views/PlayerVsPlayerView.swift (home icon)
-- Tipob/Views/GameVsPlayerVsPlayerView.swift (home icon)
-- Tipob/Views/DevPanelView.swift (removed duplicate ShareSheet)
-- Tipob/Components/SettingActionRow.swift (NEW)
-- Tipob/Utilities/ShareSheet.swift (NEW)
-- Assets: icon_home_default, icon_share_default
-
-## Build 9 Changes Summary
-- Share Out of Pocket feature in Settings
-- Custom Home and Share icons throughout app
-- Long Press timing fix (1.0s → 1.5s minimum)
-
-## Key Decisions
-- DevPanelView keeps SF Symbol for export (internal dev tool)
-- Icons sized at 40x40 with -12 padding to match trophy pattern
-- ShareSheet moved to shared Utilities for reuse
+## Key Files Modified
+- `Tipob/Utilities/AdManager.swift` - Simplified gating logic
+- `Tipob/Views/GameOverView.swift` - Ad trigger integration
+- `Tipob/Views/PlayerVsPlayerView.swift` - Ad trigger + lastRunDuration
+- `Tipob/Views/GameVsPlayerVsPlayerView.swift` - Ad trigger + lastRunDuration
+- `Tipob/Views/TutorialCompletionView.swift` - Custom repeat icon
+- `Tipob/Models/GameMode.swift` - Updated descriptions
+- `claudedocs/PRODUCT_OVERVIEW.md` - Version 3.8
+- `claudedocs/feature-scoping-document.md` - Ad gating updates
+- `claudedocs/FUTURE_TASKS.md` - Rewarded ad feature
 
 ## Next Session
-- Commit and create TestFlight Build 9
-- Test share functionality on device
-- Verify Long Press timing improvement in gameplay
+- Build and test Build 10 on TestFlight
+- Monitor ad fill rates and user experience
+- Consider implementing rewarded ad continue feature
+
+## Key Decisions
+- Ad gating: 30s session grace period + 60s cooldown (simplified from complex logic)
+- Single unified cooldown for all triggers (no trigger-specific rules)
+- Removed: games count, run duration, trigger-specific cooldowns

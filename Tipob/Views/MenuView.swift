@@ -165,7 +165,7 @@ struct MenuView: View {
         .alert("Discreet Mode", isPresented: $showingDiscreetInfo) {
             Button("Got it!", role: .cancel) {}
         } message: {
-            Text("Filters out physical motion gestures (raise, lower) and keeps only touch gestures (swipe, tap). Perfect for playing in public!")
+            Text("Hides all motion gestures. Only touch gestures remain — perfect for playing in public.")
         }
         .onAppear {
             // Initialize ViewModel's discreet mode setting on appear

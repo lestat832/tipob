@@ -1,8 +1,8 @@
 OUT OF POCKET - PRODUCT OVERVIEW
 
-Last Updated: December 28, 2025
-Version: 3.7
-Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Production + Audio System + Firebase Analytics + Settings Screen + Unified End Cards
+Last Updated: December 29, 2025
+Version: 3.8
+Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Production + Audio System + Firebase Analytics + Settings Screen + Unified End Cards + Ad Gating
 
 ========================================
 
@@ -967,19 +967,19 @@ Implementation Architecture:
 - Integration in game over views (GameOverView, PlayerVsPlayerView, GameVsPlayerVsPlayerView)
 - GameViewModel calls `preloadIfNeeded()` on all game start methods
 
-Ad Display Logic (Updated November 12, 2025):
-- Trigger: EVERY button tap on end-of-game screens
-- Buttons: "Home" and "Play Again" both show ads
-- Frequency: No cooldowns (full testing mode)
-- Graceful Degradation: Game continues if ad fails to load
+Ad Display Logic (Updated December 29, 2025):
+- Trigger Types: `AdTrigger` enum with `.home` and `.playAgain` cases
+- Buttons: "Home" and "Play Again" both check gating logic
+- Session Grace Period: 30 seconds (no ads during first 30s after app launch)
+- Cooldown: 60 seconds between any ads (unified for all triggers)
+- Graceful Degradation: Game continues if ad fails to load or gating not met
 
-Previous Logic (November 11, 2025):
-- 30-second launch cooldown
-- 30-second inter-ad cooldown
-- Every 2 games minimum
+Previous Logic (November 12, 2025):
+- No cooldowns (full testing mode)
+- Ad on EVERY button tap
 
-Rationale for Simplification:
-Testing mode allows maximum ad impressions to validate integration, performance impact, and user experience before production deployment.
+Rationale for Current Gating:
+Simplified from complex multi-condition logic (90s session, 120s cooldown, 3 games, 20s run duration) to user-friendly 30s+60s approach that balances monetization with player experience.
 
 Ad Flow:
 1. User completes game (success or failure)
@@ -1011,11 +1011,11 @@ Files Modified:
 - GameVsPlayerVsPlayerView.swift (ad trigger integration)
 - Info.plist (49 SKAdNetwork IDs, portrait lock, scene delegate fix)
 
-Production Readiness (Updated November 30, 2025):
-- Current: PRODUCTION mode with real AdMob credentials
-- Status: Awaiting ad fill (new ad units take 24-48 hours)
-- Completed: Production IDs configured, race condition fixed, preload pattern implemented
-- Pending: Re-enable cooldown restrictions after verifying ad fill
+Production Readiness (Updated December 29, 2025):
+- Current: PRODUCTION mode with real AdMob credentials + ad gating
+- Status: Ad gating implemented (30s session + 60s cooldown)
+- Completed: Production IDs, race condition fix, preload pattern, AdTrigger enum, simplified gating
+- Pending: Monitor ad fill rates and user experience feedback
 
 Performance Impact:
 - Preloading during gameplay: Minimal (background thread)
@@ -1133,6 +1133,12 @@ Key Files
 Total Swift Files
 23 files across the project
 
+Recent Updates (December 29, 2025):
+- Ad gating simplification: 30s session delay + 60s cooldown (removed complex multi-condition logic)
+- Custom repeat icon: Replaced SF Symbol with icon_repeat_default asset for Play Again buttons
+- UI text updates: Discreet Mode popup and game mode descriptions shortened and clarified
+- AdTrigger enum: .home and .playAgain triggers with unified gating logic
+
 Recent Updates (December 28, 2025):
 - Long Press timing fix: raised Classic Mode minimumReactionTime from 1.0s to 1.5s
 - Comprehensive documentation update with all December features
@@ -1246,6 +1252,7 @@ Version 3.4 | December 15, 2025 | Gesture detection improvements: double tap win
 Version 3.5 | December 20, 2025 | Settings screen with Sound/Haptics/Gesture Names toggles; Post-ad countdown timer (3,2,1,START); PvP auto-start bypass on replay; Gesture helper text feature
 Version 3.6 | December 22, 2025 | Unified End Card System across all modes; Gesture Pack V2 with 56x56 image-based visuals; standardized icons; removed GAME OVER headers
 Version 3.7 | December 28, 2025 | Long Press timing fix (minimumReactionTime 1.0s→1.5s); Comprehensive documentation update covering all December features
+Version 3.8 | December 29, 2025 | Ad gating simplification (30s + 60s cooldown); custom icon_repeat_default asset; UI text updates for Discreet Mode and game mode descriptions
 
 ========================================
 

@@ -10,6 +10,12 @@ import Foundation
 import UIKit
 import GoogleMobileAds
 
+/// Ad trigger types for gating logic
+enum AdTrigger {
+    case home
+    case playAgain
+}
+
 /// Manages interstitial ad loading and presentation
 class AdManager: NSObject {
 
@@ -88,11 +94,10 @@ class AdManager: NSObject {
     /// Flag to prevent duplicate load requests
     private var isLoading = false
 
-    // MARK: - Configuration
+    // MARK: - Ad Gating Constants
 
-    // REMOVED COOLDOWN RESTRICTIONS FOR TESTING
-    // All timing and frequency restrictions disabled
-    // Ad shows every time if loaded
+    private static let sessionMinAge: TimeInterval = 30        // Brief grace period after app launch
+    private static let adCooldown: TimeInterval = 60           // 60s between any ads
 
     // MARK: - Initialization
 
@@ -117,17 +122,38 @@ class AdManager: NSObject {
 
     // MARK: - Public Methods
 
-    /// Check if an ad should be shown at end of game
-    /// Returns true if ad is loaded (all cooldowns removed for testing)
-    func shouldShowEndOfGameAd() -> Bool {
-        // Only check: Ad is loaded and ready
+    /// Check if an interstitial ad should be shown based on trigger type and gating rules
+    /// - Parameters:
+    ///   - trigger: The trigger type (.home or .playAgain)
+    ///   - runDuration: Duration of the completed game run (only used for playAgain)
+    ///   - now: Current time (injectable for testing)
+    /// - Returns: true if ad should be shown, false otherwise
+    func shouldShowInterstitial(trigger: AdTrigger, runDuration: TimeInterval, now: Date = Date()) -> Bool {
+        // Check if ad is loaded
         guard interstitialAd != nil else {
-            print("⏭️ Skipping ad - not loaded yet")
+            debugLog(trigger: trigger, sessionAge: 0, timeSinceLastAd: 0, decision: false, reason: "No ad loaded")
             return false
         }
 
-        print("✅ Ad loaded - ready to show")
-        return true
+        let sessionAge = now.timeIntervalSince(appLaunchTime)
+        let timeSinceLastAd = lastAdShownTime.map { now.timeIntervalSince($0) } ?? .infinity
+
+        // Brief grace period after app launch
+        guard sessionAge >= Self.sessionMinAge else {
+            debugLog(trigger: trigger, sessionAge: sessionAge, timeSinceLastAd: timeSinceLastAd, decision: false, reason: "Session too young")
+            return false
+        }
+
+        // Simple cooldown check - same for all triggers
+        let eligible = timeSinceLastAd >= Self.adCooldown
+        debugLog(trigger: trigger, sessionAge: sessionAge, timeSinceLastAd: timeSinceLastAd, decision: eligible, reason: eligible ? "Eligible" : "Cooldown not met")
+        return eligible
+    }
+
+    /// Legacy method - use shouldShowInterstitial(trigger:runDuration:) instead
+    @available(*, deprecated, message: "Use shouldShowInterstitial(trigger:runDuration:) instead")
+    func shouldShowEndOfGameAd() -> Bool {
+        return interstitialAd != nil
     }
 
     /// Show interstitial ad from the given view controller
@@ -144,14 +170,26 @@ class AdManager: NSObject {
             return
         }
 
+        // Reset counters when ad is actually shown
+        lastAdShownTime = Date()
+        gamesCompletedSinceLastAd = 0
+        #if DEBUG
+        print("📺 Presenting interstitial ad... (counters reset)")
+        #else
         print("📺 Presenting interstitial ad...")
+        #endif
+
         ad.present(from: viewController)
         // Note: Next ad is preloaded when new game starts via preloadIfNeeded()
     }
 
-    /// Increment the completed games counter (no-op - cooldowns removed)
+    /// Increment the completed games counter
+    /// Called when game over screen appears
     func incrementGameCount() {
-        // No-op: Game counting disabled for testing
+        gamesCompletedSinceLastAd += 1
+        #if DEBUG
+        print("🎮 Games since last ad: \(gamesCompletedSinceLastAd)")
+        #endif
     }
 
     /// Preload an ad if one isn't already loaded or loading
@@ -204,6 +242,25 @@ class AdManager: NSObject {
             print("✅ Interstitial ad loaded successfully")
         }
     }
+
+    // MARK: - Debug Logging
+
+    #if DEBUG
+    private func debugLog(trigger: AdTrigger, sessionAge: TimeInterval, timeSinceLastAd: TimeInterval, decision: Bool, reason: String) {
+        print("""
+        📊 Ad Gate Check:
+           Trigger: \(trigger)
+           Session Age: \(Int(sessionAge))s
+           Time Since Last Ad: \(timeSinceLastAd == .infinity ? "∞" : "\(Int(timeSinceLastAd))s")
+           Decision: \(decision ? "✅ SHOW" : "❌ SKIP")
+           Reason: \(reason)
+        """)
+    }
+    #else
+    private func debugLog(trigger: AdTrigger, sessionAge: TimeInterval, timeSinceLastAd: TimeInterval, decision: Bool, reason: String) {
+        // No-op in release builds
+    }
+    #endif
 }
 
 // MARK: - FullScreenContentDelegate

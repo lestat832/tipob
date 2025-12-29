@@ -405,8 +405,8 @@ struct PlayerVsPlayerView: View {
                     // Log replay_game analytics
                     AnalyticsManager.shared.logReplayGame(mode: .playerVsPlayer, discreetMode: viewModel.discreetModeEnabled)
 
-                    // Check if we should show an ad
-                    if AdManager.shared.shouldShowEndOfGameAd() {
+                    // Check if we should show an ad (Play Again trigger)
+                    if AdManager.shared.shouldShowInterstitial(trigger: .playAgain, runDuration: viewModel.lastRunDuration) {
                         // Get top view controller and show ad
                         if let viewController = UIApplication.topViewController() {
                             // Prepare countdown BEFORE showing ad (hides Game Over screen immediately)
@@ -430,8 +430,11 @@ struct PlayerVsPlayerView: View {
                     }
                 }) {
                     HStack {
-                        Image(systemName: "arrow.clockwise.circle.fill")
-                            .font(.title2)
+                        Image("icon_repeat_default")
+                            .resizable()
+                            .renderingMode(.original)
+                            .frame(width: 40, height: 40)
+                            .padding(.vertical, -12)
                         Text("Play Again")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
                     }
@@ -449,8 +452,8 @@ struct PlayerVsPlayerView: View {
                 HStack(spacing: 15) {
                     // Home button
                     Button(action: {
-                        // Show ad if available, then go home
-                        if AdManager.shared.shouldShowEndOfGameAd() {
+                        // Show ad if available, then go home (Home trigger)
+                        if AdManager.shared.shouldShowInterstitial(trigger: .home, runDuration: 0) {
                             if let viewController = UIApplication.topViewController() {
                                 AdManager.shared.showInterstitialAd(from: viewController) {
                                     viewModel.resetToMenu()
@@ -879,6 +882,8 @@ struct PlayerVsPlayerView: View {
             endedBy: "opponent_win",  // Other player wins due to wrong gesture
             discreetMode: viewModel.discreetModeEnabled
         )
+        // Save run duration for ad gating before clearing
+        viewModel.lastRunDuration = Date().timeIntervalSince(viewModel.gameStartTime ?? Date())
         viewModel.gameStartTime = nil
 
         // Check if new high score and add to leaderboard
@@ -931,6 +936,8 @@ struct PlayerVsPlayerView: View {
             endedBy: "timeout",  // Lost due to timeout
             discreetMode: viewModel.discreetModeEnabled
         )
+        // Save run duration for ad gating before clearing
+        viewModel.lastRunDuration = Date().timeIntervalSince(viewModel.gameStartTime ?? Date())
         viewModel.gameStartTime = nil
 
         // Check if new high score and add to leaderboard
