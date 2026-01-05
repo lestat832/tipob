@@ -154,7 +154,7 @@ private struct GestureCategorySection: View {
 
 #Preview {
     ZStack {
-        Color.toyBoxMenuGradient.ignoresSafeArea()
+        Color.toyBoxClassicGradient.ignoresSafeArea()
         GestureDrawerView(
             isExpanded: .constant(true),
             discreetMode: false,

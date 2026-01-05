@@ -5,12 +5,8 @@ struct SequenceDisplayView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [.purple.opacity(0.8), .blue.opacity(0.8)]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            Color.toyBoxGameOverGradient
+                .ignoresSafeArea()
 
             VStack {
                 Text("Watch the sequence!")

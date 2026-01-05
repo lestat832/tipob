@@ -57,7 +57,7 @@ struct GestureDrawerTabView: View {
 
 #Preview {
     ZStack {
-        Color.toyBoxMenuGradient.ignoresSafeArea()
+        Color.toyBoxClassicGradient.ignoresSafeArea()
         VStack {
             Spacer()
             GestureDrawerTabView {

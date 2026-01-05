@@ -5,7 +5,7 @@ struct ClassicModeView: View {
 
     var body: some View {
         ZStack {
-            Color.toyBoxClassicGradient
+            Color.toyBoxGameOverGradient
             .ignoresSafeArea()
 
             if viewModel.flashColor != .clear {
@@ -58,12 +58,6 @@ struct ClassicModeView: View {
                     .padding(.top, 20)
 
                 Spacer()
-
-                // Reaction time indicator
-                Text(String(format: "%.1fs", viewModel.classicModeModel.reactionTime))
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.8))
-                    .padding(.bottom, 50)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .detectPinch(

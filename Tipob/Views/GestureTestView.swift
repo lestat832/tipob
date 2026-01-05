@@ -37,7 +37,7 @@ struct GestureTestView: View {
     var body: some View {
         ZStack {
             // Background - match classic mode gradient
-            Color.toyBoxClassicGradient
+            Color.toyBoxGameOverGradient
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
 

@@ -13,7 +13,7 @@ struct TutorialCompletionView: View {
     var body: some View {
         ZStack {
             // Full-screen gradient background
-            Color.toyBoxMenuGradient
+            Color.toyBoxGameOverGradient
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -22,7 +22,7 @@ struct TutorialCompletionView: View {
                 // HERO (no header - hero is first element)
                 Text("You've Mastered the Basics!")
                     .font(.system(size: 48, weight: .black, design: .rounded))
-                    .foregroundColor(.yellow)
+                    .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .scaleEffect(textScale)
                     .opacity(opacity)
@@ -44,20 +44,23 @@ struct TutorialCompletionView: View {
                         onPlayNow()
                     }) {
                         HStack {
-                            Image(systemName: "play.fill")
-                                .font(.system(size: 20))
+                            Image("icon_play_default")
+                                .resizable()
+                                .renderingMode(.original)
+                                .frame(width: 40, height: 40)
+                                .padding(.vertical, -12)
                             Text("Play Now")
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .font(.system(size: 22, weight: .bold, design: .rounded))
                         }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
+                        .foregroundColor(Color.toyBoxButtonText)
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 15)
                         .background(
-                            RoundedRectangle(cornerRadius: 15)
-                                .fill(Color.green)
+                            Capsule()
+                                .fill(Color.toyBoxButtonBg)
+                                .shadow(radius: 5)
                         )
                     }
-                    .padding(.horizontal, 30)
                     .scaleEffect(buttonScale)
                     .opacity(opacity)
 
@@ -78,7 +81,8 @@ struct TutorialCompletionView: View {
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 25)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 15)
                             .padding(.vertical, 15)
                             .background(
                                 Capsule()
@@ -86,7 +90,7 @@ struct TutorialCompletionView: View {
                             )
                         }
 
-                        // Practice More button
+                        // Repeat button
                         Button(action: {
                             AnalyticsManager.shared.logTutorialContinue()
                             HapticManager.shared.impact()
@@ -98,11 +102,12 @@ struct TutorialCompletionView: View {
                                     .renderingMode(.original)
                                     .frame(width: 40, height: 40)
                                     .padding(.vertical, -12)
-                                Text("Practice More")
+                                Text("Repeat")
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 25)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 15)
                             .padding(.vertical, 15)
                             .background(
                                 Capsule()

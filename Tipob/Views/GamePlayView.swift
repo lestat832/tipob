@@ -5,7 +5,7 @@ struct GamePlayView: View {
 
     var body: some View {
         ZStack {
-            Color.white
+            Color.toyBoxGameOverGradient
                 .ignoresSafeArea()
 
             if viewModel.flashColor != .clear {
@@ -19,12 +19,12 @@ struct GamePlayView: View {
                 if viewModel.gameModel.currentGestureIndex < viewModel.gameModel.sequence.count {
                     Text("Go!")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundColor(.gray.opacity(0.5))
+                        .foregroundColor(.white)
                         .padding(.top, 100)
                 } else {
                     Text("Complete!")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundColor(.gray.opacity(0.5))
+                        .foregroundColor(.white)
                         .padding(.top, 100)
                 }
 
@@ -38,7 +38,7 @@ struct GamePlayView: View {
                 if viewModel.gameModel.currentGestureIndex < viewModel.gameModel.sequence.count {
                     Text("Gesture \(viewModel.gameModel.currentGestureIndex + 1) of \(viewModel.gameModel.sequence.count)")
                         .font(.system(size: 20, weight: .medium, design: .rounded))
-                        .foregroundColor(.gray)
+                        .foregroundColor(.white.opacity(0.9))
                         .padding(.top, 20)
                 }
 
@@ -47,7 +47,7 @@ struct GamePlayView: View {
                 HStack(spacing: 10) {
                     ForEach(0..<viewModel.gameModel.sequence.count, id: \.self) { index in
                         Circle()
-                            .fill(index < viewModel.gameModel.currentGestureIndex ? Color.green : Color.gray.opacity(0.3))
+                            .fill(index < viewModel.gameModel.currentGestureIndex ? Color.green : Color.white.opacity(0.3))
                             .frame(width: 12, height: 12)
                     }
                 }

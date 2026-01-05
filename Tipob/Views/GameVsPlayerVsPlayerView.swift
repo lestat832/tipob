@@ -56,7 +56,7 @@ struct GameVsPlayerVsPlayerView: View {
     var body: some View {
         ZStack {
             // Background gradient
-            Color.toyBoxMenuGradient
+            Color.toyBoxGameOverGradient
             .ignoresSafeArea()
 
             // Flash overlay
@@ -148,17 +148,25 @@ struct GameVsPlayerVsPlayerView: View {
 
             Spacer()
 
-            // Start Game button
+            // Play Now button
             Button(action: startGame) {
-                Text("Start Game")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 20)
-                    .background(
-                        RoundedRectangle(cornerRadius: 15)
-                            .fill(Color.white.opacity(0.3))
-                    )
+                HStack {
+                    Image("icon_play_default")
+                        .resizable()
+                        .renderingMode(.original)
+                        .frame(width: 40, height: 40)
+                        .padding(.vertical, -12)
+                    Text("Play Now")
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                }
+                .foregroundColor(Color.toyBoxButtonText)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 15)
+                .background(
+                    Capsule()
+                        .fill(Color.toyBoxButtonBg)
+                        .shadow(radius: 5)
+                )
             }
             .padding(.horizontal, 30)
 
@@ -320,12 +328,12 @@ struct GameVsPlayerVsPlayerView: View {
                 if let winner = winner {
                     Text("\(winner) Wins!")
                         .font(.system(size: 48, weight: .black, design: .rounded))
-                        .foregroundColor(.yellow)
+                        .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                 } else {
                     Text("Draw!")
                         .font(.system(size: 48, weight: .black, design: .rounded))
-                        .foregroundColor(.orange)
+                        .foregroundColor(.white.opacity(0.9))
                 }
 
                 // Stat line: Round
@@ -373,17 +381,17 @@ struct GameVsPlayerVsPlayerView: View {
                             .frame(width: 40, height: 40)
                             .padding(.vertical, -12)
                         Text("Play Again")
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
                     }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 20)
+                    .foregroundColor(Color.toyBoxButtonText)
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 15)
                     .background(
-                        RoundedRectangle(cornerRadius: 15)
-                            .fill(Color.green)
+                        Capsule()
+                            .fill(Color.toyBoxButtonBg)
+                            .shadow(radius: 5)
                     )
                 }
-                .padding(.horizontal, 30)
 
                 // Secondary CTAs (equal width)
                 HStack(spacing: 15) {

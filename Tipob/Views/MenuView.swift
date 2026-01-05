@@ -17,7 +17,7 @@ struct MenuView: View {
 
     var body: some View {
         ZStack {
-            Color.toyBoxMenuGradient
+            Color.toyBoxClassicGradient
             .ignoresSafeArea()
 
             // Layer 1: Top icon bar (Trophy left, Settings right)

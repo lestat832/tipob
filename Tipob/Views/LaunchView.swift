@@ -13,7 +13,7 @@ struct LaunchView: View {
     var body: some View {
         ZStack {
             // Gradient background matching main app
-            Color.toyBoxMenuGradient
+            Color.toyBoxClassicGradient
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {

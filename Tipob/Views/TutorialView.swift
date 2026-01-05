@@ -34,7 +34,7 @@ struct TutorialView: View {
     var body: some View {
         ZStack {
             // Gradient background matching main game
-            Color.toyBoxMenuGradient
+            Color.toyBoxClassicGradient
             .ignoresSafeArea()
 
             // Tutorial content
