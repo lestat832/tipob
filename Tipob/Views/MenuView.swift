@@ -2,6 +2,8 @@ import SwiftUI
 
 struct MenuView: View {
     @ObservedObject var viewModel: GameViewModel
+    @StateObject private var iconFieldViewModel = HomeIconFieldViewModel()  // Animated background
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
     @State private var buttonScale: CGFloat = 1.0
     @State private var isAnimating = false
     @State private var showingModeSheet = false
@@ -19,6 +21,9 @@ struct MenuView: View {
         ZStack {
             Color.toyBoxClassicGradient
             .ignoresSafeArea()
+
+            // Layer 0: Animated floating gesture icons background
+            HomeIconField(viewModel: iconFieldViewModel)
 
             // Layer 1: Top icon bar (Trophy left, Settings right)
             VStack {
@@ -150,6 +155,19 @@ struct MenuView: View {
                 }
             }
         }
+        // Background tap gesture for icon scatter effect (use DragGesture with 0 distance to get tap location)
+        .contentShape(Rectangle())
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onEnded { value in
+                    // Scatter icons on background tap
+                    if reduceMotion {
+                        iconFieldViewModel.pulseOpacity()
+                    } else {
+                        iconFieldViewModel.scatterFrom(point: value.location)
+                    }
+                }
+        )
         .sheet(isPresented: $showingModeSheet) {
             GameModeSheet(selectedMode: Binding(
                 get: { selectedMode },

@@ -40,6 +40,7 @@ struct GameVsPlayerVsPlayerView: View {
     // Leaderboard
     @State private var isNewHighScore: Bool = false
     @State private var showingLeaderboard: Bool = false
+    @State private var showingShareSheet: Bool = false
 
     // Dev panel
     #if DEBUG || TESTFLIGHT
@@ -386,9 +387,36 @@ struct GameVsPlayerVsPlayerView: View {
                     .foregroundColor(Color.toyBoxButtonText)
                     .padding(.horizontal, 40)
                     .padding(.vertical, 15)
+                    .frame(minWidth: 250)
                     .background(
                         Capsule()
                             .fill(Color.toyBoxButtonBg)
+                            .shadow(radius: 5)
+                    )
+                }
+
+                // Share Score button (uses default message for draws)
+                Button(action: {
+                    HapticManager.shared.impact()
+                    AnalyticsManager.shared.logShareTapped(mode: .gameVsPlayerVsPlayer)
+                    showingShareSheet = true
+                }) {
+                    HStack {
+                        Image("icon_share_default")
+                            .resizable()
+                            .renderingMode(.original)
+                            .frame(width: 40, height: 40)
+                            .padding(.vertical, -12)
+                        Text("Share Score")
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 15)
+                    .frame(minWidth: 250)
+                    .background(
+                        Capsule()
+                            .fill(Color.toyBoxDoubleTap)
                             .shadow(radius: 5)
                     )
                 }
@@ -458,6 +486,23 @@ struct GameVsPlayerVsPlayerView: View {
         }
         .sheet(isPresented: $showingLeaderboard) {
             LeaderboardView()
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            // Use winner-specific text for wins, default message for draws
+            if let icon = ShareContent.appIcon {
+                ShareSheet(activityItems: [
+                    winner != nil
+                        ? ShareContent.pvpModeText(winner: winner!, round: currentRound)
+                        : ShareContent.defaultMessage,
+                    icon
+                ])
+            } else {
+                ShareSheet(activityItems: [
+                    winner != nil
+                        ? ShareContent.pvpModeText(winner: winner!, round: currentRound)
+                        : ShareContent.defaultMessage
+                ])
+            }
         }
         #if DEBUG || TESTFLIGHT
         .sheet(isPresented: $showDevPanel) {

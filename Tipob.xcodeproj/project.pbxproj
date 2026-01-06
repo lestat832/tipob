@@ -45,6 +45,7 @@
 				Components/GestureCellView.swift,
 				Components/GestureDrawerTabView.swift,
 				Components/GestureDrawerView.swift,
+				Components/HomeIconField.swift,
 				Components/SettingActionRow.swift,
 				Components/SettingToggleRow.swift,
 				Components/StroopPromptView.swift,

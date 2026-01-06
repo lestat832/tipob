@@ -10,6 +10,7 @@ struct GameOverView: View {
     @State private var textScale: CGFloat = 0.5
     @State private var opacity: Double = 0
     @State private var showingLeaderboard = false
+    @State private var showingShareSheet = false
 
     var body: some View {
         ZStack {
@@ -128,9 +129,37 @@ struct GameOverView: View {
                         .foregroundColor(Color.toyBoxButtonText)
                         .padding(.horizontal, 40)
                         .padding(.vertical, 15)
+                        .frame(minWidth: 250)
                         .background(
                             Capsule()
                                 .fill(Color.toyBoxButtonBg)
+                                .shadow(radius: 5)
+                        )
+                    }
+
+                    // Share Score button (standalone row - same size as Play Again)
+                    Button(action: {
+                        HapticManager.shared.impact()
+                        let mode: GameMode = viewModel.isClassicMode ? .classic : .memory
+                        AnalyticsManager.shared.logShareTapped(mode: mode)
+                        showingShareSheet = true
+                    }) {
+                        HStack {
+                            Image("icon_share_default")
+                                .resizable()
+                                .renderingMode(.original)
+                                .frame(width: 40, height: 40)
+                                .padding(.vertical, -12)
+                            Text("Share Score")
+                                .font(.system(size: 22, weight: .bold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 15)
+                        .frame(minWidth: 250)
+                        .background(
+                            Capsule()
+                                .fill(Color.toyBoxDoubleTap)
                                 .shadow(radius: 5)
                         )
                     }
@@ -220,6 +249,17 @@ struct GameOverView: View {
         }
         .sheet(isPresented: $showingLeaderboard) {
             LeaderboardView()
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            let shareText = viewModel.isClassicMode
+                ? ShareContent.classicModeText(score: viewModel.classicModeModel.score)
+                : ShareContent.memoryModeText(round: viewModel.gameModel.round)
+
+            if let icon = ShareContent.appIcon {
+                ShareSheet(activityItems: [shareText, icon])
+            } else {
+                ShareSheet(activityItems: [shareText])
+            }
         }
         .onAppear {
             // Increment game count when game over screen appears

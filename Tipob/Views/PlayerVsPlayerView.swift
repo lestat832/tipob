@@ -45,6 +45,7 @@ struct PlayerVsPlayerView: View {
     // Leaderboard
     @State private var isNewHighScore: Bool = false
     @State private var showingLeaderboard: Bool = false
+    @State private var showingShareSheet: Bool = false
 
     // Gesture drawer
     @State private var isDrawerExpanded: Bool = false
@@ -449,9 +450,36 @@ struct PlayerVsPlayerView: View {
                     .foregroundColor(Color.toyBoxButtonText)
                     .padding(.horizontal, 40)
                     .padding(.vertical, 15)
+                    .frame(minWidth: 250)
                     .background(
                         Capsule()
                             .fill(Color.toyBoxButtonBg)
+                            .shadow(radius: 5)
+                    )
+                }
+
+                // Share Score button (standalone row - same size as Play Again)
+                Button(action: {
+                    HapticManager.shared.impact()
+                    AnalyticsManager.shared.logShareTapped(mode: .playerVsPlayer)
+                    showingShareSheet = true
+                }) {
+                    HStack {
+                        Image("icon_share_default")
+                            .resizable()
+                            .renderingMode(.original)
+                            .frame(width: 40, height: 40)
+                            .padding(.vertical, -12)
+                        Text("Share Score")
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 15)
+                    .frame(minWidth: 250)
+                    .background(
+                        Capsule()
+                            .fill(Color.toyBoxDoubleTap)
                             .shadow(radius: 5)
                     )
                 }
@@ -521,6 +549,19 @@ struct PlayerVsPlayerView: View {
         }
         .sheet(isPresented: $showingLeaderboard) {
             LeaderboardView()
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            // winner is always set in PvP mode (no draws - one player always wins)
+            if let icon = ShareContent.appIcon {
+                ShareSheet(activityItems: [
+                    ShareContent.pvpModeText(winner: winner ?? player1Name, round: currentRound),
+                    icon
+                ])
+            } else {
+                ShareSheet(activityItems: [
+                    ShareContent.pvpModeText(winner: winner ?? player1Name, round: currentRound)
+                ])
+            }
         }
         #if DEBUG || TESTFLIGHT
         .sheet(isPresented: $showDevPanel) {

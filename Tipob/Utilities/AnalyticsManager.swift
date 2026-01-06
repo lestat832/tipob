@@ -23,6 +23,7 @@ private extension AnalyticsManager {
         case adFailedToLoad      = "ad_failed_to_load"
         case adShown             = "ad_shown"
         case adDismissed         = "ad_dismissed"
+        case shareTapped         = "share_tapped"
     }
 }
 
@@ -131,6 +132,17 @@ extension AnalyticsManager {
             "discreet_mode": discreetMode
         ]
         log(.endGame, parameters: params)
+    }
+
+    // MARK: - Share Analytics
+
+    /// Logs when user taps the Share Score button.
+    /// - Parameter mode: The game mode being shared
+    func logShareTapped(mode: GameMode) {
+        let params: [String: Any] = [
+            "mode": mode.analyticsValue
+        ]
+        log(.shareTapped, parameters: params)
     }
 }
 
