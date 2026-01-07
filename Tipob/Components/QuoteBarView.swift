@@ -12,11 +12,11 @@ struct QuoteBarView: View {
             Text("\"\(quote.text)\" — \(quote.author)")
                 .font(.footnote)
                 .foregroundColor(.white.opacity(0.85))
-                .multilineTextAlignment(.leading)
+                .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
                         .fill(.ultraThinMaterial)

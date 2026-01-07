@@ -1,8 +1,8 @@
 OUT OF POCKET - PRODUCT OVERVIEW
 
-Last Updated: December 29, 2025
-Version: 3.8
-Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Production + Audio System + Firebase Analytics + Settings Screen + Unified End Cards + Ad Gating
+Last Updated: January 7, 2026
+Version: 3.9
+Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Production + Audio System + Firebase Analytics + Settings Screen + Unified End Cards + Ad Gating + Quote Bar + Rate Us + Support + Home Screen Microinteractions
 
 ========================================
 
@@ -280,25 +280,109 @@ Accessible from menu via trophy icon (top-right)
 
 SETTINGS SCREEN
 
-Status: Complete (Implemented December 2025)
+Status: Complete (Implemented December 2025, Enhanced January 2026)
 
 Features:
 - Gesture Names Toggle: Show/hide helper text below gesture icons (default: ON)
 - Sound Effects Toggle: Enable/disable game sounds (default: ON)
 - Haptics Toggle: Enable/disable vibration feedback (default: ON)
+- Share Out of Pocket: Share app via native iOS share sheet
+- Rate Out of Pocket: StoreKit in-app review with App Store fallback
+- Support: Opens Google Forms feedback page for bug reports/feedback
 
 Implementation:
 - SettingsView.swift - SwiftUI settings UI with gradient background
 - UserSettings.swift - Persistence layer using UserDefaults
+- AppConfig.swift - Centralized app configuration (App Store ID management)
+- AppStoreReviewManager.swift - StoreKit review request with fallback logic
 - Real-time toggle updates without restart required
 
 Visual Design:
 - Gradient background matching GameModeSheet aesthetic
 - SettingToggleRow component for consistent toggle styling
-- Icon assets: icon_settings, icon_chat_default, icon_sound_default
+- SettingActionRow component for action buttons (Share, Rate Us, Support)
+- Icon assets: icon_settings, icon_chat_default, icon_sound_default, icon_share_default, icon_rate_default, icon_question_default
 
 Integration:
 Accessible from menu via gear icon (top-left)
+
+========================================
+
+QUOTE BAR SYSTEM
+
+Status: Complete (Implemented January 2026 - Build 12)
+
+Purpose:
+Display daily inspirational quotes at the bottom of the home screen
+
+Features:
+- 50 curated motivational quotes with author attribution
+- Deterministic daily selection (same quote for everyone on same day)
+- Smooth fade-in animation when loading
+- Blurred rounded rectangle background (12pt corner radius)
+- Subtle drop shadow for polish
+
+Implementation:
+- QuoteBarView.swift - SwiftUI component with blurred background
+- Quote.swift - Data model with text and author fields
+- QuoteManager.swift - Daily selection logic using day-of-year hash
+- quotes.demo.v1.json - JSON data file with 50 quotes
+
+Quote Selection Algorithm:
+- Uses deterministic hash: dayOfYear % totalQuotes
+- Ensures same quote appears for all users on same calendar day
+- Automatically cycles through all quotes over time
+
+Visual Design:
+- Horizontal layout: "Quote text" — Author Name
+- White text on blurred background
+- 12pt font size, 12pt corner radius
+- Subtle shadow: color .black.opacity(0.2), radius 4, y offset 2
+
+Integration:
+Positioned at bottom of MenuView with 20pt bottom padding
+
+========================================
+
+HOME SCREEN MICROINTERACTIONS
+
+Status: Complete (Build 11-12, January 2026)
+
+Purpose:
+Add visual polish and delight to the home screen experience
+
+Features:
+
+Floating Background Icons:
+- 8 gesture icons drift slowly across screen
+- Random spawn positions and movement directions
+- Gentle drift speed (~20-30pts/second)
+- Tap-to-scatter interaction: icons scatter away from tap point
+- Return to normal drift after scatter completes
+- Implementation: HomeIconField.swift
+
+Start Button Breathing:
+- Subtle scale animation (1.0 → 1.08 → 1.0)
+- 2-second duration, continuous loop
+- Creates "living" button that draws attention
+- easeInOut timing curve
+
+Circular Icon Backgrounds:
+- Trophy and Settings icons have circular backgrounds
+- White at 15% opacity
+- 40x40pt size with centered 24x24pt icons
+- Consistent visual weight at corners
+
+Toggle Switch Animation:
+- Custom toggle color: teal/green when ON
+- Smooth transition between states
+- Matches app color palette
+
+Visual Polish Elements:
+- Smooth transitions between screens
+- Consistent use of gradients
+- Subtle shadows on interactive elements
+- Microinteractions that respond to user input
 
 ========================================
 
@@ -331,6 +415,16 @@ Ad Events:
 
 Settings Events:
 - discreet_mode_toggled: Discreet mode changed (includes new state)
+
+Share Events:
+- share_tapped: User taps Share Score button (includes mode)
+
+Rate Us Events (Added January 2026):
+- rate_us_tapped: User taps Rate Us button
+- rate_us_method: Method used for review request (storekit, app_store, unavailable)
+
+Support Events (Added January 2026):
+- support_opened: User opens support form
 
 Implementation:
 - File: Tipob/Utilities/AnalyticsManager.swift
@@ -705,6 +799,7 @@ Models - Data models and business logic
 - ClassicModeModel.swift - Classic mode game logic
 - GestureType.swift - Gesture definitions (14 gestures)
 - ColorType.swift - Stroop color system (4 colors)
+- Quote.swift - Quote data model with text and author (Added January 2026)
 
 ViewModels - View logic and state management
 - GameViewModel.swift - Central game coordinator
@@ -733,8 +828,11 @@ Components - Reusable UI components
 - GestureDrawerView.swift - PvP gesture selection drawer
 - GestureDrawerTabView.swift - Drawer tab with pulsing animation
 - SettingToggleRow.swift - Settings toggle component
+- SettingActionRow.swift - Settings action button component (Added January 2026)
 - ExpandingSegmentedControl.swift - Custom mode selector
 - GestureCellView.swift - Gesture list cell
+- QuoteBarView.swift - Daily quote display component (Added January 2026)
+- HomeIconField.swift - Floating background icons with scatter (Added January 2026)
 
 Utilities - Helper classes
 - MotionGestureManager.swift - Centralized motion detection (~650 lines)
@@ -756,6 +854,9 @@ Utilities - Helper classes
 - DevConfigManager.swift - Debug threshold configuration (~200 lines)
 - SensorCaptureBuffer.swift - Motion sensor data logging (DEBUG only)
 - ErrorLogger.swift - Error tracking and logging
+- AppConfig.swift - App Store ID and URL configuration (Added January 2026)
+- AppStoreReviewManager.swift - StoreKit review with fallback (~40 lines, Added January 2026)
+- QuoteManager.swift - Daily quote selection logic (Added January 2026)
 
 State Machine
 Flow: Launch → Menu → [Tutorial/Classic/Memory/PvP] → Game Over → Menu
@@ -1131,7 +1232,24 @@ Key Files
 - Utilities: Tipob/Utilities/
 
 Total Swift Files
-23 files across the project
+30+ files across the project
+
+Recent Updates (January 7, 2026 - Build 12):
+- Quote Bar: Daily inspirational quote at bottom of home screen
+- Rate Us: StoreKit in-app review with App Store fallback
+- Support: Opens Google Forms feedback page from Settings
+- Home Screen polish: Circular backgrounds for Trophy/Settings icons
+- New files: QuoteBarView.swift, Quote.swift, QuoteManager.swift, quotes.demo.v1.json
+- New files: AppConfig.swift, AppStoreReviewManager.swift, SettingActionRow.swift
+- New icon assets: icon_rate_default, icon_question_default
+- New analytics events: rate_us_tapped, rate_us_method, support_opened
+- Design Style Guide: Created comprehensive DESIGN_STYLE_GUIDE.md for designer handoff
+
+Recent Updates (January 6, 2026 - Build 11):
+- Home screen microinteractions: Floating background icons with tap-to-scatter
+- Start button breathing animation (2-second pulse cycle)
+- Share Score improvements and UI consistency overhaul
+- Gradient swap for visual consistency
 
 Recent Updates (December 29, 2025):
 - Ad gating simplification: 30s session delay + 60s cooldown (removed complex multi-condition logic)
@@ -1253,6 +1371,7 @@ Version 3.5 | December 20, 2025 | Settings screen with Sound/Haptics/Gesture Nam
 Version 3.6 | December 22, 2025 | Unified End Card System across all modes; Gesture Pack V2 with 56x56 image-based visuals; standardized icons; removed GAME OVER headers
 Version 3.7 | December 28, 2025 | Long Press timing fix (minimumReactionTime 1.0s→1.5s); Comprehensive documentation update covering all December features
 Version 3.8 | December 29, 2025 | Ad gating simplification (30s + 60s cooldown); custom icon_repeat_default asset; UI text updates for Discreet Mode and game mode descriptions
+Version 3.9 | January 7, 2026 | Build 11-12: Quote Bar system, Rate Us (StoreKit), Support link, Home Screen microinteractions (floating icons, breathing button, circular backgrounds), Design Style Guide, new analytics events
 
 ========================================
 

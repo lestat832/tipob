@@ -66,7 +66,7 @@ class HomeIconFieldViewModel: ObservableObject {
         "gesture_lower_phone_default"
     ]
 
-    private let iconCount = 8  // Optimal density with reshuffling
+    private let iconCount = 13  // All gesture icons for maximum chaos
     private let iconSize: CGFloat = 44  // Icon display size
     private let gridSpacing: CGFloat = 80  // Grid spacing GUARANTEES no bunching
 

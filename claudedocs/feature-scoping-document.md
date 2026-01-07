@@ -1,21 +1,25 @@
 # Out of Pocket Feature Scoping Document
-**Date**: October 10, 2025 (Updated: December 29, 2025)
+**Date**: October 10, 2025 (Updated: January 7, 2026)
 **Project**: Out of Pocket - iOS SwiftUI Bop-It Style Game
 **Purpose**: Comprehensive feature planning and decision framework
-**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (PRODUCTION) + Audio System + Firebase Analytics + Settings + Unified End Cards + Ad Gating
+**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (PRODUCTION) + Audio System + Firebase Analytics + Settings + Unified End Cards + Ad Gating + Quote Bar + Rate Us + Support + Home Screen Microinteractions
 
 ---
 
 ## 📋 Table of Contents
 1. [Gesture Expansion Options](#gesture-expansion-options)
 2. [Audio System](#audio-system)
-3. [Feature Roadmap](#feature-roadmap)
-4. [Monetization Strategy](#monetization-strategy)
-5. [Implementation Complexity Matrix](#implementation-complexity-matrix)
-6. [Revenue Projections](#revenue-projections)
-7. [Technical Requirements](#technical-requirements)
-8. [Risk Assessment](#risk-assessment)
-9. [Decision Framework](#decision-framework)
+3. [Quote Bar System](#quote-bar-system) (Build 12)
+4. [Rate Us System](#rate-us-system) (Build 12)
+5. [Support System](#support-system) (Build 12)
+6. [Home Screen Microinteractions](#home-screen-microinteractions) (Build 11-12)
+7. [Feature Roadmap](#feature-roadmap)
+8. [Monetization Strategy](#monetization-strategy)
+9. [Implementation Complexity Matrix](#implementation-complexity-matrix)
+10. [Revenue Projections](#revenue-projections)
+11. [Technical Requirements](#technical-requirements)
+12. [Risk Assessment](#risk-assessment)
+13. [Decision Framework](#decision-framework)
 
 ---
 
@@ -197,6 +201,104 @@ Removed AVAudioEngine due to:
 - `GameViewModel` calls `playRoundComplete()` on sequence completion
 - `FailureFeedbackManager` calls `playFailure()` for unified failure feedback
 - `ContentView` calls `AudioManager.shared.initialize()` after launch animation
+
+---
+
+## 💬 Quote Bar System (Implemented January 2026 - Build 12)
+
+### Features
+**Status**: ✅ Complete
+
+- **Daily Quote**: Inspirational quote displayed at bottom of home screen
+- **50 Curated Quotes**: Motivational content with author attribution
+- **Deterministic Selection**: Same quote for all users on same calendar day
+- **Visual Polish**: Blurred background, fade-in animation, subtle shadow
+
+### Implementation
+**Files**:
+- `QuoteBarView.swift` - SwiftUI component
+- `Quote.swift` - Data model
+- `QuoteManager.swift` - Selection logic
+- `quotes.demo.v1.json` - Quote data (50 entries)
+
+**Selection Algorithm:**
+```swift
+dayOfYear % totalQuotes  // Deterministic daily rotation
+```
+
+**Visual Design:**
+- Horizontal layout: "Quote text" — Author Name
+- White text on blurred rounded rectangle
+- 12pt font, 12pt corner radius
+- Shadow: black 20% opacity, radius 4, y offset 2
+
+---
+
+## ⭐ Rate Us System (Implemented January 2026 - Build 12)
+
+### Features
+**Status**: ✅ Complete
+
+- **StoreKit Integration**: In-app review prompt via `SKStoreReviewController`
+- **App Store Fallback**: Opens App Store review page if StoreKit unavailable
+- **Analytics Tracking**: `rate_us_tapped`, `rate_us_method` events
+- **Graceful Degradation**: Works in dev builds without App Store ID
+
+### Implementation
+**Files**:
+- `AppConfig.swift` - App Store ID configuration
+- `AppStoreReviewManager.swift` - Review request logic (~40 lines)
+
+**Review Methods (Enum):**
+- `.storeKit` - In-app review prompt (primary)
+- `.appStore` - Direct App Store link (fallback)
+- `.unavailable` - Development builds without ID
+
+**Integration**: Settings screen "Rate Out of Pocket" button
+
+---
+
+## 🆘 Support System (Implemented January 2026 - Build 12)
+
+### Features
+**Status**: ✅ Complete
+
+- **Google Forms Link**: Opens external feedback form
+- **Bug Reports**: Users can report issues
+- **Feature Requests**: Users can suggest improvements
+- **Analytics Tracking**: `support_opened` event
+
+### Implementation
+**Integration**: Settings screen "Support" button with `icon_question_default`
+
+**URL**: Google Forms feedback page (external)
+
+---
+
+## ✨ Home Screen Microinteractions (Implemented January 2026 - Build 11-12)
+
+### Features
+**Status**: ✅ Complete
+
+**Floating Background Icons:**
+- 8 gesture icons drift across screen
+- Random spawn positions and movement
+- Tap-to-scatter interaction
+- Returns to normal drift after scatter
+
+**Start Button Breathing:**
+- Scale animation: 1.0 → 1.08 → 1.0
+- 2-second duration, continuous loop
+- Creates "living" button effect
+
+**Circular Icon Backgrounds:**
+- Trophy and Settings icons with circular backgrounds
+- White at 15% opacity
+- 40x40pt with 24x24pt icons
+
+**Implementation Files:**
+- `HomeIconField.swift` - Floating icons with scatter
+- `MenuView.swift` - Breathing animation, circular backgrounds
 
 ---
 
