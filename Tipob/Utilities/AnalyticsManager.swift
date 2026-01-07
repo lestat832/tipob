@@ -24,6 +24,9 @@ private extension AnalyticsManager {
         case adShown             = "ad_shown"
         case adDismissed         = "ad_dismissed"
         case shareTapped         = "share_tapped"
+        case supportOpened       = "support_opened"
+        case rateUsTapped        = "rate_us_tapped"
+        case rateUsMethod        = "rate_us_method"
     }
 }
 
@@ -143,6 +146,29 @@ extension AnalyticsManager {
             "mode": mode.analyticsValue
         ]
         log(.shareTapped, parameters: params)
+    }
+
+    // MARK: - Support Analytics
+
+    /// Logs when user opens the support form.
+    func logSupportOpened() {
+        log(.supportOpened, parameters: nil)
+    }
+
+    // MARK: - Rate Us Analytics
+
+    /// Logs when user taps the Rate Us button.
+    func logRateUsTapped() {
+        log(.rateUsTapped, parameters: nil)
+    }
+
+    /// Logs which method was used to request a review.
+    /// - Parameter method: The review method used (storekit, app_store, unavailable)
+    func logRateUsMethod(_ method: String) {
+        let params: [String: Any] = [
+            "method": method
+        ]
+        log(.rateUsMethod, parameters: params)
     }
 }
 

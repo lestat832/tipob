@@ -3,6 +3,9 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
+    // Support form URL
+    private let supportFormURL = "https://docs.google.com/forms/d/e/1FAIpQLSfp1IgUxfB0Re2uXWqJNgF_QDetOqSDgfSCG_V1m4_NA3jOxg/viewform?usp=header"
+
     // Local state synced with UserSettings
     @State private var showGestureNames: Bool = UserSettings.showGestureNames
     @State private var soundEnabled: Bool = UserSettings.soundEnabled
@@ -53,8 +56,9 @@ struct SettingsView: View {
                     }
                     .padding(.horizontal, 20)
 
-                    // Share section (visual separation)
+                    // Action rows section (visual separation)
                     VStack(spacing: 12) {
+                        // Share
                         Button {
                             HapticManager.shared.impact()
                             showingShareSheet = true
@@ -62,6 +66,36 @@ struct SettingsView: View {
                             SettingActionRow(
                                 title: "Share Out of Pocket",
                                 iconName: "icon_share_default"
+                            )
+                        }
+                        .buttonStyle(.plain)
+
+                        // Rate Us
+                        Button {
+                            HapticManager.shared.impact()
+                            AnalyticsManager.shared.logRateUsTapped()
+                            let method = AppStoreReviewManager.shared.requestReview()
+                            AnalyticsManager.shared.logRateUsMethod(method.rawValue)
+                        } label: {
+                            SettingActionRow(
+                                title: "Rate Out of Pocket",
+                                iconName: "icon_rate_default"
+                            )
+                        }
+                        .buttonStyle(.plain)
+
+                        // Support
+                        Button {
+                            HapticManager.shared.impact()
+                            AnalyticsManager.shared.logSupportOpened()
+                            if let url = URL(string: supportFormURL) {
+                                UIApplication.shared.open(url)
+                            }
+                        } label: {
+                            SettingActionRow(
+                                title: "Support",
+                                subtitle: "Report a bug or send feedback",
+                                iconName: "icon_question_default"
                             )
                         }
                         .buttonStyle(.plain)

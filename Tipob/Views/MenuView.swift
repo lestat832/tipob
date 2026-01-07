@@ -33,11 +33,16 @@ struct MenuView: View {
                         HapticManager.shared.impact()
                         showingLeaderboard = true
                     }) {
-                        Image("icon_trophy_default")
-                            .resizable()
-                            .renderingMode(.original)
-                            .frame(width: 56, height: 56)
-                            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.25))
+                                .frame(width: 64, height: 64)
+                            Image("icon_trophy_default")
+                                .resizable()
+                                .renderingMode(.original)
+                                .frame(width: 44, height: 44)
+                        }
+                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
 
                     Spacer()
@@ -47,11 +52,16 @@ struct MenuView: View {
                         HapticManager.shared.impact()
                         showingSettings = true
                     }) {
-                        Image("icon_settings_default")
-                            .resizable()
-                            .renderingMode(.original)
-                            .frame(width: 56, height: 56)
-                            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.25))
+                                .frame(width: 64, height: 64)
+                            Image("icon_settings_default")
+                                .resizable()
+                                .renderingMode(.original)
+                                .frame(width: 44, height: 44)
+                        }
+                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
                     .accessibilityLabel("Settings")
                 }
@@ -153,6 +163,14 @@ struct MenuView: View {
                         buttonScale = 1.1
                     }
                 }
+            }
+
+            // Layer 3: Quote Bar (pinned to bottom)
+            VStack {
+                Spacer()
+                QuoteBarView()
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
             }
         }
         // Background tap gesture for icon scatter effect (use DragGesture with 0 distance to get tap location)

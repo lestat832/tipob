@@ -1,0 +1,46 @@
+{
+    "version": 1,
+    "name": "demo_quotes_v1",
+    "quotes": [
+        {
+            "id": "quote_001",
+            "text": "Age is something that doesn't matter, unless you are a cheese.",
+            "author": "Luis Bunuel",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_002",
+            "text": "A day without sunshine is like, you know, night.",
+            "author": "Steve Martin",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_003",
+            "text": "Before you criticize someone, walk a mile in their shoes. That way, you'll be a mile from them, and you'll have their shoes.",
+            "author": "Jack Handey",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_004",
+            "text": "I told my doctor I broke my arm in two places. He told me to keep out of those places.",
+            "author": "Rodney Dangerfield",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_005",
+            "text": "It's just a job. Grass grows, birds fly, waves pound the sand. I beat people up.",
+            "author": "Muhammad Ali",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        }
+    ]
+}
