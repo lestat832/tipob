@@ -41,6 +41,198 @@
             "enabled": true,
             "verified": false,
             "source": null
+        },
+        {
+            "id": "quote_006",
+            "text": "Whatever you do, always give 100%. Unless you're donating blood.",
+            "author": "Bill Murray",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_007",
+            "text": "Some people have a way with words, and other people...uh, not have a way.",
+            "author": "Steve Martin",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_008",
+            "text": "Once you can accept the universe as matter expanding into nothing that is something, wearing stripes with plaid comes easy.",
+            "author": "Albert Einstein",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_009",
+            "text": "Don't gobblefunk around with words.",
+            "author": "Roald Dahl",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_010",
+            "text": "If at first you don't succeed then skydiving definitely isn't for you.",
+            "author": "Steven Wright",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_011",
+            "text": "The older you get, the better you get. Unless you're a banana.",
+            "author": "Betty White",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_012",
+            "text": "If you think nobody cares about you, try missing a couple of payments.",
+            "author": "Steven Wright",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_013",
+            "text": "I walk around like everything is fine, but deep down, inside my shoe, my sock is sliding off.",
+            "author": "Anonymous",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_014",
+            "text": "Rice is great when you're hungry and you want 2,000 of something.",
+            "author": "Mitch Hedberg",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_015",
+            "text": "Be the change you want to see in the world, unless the change you want to see is everyone wearing capes. That might take more convincing.",
+            "author": "Bill Murray",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_016",
+            "text": "You miss 100% of the shots you don't take, and about 80% of the ones you do. But those 20% make for a great highlight reel.",
+            "author": "Shaquille O'Neal",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_017",
+            "text": "When life gives you lemons, remember they cost like $1 each now. That's not just lemonade, that's an investment portfolio.",
+            "author": "John Mulaney",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_018",
+            "text": "Outside of a dog, a book is man's best friend. Inside of a dog, it's too dark to read.",
+            "author": "Groucho Marx",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_019",
+            "text": "People say nothing is impossible, but I do nothing every day.",
+            "author": "Winnie the Pooh",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_020",
+            "text": "I didn't give you the finger, you earned it.",
+            "author": "Bill Murray",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_021",
+            "text": "I have short term memory loss. LOL JK I have short term memory loss.",
+            "author": "Anonymous",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_022",
+            "text": "When life gives you melons, you could be dyslexic.",
+            "author": "Anonymous",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_023",
+            "text": "The T-Rex will never know the joy of putting olives on the end of his claws.",
+            "author": "Anonymous",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_024",
+            "text": "Nothing says Hawaii like Canada.",
+            "author": "Anonymous",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_025",
+            "text": "Nothing is impossible, except slamming a revolving door.",
+            "author": "Anonymous",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_026",
+            "text": "I don't know if my ceiling is the best ceiling, but it's definitely up there.",
+            "author": "Anonymous",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_027",
+            "text": "Breaking News: Energizer Bunny arrested. Charged with battery.",
+            "author": "Anonymous",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_028",
+            "text": "Have you ever tried to eat a clock? It's time consuming.",
+            "author": "Anonymous",
+            "enabled": true,
+            "verified": false,
+            "source": null
+        },
+        {
+            "id": "quote_029",
+            "text": "There are few things in life harder to find and more important to keep than love. Well, love and a birth certificate.",
+            "author": "Barack Obama",
+            "enabled": true,
+            "verified": false,
+            "source": null
         }
     ]
 }
