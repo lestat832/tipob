@@ -1,8 +1,8 @@
 # Out of Pocket Feature Scoping Document
-**Date**: October 10, 2025 (Updated: January 7, 2026)
+**Date**: October 10, 2025 (Updated: January 13, 2026)
 **Project**: Out of Pocket - iOS SwiftUI Bop-It Style Game
 **Purpose**: Comprehensive feature planning and decision framework
-**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (PRODUCTION) + Audio System + Firebase Analytics + Settings + Unified End Cards + Ad Gating + Quote Bar + Rate Us + Support + Home Screen Microinteractions
+**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (PRODUCTION) + Audio System + Firebase Analytics + Settings + Unified End Cards + Ad Gating + Quote Bar + Rate Us + Support + Home Screen Microinteractions + ATT Pre-Prompt + iPhone-Only Target
 
 ---
 
@@ -13,13 +13,14 @@
 4. [Rate Us System](#rate-us-system) (Build 12)
 5. [Support System](#support-system) (Build 12)
 6. [Home Screen Microinteractions](#home-screen-microinteractions) (Build 11-12)
-7. [Feature Roadmap](#feature-roadmap)
-8. [Monetization Strategy](#monetization-strategy)
-9. [Implementation Complexity Matrix](#implementation-complexity-matrix)
-10. [Revenue Projections](#revenue-projections)
-11. [Technical Requirements](#technical-requirements)
-12. [Risk Assessment](#risk-assessment)
-13. [Decision Framework](#decision-framework)
+7. [ATT System](#att-system) (Build 15)
+8. [Feature Roadmap](#feature-roadmap)
+9. [Monetization Strategy](#monetization-strategy)
+10. [Implementation Complexity Matrix](#implementation-complexity-matrix)
+11. [Revenue Projections](#revenue-projections)
+12. [Technical Requirements](#technical-requirements)
+13. [Risk Assessment](#risk-assessment)
+14. [Decision Framework](#decision-framework)
 
 ---
 
@@ -299,6 +300,48 @@ dayOfYear % totalQuotes  // Deterministic daily rotation
 **Implementation Files:**
 - `HomeIconField.swift` - Floating icons with scatter
 - `MenuView.swift` - Breathing animation, circular backgrounds
+
+---
+
+## 🔒 ATT System (Implemented January 2026 - Build 15)
+
+### Features
+**Status**: ✅ Complete
+
+- **Pre-Prompt Strategy**: Custom dialog before system ATT request
+- **Timing**: After 3 completed games (industry best practice)
+- **User Choice**: "Continue" → system dialog, "Not Now" → dismiss permanently
+- **iPhone-Only**: Removed iPad support for simpler submission
+
+### Implementation
+**Files**:
+- `TrackingPermissionManager.swift` - Centralized ATT logic (~50 lines)
+- `ATTPrePromptView.swift` - Custom pre-prompt UI
+- `AdManager.swift` - Persists totalGamesPlayed for timing
+
+**Key Logic:**
+```swift
+var shouldShowPrePrompt: Bool {
+    !hasShownATTPrompt &&
+    gameCount >= 3 &&
+    ATTrackingManager.trackingAuthorizationStatus == .notDetermined
+}
+```
+
+**Info.plist:**
+- `NSUserTrackingUsageDescription`: Required for ATT
+
+### User Flow
+1. User plays 3 games normally
+2. On 3rd game over, pre-prompt appears (0.8s delay)
+3. "Continue" → System ATT dialog
+4. "Not Now" → Never asks again
+5. Ads work regardless of choice
+
+### iPhone-Only Target
+- `TARGETED_DEVICE_FAMILY = 1` (iPhone only)
+- Removed iPad orientation entries
+- Simplifies App Store submission (no iPad screenshots)
 
 ---
 

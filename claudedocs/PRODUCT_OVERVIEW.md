@@ -1,8 +1,8 @@
 OUT OF POCKET - PRODUCT OVERVIEW
 
-Last Updated: January 7, 2026
-Version: 3.9
-Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Production + Audio System + Firebase Analytics + Settings Screen + Unified End Cards + Ad Gating + Quote Bar + Rate Us + Support + Home Screen Microinteractions
+Last Updated: January 13, 2026
+Version: 4.0
+Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Production + Audio System + Firebase Analytics + Settings Screen + Unified End Cards + Ad Gating + Quote Bar + Rate Us + Support + Home Screen Microinteractions + ATT Pre-Prompt + iPhone-Only Target
 
 ========================================
 
@@ -818,6 +818,7 @@ Views - UI screens
 - DevPanelView.swift - Developer panel (DEBUG/TESTFLIGHT only)
 - GestureTestView.swift - Per-gesture test interface
 - LeaderboardView.swift - High scores display
+- ATTPrePromptView.swift - ATT pre-prompt modal (Added January 2026)
 
 Components - Reusable UI components
 - ArrowView.swift - Animated gesture arrows
@@ -857,6 +858,7 @@ Utilities - Helper classes
 - AppConfig.swift - App Store ID and URL configuration (Added January 2026)
 - AppStoreReviewManager.swift - StoreKit review with fallback (~40 lines, Added January 2026)
 - QuoteManager.swift - Daily quote selection logic (Added January 2026)
+- TrackingPermissionManager.swift - ATT permission centralized logic (~50 lines, Added January 2026)
 
 State Machine
 Flow: Launch → Menu → [Tutorial/Classic/Memory/PvP] → Game Over → Menu
@@ -1132,6 +1134,63 @@ Future Enhancements:
 
 ========================================
 
+ATT (APP TRACKING TRANSPARENCY) SYSTEM
+
+Status: Complete (Implemented January 2026 - Build 15)
+
+Purpose:
+Request tracking permission for personalized advertising via ATTrackingManager
+
+Pre-Prompt Strategy (Industry Best Practice):
+- Shows custom pre-prompt after 3 completed games
+- Explains value proposition before system dialog
+- Improves opt-in rates vs immediate prompt on launch
+- "Continue" → triggers system ATT dialog
+- "Not Now" → dismisses, never asks again
+
+Implementation:
+- TrackingPermissionManager.swift - Centralized ATT logic singleton (~50 lines)
+- ATTPrePromptView.swift - Custom pre-prompt UI with gradient styling
+- GameOverView.swift integration - Trigger point after 3 games
+- AdManager.swift - Persists totalGamesPlayed for prompt timing
+
+Key Components:
+- `shouldShowPrePrompt`: Checks game count >= 3, not previously shown, status == .notDetermined
+- `markPromptShown()`: Sets hasShownATTPrompt flag permanently
+- `requestTracking()`: Calls ATTrackingManager.requestTrackingAuthorization
+
+Info.plist Configuration:
+- NSUserTrackingUsageDescription: "This identifier will be used to deliver personalized ads to you."
+
+User Flow:
+1. User plays first 3 games (normal gameplay)
+2. On 3rd game over, custom pre-prompt appears (0.8s delay)
+3. "Continue" → System ATT dialog → User chooses Allow/Deny
+4. "Not Now" → Pre-prompt dismissed, never shown again
+5. Either choice: Game continues normally, ads show regardless
+
+Analytics Events:
+- Pre-prompt shown, user choice (Continue/Not Now)
+- ATT authorization status after system dialog
+
+========================================
+
+IPHONE-ONLY TARGET
+
+Status: Complete (Implemented January 2026 - Build 15)
+
+Configuration:
+- TARGETED_DEVICE_FAMILY = 1 (iPhone only)
+- iPad support removed from all build configurations
+- Portrait orientation only (existing)
+
+Rationale:
+- Simplifies App Store submission (no iPad screenshots required)
+- Focuses development on primary target platform
+- Reduces testing matrix
+
+========================================
+
 USER FLOWS
 
 First-Time User Flow
@@ -1233,6 +1292,13 @@ Key Files
 
 Total Swift Files
 30+ files across the project
+
+Recent Updates (January 13, 2026 - Build 15):
+- ATT Pre-Prompt: Custom pre-prompt after 3 games before system ATT dialog
+- iPhone-Only Target: Removed iPad support (TARGETED_DEVICE_FAMILY = 1)
+- New files: TrackingPermissionManager.swift, ATTPrePromptView.swift
+- AdManager fix: Persists totalGamesPlayed to UserDefaults for ATT timing
+- Info.plist: Added NSUserTrackingUsageDescription key
 
 Recent Updates (January 7, 2026 - Build 12):
 - Quote Bar: Daily inspirational quote at bottom of home screen
@@ -1372,6 +1438,7 @@ Version 3.6 | December 22, 2025 | Unified End Card System across all modes; Gest
 Version 3.7 | December 28, 2025 | Long Press timing fix (minimumReactionTime 1.0s→1.5s); Comprehensive documentation update covering all December features
 Version 3.8 | December 29, 2025 | Ad gating simplification (30s + 60s cooldown); custom icon_repeat_default asset; UI text updates for Discreet Mode and game mode descriptions
 Version 3.9 | January 7, 2026 | Build 11-12: Quote Bar system, Rate Us (StoreKit), Support link, Home Screen microinteractions (floating icons, breathing button, circular backgrounds), Design Style Guide, new analytics events
+Version 4.0 | January 13, 2026 | Build 15: ATT pre-prompt system (after 3 games), iPhone-only target (removed iPad), TrackingPermissionManager.swift, ATTPrePromptView.swift, AdManager totalGamesPlayed persistence fix
 
 ========================================
 
