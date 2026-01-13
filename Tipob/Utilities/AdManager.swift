@@ -187,8 +187,13 @@ class AdManager: NSObject {
     /// Called when game over screen appears
     func incrementGameCount() {
         gamesCompletedSinceLastAd += 1
+
+        // Also persist total games for ATT prompt timing
+        let totalGames = UserDefaults.standard.integer(forKey: "totalGamesPlayed") + 1
+        UserDefaults.standard.set(totalGames, forKey: "totalGamesPlayed")
+
         #if DEBUG
-        print("🎮 Games since last ad: \(gamesCompletedSinceLastAd)")
+        print("🎮 Games since last ad: \(gamesCompletedSinceLastAd), Total games: \(totalGames)")
         #endif
     }
 

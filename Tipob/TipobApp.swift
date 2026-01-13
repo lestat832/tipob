@@ -1,7 +1,5 @@
 import SwiftUI
 import GoogleMobileAds
-import AppTrackingTransparency
-import AdSupport
 import FirebaseCore
 import FirebaseCrashlytics
 
@@ -22,22 +20,8 @@ struct TipobApp: App {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(.dark)
-                .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-                    requestTrackingPermission()
-                }
         }
         .defaultSize(width: 393, height: 852)  // iPhone 14 Pro dimensions
-    }
-
-    private func requestTrackingPermission() {
-        // Only request if not already determined
-        if ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                ATTrackingManager.requestTrackingAuthorization { status in
-                    print("📊 ATT Status: \(status.rawValue)")
-                }
-            }
-        }
     }
 }
 

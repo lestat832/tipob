@@ -11,6 +11,7 @@ struct GameOverView: View {
     @State private var opacity: Double = 0
     @State private var showingLeaderboard = false
     @State private var showingShareSheet = false
+    @State private var showATTPrePrompt = false
 
     var body: some View {
         ZStack {
@@ -268,6 +269,33 @@ struct GameOverView: View {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
                 textScale = 1.0
                 opacity = 1.0
+            }
+
+            // Check if ATT pre-prompt should be shown (after 3 games)
+            if TrackingPermissionManager.shared.shouldShowPrePrompt {
+                // Slight delay to let game over animation complete
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    showATTPrePrompt = true
+                }
+            }
+        }
+        .overlay {
+            if showATTPrePrompt {
+                ATTPrePromptView(
+                    onContinue: {
+                        showATTPrePrompt = false
+                        TrackingPermissionManager.shared.markPromptShown()
+                        TrackingPermissionManager.shared.requestTracking { _ in
+                            // Status handled by system, no action needed
+                        }
+                    },
+                    onNotNow: {
+                        showATTPrePrompt = false
+                        TrackingPermissionManager.shared.markPromptShown()
+                    }
+                )
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.3), value: showATTPrePrompt)
             }
         }
     }
