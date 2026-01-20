@@ -211,7 +211,7 @@ Removed AVAudioEngine due to:
 **Status**: ✅ Complete
 
 - **Daily Quote**: Inspirational quote displayed at bottom of home screen
-- **50 Curated Quotes**: Motivational content with author attribution
+- **29 Curated Quotes**: Motivational content with author attribution
 - **Deterministic Selection**: Same quote for all users on same calendar day
 - **Visual Polish**: Blurred background, fade-in animation, subtle shadow
 
@@ -342,6 +342,42 @@ var shouldShowPrePrompt: Bool {
 - `TARGETED_DEVICE_FAMILY = 1` (iPhone only)
 - Removed iPad orientation entries
 - Simplifies App Store submission (no iPad screenshots)
+
+---
+
+## 🔧 Build Configurations & Schemes (January 2026)
+
+### Build Configurations
+| Config | SWIFT_ACTIVE_COMPILATION_CONDITIONS | Dev Panel |
+|--------|-------------------------------------|-----------|
+| Debug | `DEBUG` | ✅ Visible |
+| TestFlight | `TESTFLIGHT` | ✅ Visible |
+| **Release** | **(none)** | ❌ **Hidden** |
+
+### Recommended Schemes
+Create two schemes for different purposes:
+
+**OutofPocket-TestFlight**:
+- Archive → Build Configuration: TestFlight
+- Use for: Internal testing with dev panel access
+- Dev panel gear icon: Visible
+
+**OutofPocket-Release**:
+- Archive → Build Configuration: Release
+- Use for: App Store submission
+- Dev panel gear icon: Hidden (code not compiled)
+
+### Dev Panel Visibility
+Controlled by preprocessor directive in `GameOverView.swift`:
+```swift
+#if DEBUG || TESTFLIGHT
+@Binding var showDevPanel: Bool  // Only exists in Debug/TestFlight
+#endif
+```
+
+### Operational Workflow
+1. **Internal Testing**: Select OutofPocket-TestFlight → Archive → Distribute to TestFlight
+2. **App Store Submission**: Select OutofPocket-Release → Archive → Submit for Review
 
 ---
 
@@ -774,7 +810,9 @@ func testGesture_SessionXYZ_Issue1() {
    - Track success rates per configuration
    - Statistical significance calculation
 
-6. **Per-Gesture Test Buttons (Detailed Spec)**
+6. **Per-Gesture Test Buttons (Detailed Spec)** ✅ IMPLEMENTED (December 2025)
+
+   **Status**: Complete - See `GestureTestView.swift`
 
    **Purpose**: Enable developers to test one gesture at a time (Double Tap, Swipe Left, Shake, etc.) without playing the full game. Each test captures expected vs detected results along with full diagnostic data (sensor snapshot, thresholds, timing, device info). Tests can be saved as log entries and exported like normal gesture issues.
 

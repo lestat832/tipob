@@ -316,7 +316,7 @@ Purpose:
 Display daily inspirational quotes at the bottom of the home screen
 
 Features:
-- 50 curated motivational quotes with author attribution
+- 29 curated motivational quotes with author attribution
 - Deterministic daily selection (same quote for everyone on same day)
 - Smooth fade-in animation when loading
 - Blurred rounded rectangle background (12pt corner radius)
@@ -1188,6 +1188,32 @@ Rationale:
 - Simplifies App Store submission (no iPad screenshots required)
 - Focuses development on primary target platform
 - Reduces testing matrix
+
+========================================
+
+BUILD CONFIGURATIONS & SCHEMES
+
+Status: Configured (January 2026)
+
+Build Configurations:
+| Config | SWIFT_ACTIVE_COMPILATION_CONDITIONS | Dev Panel |
+|--------|-------------------------------------|-----------|
+| Debug | DEBUG | Visible |
+| TestFlight | TESTFLIGHT | Visible |
+| Release | (none) | Hidden |
+
+Recommended Schemes:
+- OutofPocket-TestFlight: Archive → TestFlight config (internal testing with dev panel)
+- OutofPocket-Release: Archive → Release config (App Store submission, no dev panel)
+
+Usage Workflow:
+- Internal Testing: Select OutofPocket-TestFlight scheme → Archive → Distribute
+- App Store Submission: Select OutofPocket-Release scheme → Archive → Submit
+
+Dev Panel Visibility:
+- Controlled by #if DEBUG || TESTFLIGHT preprocessor directive
+- Gear icon in GameOverView only appears in Debug/TestFlight builds
+- Production App Store builds have no dev panel code compiled
 
 ========================================
 
