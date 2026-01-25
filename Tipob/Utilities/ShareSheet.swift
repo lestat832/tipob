@@ -14,7 +14,7 @@ struct ShareSheet: UIViewControllerRepresentable {
 
 /// Share content constants and generators
 enum ShareContent {
-    static let appStoreURL = "https://apps.apple.com/app/out-of-pocket/id[PLACEHOLDER]"
+    static let appStoreURL = "https://apps.apple.com/app/out-of-pocket/id6756274838"
 
     // MARK: - General App Share
 

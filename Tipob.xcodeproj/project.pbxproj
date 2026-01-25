@@ -94,9 +94,9 @@
 				Utilities/ShareSheet.swift,
 				Utilities/SwipeGestureModifier.swift,
 				Utilities/TapGestureModifier.swift,
+				Utilities/TrackingPermissionManager.swift,
 				Utilities/UIViewControllerHelper.swift,
 				Utilities/UserSettings.swift,
-				Utilities/TrackingPermissionManager.swift,
 				ViewModels/GameViewModel.swift,
 				Views/ATTPrePromptView.swift,
 				Views/ClassicModeView.swift,
@@ -558,7 +558,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mgeraldez.OutofPocket;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -598,7 +598,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ourappologies.outofpocket;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -729,7 +729,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ourappologies.outofpocket;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

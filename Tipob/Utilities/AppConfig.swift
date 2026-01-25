@@ -4,9 +4,9 @@ import Foundation
 
 /// Centralized app configuration constants
 enum AppConfig {
-    /// App Store ID for the app (nil until app is published)
-    /// Set this to your actual App Store ID once available
-    static let appStoreID: String? = nil
+    /// App Store ID for the app
+    /// Used for Rate Us fallback and App Store deep links
+    static let appStoreID: String? = "6756274838"
 
     /// App Store URL constructed from appStoreID
     static var appStoreURL: URL? {
