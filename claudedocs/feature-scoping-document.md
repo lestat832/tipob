@@ -1,8 +1,8 @@
 # Out of Pocket Feature Scoping Document
-**Date**: October 10, 2025 (Updated: January 13, 2026)
+**Date**: October 10, 2025 (Updated: January 24, 2026)
 **Project**: Out of Pocket - iOS SwiftUI Bop-It Style Game
 **Purpose**: Comprehensive feature planning and decision framework
-**Status**: Phase 1 Complete with 14 Gestures + Performance Optimization + Monetization (PRODUCTION) + Audio System + Firebase Analytics + Settings + Unified End Cards + Ad Gating + Quote Bar + Rate Us + Support + Home Screen Microinteractions + ATT Pre-Prompt + iPhone-Only Target
+**Status**: ✅ RELEASED v1.0 on App Store (January 2026) | App Store ID: 6756274838 | v1.0.1 Submitted (Build 17)
 
 ---
 

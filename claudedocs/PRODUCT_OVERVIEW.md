@@ -1,8 +1,8 @@
 OUT OF POCKET - PRODUCT OVERVIEW
 
-Last Updated: January 13, 2026
-Version: 4.0
-Status: Phase 1 Complete - 14 Gestures + Performance Optimized + AdMob Production + Audio System + Firebase Analytics + Settings Screen + Unified End Cards + Ad Gating + Quote Bar + Rate Us + Support + Home Screen Microinteractions + ATT Pre-Prompt + iPhone-Only Target
+Last Updated: January 24, 2026
+Version: 4.1
+Status: ✅ RELEASED v1.0 on App Store (January 2026) | App Store ID: 6756274838 | v1.0.1 Submitted
 
 ========================================
 
@@ -1319,6 +1319,13 @@ Key Files
 Total Swift Files
 30+ files across the project
 
+Recent Updates (January 24, 2026 - v1.0 RELEASE + v1.0.1):
+- 🚀 v1.0 RELEASED on App Store (January 2026)
+- App Store ID configured: 6756274838 in AppConfig.swift
+- Share URLs updated: ShareSheet.swift now uses production App Store URL
+- Website launched: getoutofpocket.com with App Store download button
+- v1.0.1 submitted: Build 17 with Share URL fix
+
 Recent Updates (January 13, 2026 - Build 15):
 - ATT Pre-Prompt: Custom pre-prompt after 3 games before system ATT dialog
 - iPhone-Only Target: Removed iPad support (TARGETED_DEVICE_FAMILY = 1)
@@ -1465,6 +1472,7 @@ Version 3.7 | December 28, 2025 | Long Press timing fix (minimumReactionTime 1.0
 Version 3.8 | December 29, 2025 | Ad gating simplification (30s + 60s cooldown); custom icon_repeat_default asset; UI text updates for Discreet Mode and game mode descriptions
 Version 3.9 | January 7, 2026 | Build 11-12: Quote Bar system, Rate Us (StoreKit), Support link, Home Screen microinteractions (floating icons, breathing button, circular backgrounds), Design Style Guide, new analytics events
 Version 4.0 | January 13, 2026 | Build 15: ATT pre-prompt system (after 3 games), iPhone-only target (removed iPad), TrackingPermissionManager.swift, ATTPrePromptView.swift, AdManager totalGamesPlayed persistence fix
+Version 4.1 | January 24, 2026 | 🚀 v1.0 RELEASED on App Store (App Store ID: 6756274838), v1.0.1 Build 17 submitted with Share URL fix, website launched at getoutofpocket.com
 
 ========================================
 
