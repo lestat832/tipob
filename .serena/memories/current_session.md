@@ -1,26 +1,36 @@
-# Session Summary - 2026-01-20
+# Session Summary - January 26, 2026
 
 ## Completed Tasks
-- Updated PRODUCT_OVERVIEW.md: Fixed quote count (50→29), added Build Configurations & Schemes section
-- Updated feature-scoping-document.md: Fixed quote count, marked Per-Gesture Testers as implemented, added Build Schemes section
-- Explained Xcode schemes vs build configurations - clarified that code changes are shared across all schemes
-- Provided instructions for creating two schemes (OutofPocket-TestFlight and OutofPocket-Release)
-- Verified dev panel visibility is correctly controlled by `#if DEBUG || TESTFLIGHT`
+- ✅ Fixed AdMob app verification (was failing due to domain mismatch)
+  - Deployed app-ads.txt to getoutofpocket.com
+  - Identified www → non-www redirect issue
+  - User updated App Store Connect URLs from `http://www.getoutofpocket.com` to `https://getoutofpocket.com`
+  - AdMob verification now PASSING
+- ✅ Updated documentation (PRODUCT_OVERVIEW.md v4.2, feature-scoping-document.md)
+  - Changed AdMob status from "awaiting ad fill" to "verified and active"
+  - Added revision history entries
 
-## Key Decisions
-- Two schemes approach: TestFlight (dev panel visible) vs Release (no dev panel)
-- Archive → Build Configuration determines if gear icon appears, not the scheme name
-- For App Store submission: Must use Release configuration in Archive action
+## App Status
+- **v1.0**: RELEASED on App Store
+- **v1.0.1**: Submitted (Build 17) - Share URL fix + App Store Connect URL corrections
+- **AdMob**: ✅ VERIFIED (was failing, now fixed)
+- **Website**: getoutofpocket.com with app-ads.txt deployed
 
-## App Store Submission Status
-- Dev panel code is CORRECT - uses preprocessor directives properly
-- Issue was scheme misconfiguration (Archive using TestFlight instead of Release)
-- User needs to change Archive config to Release before resubmitting
+## Key Files Modified This Session
+- `claudedocs/PRODUCT_OVERVIEW.md` - v4.2, AdMob verified status
+- `claudedocs/feature-scoping-document.md` - AdMob verified status
+- Website repo: `app-ads.txt` (deployed earlier)
 
 ## Next Session
-- Resubmit app with Release configuration
-- Create the two schemes in Xcode if desired
-- Monitor App Store review feedback
+- Monitor v1.0.1 App Store review
+- Check ad fill rates in AdMob dashboard
+- Continue with next feature priorities from roadmap
 
-## Blockers/Issues
-- None - documentation and scheme guidance complete
+## Key Decisions
+- App Store Connect URLs must use `https://` and NO `www.` prefix
+- AdMob crawler doesn't follow 301 redirects reliably
+
+## Notes
+- App Store ID: 6756274838
+- AdMob Publisher ID: pub-8372563313053067
+- app-ads.txt content: `google.com, pub-8372563313053067, DIRECT, f08c47fec0942fa0`
