@@ -1,8 +1,8 @@
 OUT OF POCKET - PRODUCT OVERVIEW
 
-Last Updated: January 24, 2026
-Version: 4.1
-Status: ✅ RELEASED v1.0 on App Store (January 2026) | App Store ID: 6756274838 | v1.0.1 Submitted
+Last Updated: January 26, 2026
+Version: 4.2
+Status: ✅ RELEASED v1.0 on App Store | App Store ID: 6756274838 | v1.0.1 Submitted | AdMob Verified
 
 ========================================
 
@@ -21,7 +21,7 @@ Hard to Master: Progressive difficulty keeps players engaged
 Discreet Mode: Toggle between public-friendly vs full gesture set
 Performance Optimized: 20-30% faster gesture response (Nov 2025)
 Audio Feedback: Success ticks, round complete chimes, and failure sounds
-Monetization Ready: Google AdMob integration with PRODUCTION credentials (awaiting ad fill)
+Monetization Ready: Google AdMob integration with PRODUCTION credentials (verified and active)
 Triple Game Modes: Three distinct gameplay experiences (Classic, Memory, and PvP)
 Visual Polish: Beautiful gradient UI with color-coded gestures
 
@@ -1048,7 +1048,7 @@ Planned Features:
 
 MONETIZATION SYSTEM
 
-Status: PRODUCTION Mode (Updated November 30, 2025, Awaiting Ad Fill)
+Status: PRODUCTION Mode (Updated January 26, 2026, Verified)
 
 Google AdMob Integration
 SDK: Google Mobile Ads (GoogleMobileAds framework)
@@ -1058,7 +1058,7 @@ Ad Type: Interstitial ads (full-screen)
 PRODUCTION Credentials (Updated November 30, 2025):
 - Ad Unit ID: ca-app-pub-8372563313053067/2149863647
 - Application ID: ca-app-pub-8372563313053067~4654955095
-- Status: Awaiting ad fill (new ad units take 24-48 hours to start serving)
+- Status: Verified and active (app-ads.txt deployed, AdMob verification complete)
 
 Implementation Architecture:
 - AdManager.swift: Singleton managing ad lifecycle (~180 lines)
@@ -1319,6 +1319,12 @@ Key Files
 Total Swift Files
 30+ files across the project
 
+Recent Updates (January 26, 2026 - AdMob Verification Complete):
+- ✅ AdMob app verification COMPLETE (was failing due to domain mismatch)
+- app-ads.txt deployed to getoutofpocket.com/app-ads.txt
+- App Store Connect URLs updated: `https://getoutofpocket.com` (removed www, added https)
+- v1.0.1 includes: Share URL fix + App Store Connect URL corrections
+
 Recent Updates (January 24, 2026 - v1.0 RELEASE + v1.0.1):
 - 🚀 v1.0 RELEASED on App Store (January 2026)
 - App Store ID configured: 6756274838 in AppConfig.swift
@@ -1473,6 +1479,7 @@ Version 3.8 | December 29, 2025 | Ad gating simplification (30s + 60s cooldown);
 Version 3.9 | January 7, 2026 | Build 11-12: Quote Bar system, Rate Us (StoreKit), Support link, Home Screen microinteractions (floating icons, breathing button, circular backgrounds), Design Style Guide, new analytics events
 Version 4.0 | January 13, 2026 | Build 15: ATT pre-prompt system (after 3 games), iPhone-only target (removed iPad), TrackingPermissionManager.swift, ATTPrePromptView.swift, AdManager totalGamesPlayed persistence fix
 Version 4.1 | January 24, 2026 | 🚀 v1.0 RELEASED on App Store (App Store ID: 6756274838), v1.0.1 Build 17 submitted with Share URL fix, website launched at getoutofpocket.com
+Version 4.2 | January 26, 2026 | ✅ AdMob verification complete: app-ads.txt deployed, App Store Connect URLs corrected (https://getoutofpocket.com)
 
 ========================================
 
